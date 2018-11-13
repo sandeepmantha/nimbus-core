@@ -16,13 +16,15 @@
  */
 'use strict';
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { WebContentSvc } from './../../../services/content-management.service';
 import { PageService } from '../../../services/page.service';
 import { HttpMethod, Behavior} from './../../../shared/command.enum';
 import { GenericDomain } from '../../../model/generic-domain.model';
 import { BaseElement } from '../base-element.component';
 import { ViewComponent, ComponentTypes } from '../../../shared/param-annotations.enum';
+import { Dialog } from 'primeng/primeng';
+import { DomHandler } from 'primeng/components/dom/domhandler';
 
 /**
  * \@author Sandeep.Mantha
@@ -42,7 +44,7 @@ import { ViewComponent, ComponentTypes } from '../../../shared/param-annotations
     selector: 'nm-modal',
     templateUrl: './modal.component.html',
     providers: [
-        WebContentSvc
+        WebContentSvc, DomHandler
     ]
 })
 export class Modal extends BaseElement implements OnInit, OnDestroy {
@@ -55,27 +57,52 @@ export class Modal extends BaseElement implements OnInit, OnDestroy {
     private _resizable: boolean;
     private elementCss: string;
     viewComponent = ViewComponent;
+    @ViewChild('modal') modal: Dialog;
     componentTypes = ComponentTypes;
-
+    
     readonly modalSize: { [id: string]: IModalSize } = {
         SMALL: { width: '500' },
         MEDIUM: { width: '700' },
         LARGE: { width: '900' }
     };
     
-    constructor(private wcsvc: WebContentSvc, private pageSvc: PageService) {
+    constructor(private wcsvc: WebContentSvc, public domHandler: DomHandler, private pageSvc: PageService, private elRef:ElementRef) {
         super(wcsvc);
     }
 
-    ngOnDestroy() {
-    }
-
     ngAfterViewInit() {
+
+        //override the primeng definition as the modal does not have scrollbar and also does not position correctly with grid data (pagesize = 50)
+        this.modal.positionOverlay = () => {
+            let viewport = this.domHandler.getViewport();
+            if (this.domHandler.getOuterHeight(this.modal.container) > viewport.height) {
+                 this.modal.contentViewChild.nativeElement.style.height = (viewport.height * .75) + 'px';
+            }
+            
+            if (this.modal.positionLeft >= 0 && this.modal.positionTop >= 0) {
+                this.modal.container.style.left = this.modal.positionLeft + 'px';
+                this.modal.container.style.top = this.modal.positionTop + 'px';
+            }
+            else if (this.modal.positionTop >= 0) {
+                this.modal.center();
+                this.modal.container.style.top = this.modal.positionTop + 'px';
+            }
+            else{
+                this.modal.center();
+            }
+        }
+
         this.pageSvc.eventUpdate$.subscribe(event => {
             if(event.path == this.element.path) {
                 this.display = event.visible;
             }
         });
+    }
+
+    ngAfterViewChecked() {
+        if(this.modal.visible && this.modal.container) {
+            this.modal.positionOverlay();
+        }
     }
     /**
      * Closable attribute. Can the Modal window be closed?

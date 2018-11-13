@@ -1,11 +1,11 @@
 <ng-template [ngIf]="type == componentTypes.dialog.toString()">
-    <p-dialog 
+    <p-dialog #modal
         [(visible)]="display" 
         [closable]="closable"
         [closeOnEscape]="false" 
         [focusOnShow]="false"
         [modal]="true" 
-        [width]="width" 
+        [width]="width"
         (visibleChange)="closeDialog($event)"
         appendTo="body" 
         [responsive]="true" 
