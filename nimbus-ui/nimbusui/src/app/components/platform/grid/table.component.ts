@@ -341,7 +341,11 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
             return 'dropdown';
         } else if (col.uiStyles && col.uiStyles.attributes.alias === 'Button') {
             return 'imageColumn';
-        }
+        } else {
+            if (col.uiStyles && col.uiStyles.attributes.cssClass && col.uiStyles.attributes.cssClass !== "") {
+                return col.uiStyles.attributes.cssClass;
+            } 
+        } 
     }
 
     isActive(index) {
@@ -647,7 +651,11 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
     }
 
     getCellStyle(rowIndex, code): string {
-        let style: StyleState = this.element.gridData.stateMap[rowIndex][code].style;
+        let elemStateMap = this.element.gridData.stateMap[rowIndex];
+        if (!elemStateMap) {
+            return '';
+        }
+        let style: StyleState = elemStateMap[code].style;
         return style ? style.cssClass : '';
     }
 

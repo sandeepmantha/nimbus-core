@@ -399,7 +399,7 @@ export class PageService {
                                                 this.setViewRootAndNavigate(output,flow,navToDefault,refresh);
 
                                         } else {
-                                                this.logger.warn('Received an _get call without model or config ' + output.value.path);
+                                                this.logger.warn('Received a _get call without model or config ' + output.value.path);
                                         }
                                 } else if (output.action === Action._nav.value) {
                                         // Do Nothing. We will process _nav action in the end.
@@ -492,7 +492,7 @@ export class PageService {
                         }
                 }
                 if (!page) {
-                        this.logError('Page Configuration not found for Page ID: ' + pageId + ' in Flow: ' + flowName);
+                        this.logger.warn('Page Configuration not found for Page ID: ' + pageId + ' in Flow: ' + flowName);
                 }
                 return page;
         }
@@ -536,7 +536,7 @@ export class PageService {
                          this.executeHttpPost(url, model);
                  } else {
                          this.invokeFinally(url);
-                         throw 'http method not supported';
+                         this.logger.error('http method not supported');
                  }
         }
         executeHttpGet(url) {
@@ -600,11 +600,12 @@ export class PageService {
         traverseFlowConfig(eventModel: ModelEvent, flowName: string) {
                 let viewRoot: ViewRoot = this.configService.getFlowConfig(flowName);
                 if(viewRoot == undefined) {
-                        throw "Response cannot be processed for the path " + eventModel.value.path + " as there is no get/new done on the viewroot "+flowName;
-                }
-                let flowConfig: Model = viewRoot.model;
-                if (flowConfig) {
-                        this.traverseConfig(flowConfig.params, eventModel);
+                        this.logger.warn("Response cannot be processed for the path " + eventModel.value.path + " as there is no get/new done on the viewroot "+flowName);
+                } else {
+                        let flowConfig: Model = viewRoot.model;
+                        if (flowConfig) {
+                                this.traverseConfig(flowConfig.params, eventModel);
+                        }
                 }
         }
 
@@ -789,7 +790,7 @@ export class PageService {
                 } else if (param.config.uiStyles != null && param.config.uiStyles.attributes.alias === ViewComponent.cardDetailsGrid.toString()) {
                         if (param.config.type.collection === true) {
                                 let payload: Param = new Param(this.configService).deserialize(eventModel.value, eventModel.value.path);
-                                if(payload.type.model) // TODO - need to handle updates for each collection item in a card detail grid
+                                if(payload.type.model && payload.path == param.path) // TODO - need to handle updates for each collection item in a card detail grid
                                         param.type.model['params'] = payload.type.model.params;
                         } else {
                                 this.traverseParam(param, eventModel);
@@ -909,7 +910,7 @@ export class PageService {
                                 if(respKey !== ParamAttribute.config.toString() && respKey !== ParamAttribute.type.toString()) 
                                         Reflect.set(sourceParam, respKey, Reflect.get(responseParam, respKey)); 
                         } catch (e) { 
-                                throw e; 
+                                this.logger.error(JSON.stringify(e));
                         } 
                 });
         }
@@ -924,7 +925,7 @@ export class PageService {
                                 }
                         }catch (e) {
                                 this.logError('Could not find source param to update the nested payload param path'+ responseParam.path);
-                                throw e; 
+                                this.logger.error(JSON.stringify(e));
                         }
                 }
         }

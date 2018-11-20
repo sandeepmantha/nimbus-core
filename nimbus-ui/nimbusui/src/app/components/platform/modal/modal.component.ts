@@ -16,7 +16,9 @@
  */
 'use strict';
 
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Param, Model } from '../../../shared/param-state';
+import { DialogModule } from 'primeng/primeng';
 import { WebContentSvc } from './../../../services/content-management.service';
 import { PageService } from '../../../services/page.service';
 import { HttpMethod, Behavior} from './../../../shared/command.enum';
@@ -25,7 +27,6 @@ import { BaseElement } from '../base-element.component';
 import { ViewComponent, ComponentTypes } from '../../../shared/param-annotations.enum';
 import { Dialog } from 'primeng/primeng';
 import { DomHandler } from 'primeng/components/dom/domhandler';
-
 /**
  * \@author Sandeep.Mantha
  * \@author Dinakar.Meda
@@ -65,13 +66,12 @@ export class Modal extends BaseElement implements OnInit, OnDestroy {
         MEDIUM: { width: '700' },
         LARGE: { width: '900' }
     };
-    
-    constructor(private wcsvc: WebContentSvc, public domHandler: DomHandler, private pageSvc: PageService, private elRef:ElementRef) {
+
+    constructor(private wcsvc: WebContentSvc, public domHandler: DomHandler, private pageSvc: PageService) {
         super(wcsvc);
     }
 
     ngAfterViewInit() {
-
         //override the primeng definition as the modal does not have scrollbar and also does not position correctly with grid data (pagesize = 50)
         this.modal.positionOverlay = () => {
             let viewport = this.domHandler.getViewport();
