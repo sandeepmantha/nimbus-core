@@ -39,7 +39,7 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.UpdateFunctionH
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerExample;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerLookup;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerQuery;
-import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.antheminc.oss.nimbus.support.expr.ExpressionEvaluator;
 import com.antheminc.oss.nimbus.support.expr.SpelExpressionEvaluator;
 
@@ -129,8 +129,8 @@ public class DefaultProcessConfig {
 	}
 	
 	@Bean(name="default._process$execute?fn=_dataImport")
-	public FunctionHandler<?,?> dataImportFunctionHandler(ModelRepository modelRepository, BeanResolverStrategy beanResolver) {
-		return new DataImportFunctionHandler<>(modelRepository, beanResolver);
+	public FunctionHandler<?,?> dataImportFunctionHandler(ModelRepositoryFactory modelRepositoryFactory, BeanResolverStrategy beanResolver) {
+		return new DataImportFunctionHandler<>(modelRepositoryFactory, beanResolver);
 	}
 	
 	@Bean(name="default._process$execute?fn=_eval")

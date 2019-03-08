@@ -36,7 +36,7 @@ public class ExcelFileImporter extends FileImporter<ExcelParserSettings> {
 	}
 	
 	@Override
-	public void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> modelConfig, ExcelParserSettings settings) {
+	public void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> rootModelConfig, ExcelParserSettings settings) {
 		try {
 			settings.setFile(resource.getFile());
 			new ExcelParser(settings).parse();

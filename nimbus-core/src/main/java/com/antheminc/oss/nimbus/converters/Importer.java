@@ -26,5 +26,5 @@ import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
  */
 public interface Importer<T> {
 
-	void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> modelConfig, T settings);
+	void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> rootModelConfig, T settings);
 }
