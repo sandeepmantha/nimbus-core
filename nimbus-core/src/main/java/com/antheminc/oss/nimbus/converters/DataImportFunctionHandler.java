@@ -23,16 +23,19 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.InvalidConfigException;
+import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContext;
 import com.antheminc.oss.nimbus.domain.cmd.exec.FunctionHandler;
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.univocity.parsers.csv.CsvParserSettings;
 
 import lombok.Getter;
 
 /**
  * @author Tony Lopez
+ * @author Sandeep Mantha
  *
  */
 @Getter
@@ -43,12 +46,10 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 	private final CSVFileImporter csvFileImporter;
 	private final ExcelFileImporter excelFileImporter;
 	
-	public DataImportFunctionHandler(ModelRepository modelRepository) {
+	public DataImportFunctionHandler(ModelRepository modelRepository, BeanResolverStrategy beanResolver) {
 		this.modelRepository = modelRepository;
-		
-		// TODO if we need to externalize these we can
-		this.csvFileImporter = new CSVFileImporter();
-		this.excelFileImporter = new ExcelFileImporter();
+		this.csvFileImporter = beanResolver.get(CSVFileImporter.class);
+		this.excelFileImporter = beanResolver.get(ExcelFileImporter.class);
 	}
 
 	// /p/domain/_process?fn=_dataImport&file=sample.xlsx
@@ -81,11 +82,13 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 		switch (extension) {
 		
 			case "xlsx":
-				this.excelFileImporter.doImport(resource, modelRepository, modelConfig);
+				ExcelParserSettings excelSettings = new ExcelParserSettings();
+				this.excelFileImporter.doImport(resource, modelRepository, modelConfig, excelSettings);
 				break;
 				
 			case "csv":
-				this.csvFileImporter.doImport(resource, modelRepository, modelConfig);
+				CsvParserSettings csvParserSettings = new CsvParserSettings();
+				this.csvFileImporter.doImport(resource, modelRepository, modelConfig, csvParserSettings	);
 				break;
 				
 			default:

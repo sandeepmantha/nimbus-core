@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.converters.DataImportFunctionHandler;
 import com.antheminc.oss.nimbus.domain.bpm.BPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiBPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiExpressionManager;
@@ -38,6 +39,7 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.UpdateFunctionH
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerExample;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerLookup;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerQuery;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.support.expr.ExpressionEvaluator;
 import com.antheminc.oss.nimbus.support.expr.SpelExpressionEvaluator;
 
@@ -125,7 +127,12 @@ public class DefaultProcessConfig {
 	public FunctionHandler<?, ?> queryFunctionHandler(){
 		return new DefaultSearchFunctionHandlerQuery<>();
 	}
-
+	
+	@Bean(name="default._process$execute?fn=_dataImport")
+	public FunctionHandler<?,?> dataImportFunctionHandler(ModelRepository modelRepository, BeanResolverStrategy beanResolver) {
+		return new DataImportFunctionHandler<>(modelRepository, beanResolver);
+	}
+	
 	@Bean(name="default._process$execute?fn=_eval")
 	public EvalFunctionHandler<?,?> evalFunctionHandler(ExpressionManager expressionManager){
 		return new EvalFunctionHandler(expressionManager);

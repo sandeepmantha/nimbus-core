@@ -19,6 +19,6 @@ package com.antheminc.oss.nimbus.converters;
  * @author Tony Lopez
  *
  */
-public abstract class FileImporter implements Importer {
+public abstract class FileImporter<T> implements Importer<T> {
 
 }

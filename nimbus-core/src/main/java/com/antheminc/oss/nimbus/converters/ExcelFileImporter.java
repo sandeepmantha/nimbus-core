@@ -15,21 +15,36 @@
  */
 package com.antheminc.oss.nimbus.converters;
 
+import java.io.IOException;
+
 import org.springframework.core.io.Resource;
 
+import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 
 /**
  * @author Tony Lopez
+ * @author Sandeep Mantha
  *
  */
-public class ExcelFileImporter extends FileImporter {
-
+public class ExcelFileImporter extends FileImporter<ExcelParserSettings> {
+		
+	public ExcelFileImporter(BeanResolverStrategy beanResolver) {
+		
+	}
+	
 	@Override
-	public void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> modelConfig) {
-		// TODO Convert to .csv
-		// handle .csv persistence
+	public void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> modelConfig, ExcelParserSettings settings) {
+		try {
+			settings.setFile(resource.getFile());
+			new ExcelParser(settings).parse();
+			
+		}
+		catch(IOException e) {
+			throw new FrameworkRuntimeException(e);
+		}
 	}
 
 }

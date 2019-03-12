@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.support.JustLogit;
@@ -32,22 +33,20 @@ import lombok.Getter;
 
 /**
  * @author Tony Lopez
+ * @author Sandeep Mantha
  *
  */
-public class CSVFileImporter extends FileImporter {
+public class CSVFileImporter extends FileImporter<CsvParserSettings> {
 
-	private final CsvParserSettings parserSettings;
 	
-	public CSVFileImporter() {
-		this.parserSettings = new CsvParserSettings();
-		parserSettings.getFormat().setLineSeparator("\n");
-		parserSettings.setHeaderExtractionEnabled(true);
+	
+	public CSVFileImporter(BeanResolverStrategy beanResolver) {
 	}
 	
 	@Override
-	public void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> modelConfig) {
+	public void doImport(Resource resource, ModelRepository modelRepository, ModelConfig<?> modelConfig, CsvParserSettings parserSettings) {
 		BeanProcessor<?> rowProcessor = new PersistenceProcessor(modelRepository, modelConfig);
-		this.parserSettings.setProcessor(rowProcessor);
+		parserSettings.setProcessor(rowProcessor);
 		try {
 			new CsvParser(parserSettings).parse(resource.getFile());
 		} catch (IOException e) {

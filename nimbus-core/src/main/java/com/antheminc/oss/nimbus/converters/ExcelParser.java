@@ -1,5 +1,6 @@
 package com.antheminc.oss.nimbus.converters;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,14 +21,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ExcelReader<T> implements SourceReader, InitializingBean{
+public class ExcelParser implements SourceReader, InitializingBean{
 
     private Workbook workbook;
     private DataFormatter formatter;
     private FormulaEvaluator evaluator;
-    private ExcelReaderSettings settings;
+    private ExcelParserSettings settings;
     
-    public ExcelReader(ExcelReaderSettings settings) {
+    public ExcelParser(ExcelParserSettings settings) {
     	this.settings = settings;
     }
     
@@ -36,11 +37,18 @@ public class ExcelReader<T> implements SourceReader, InitializingBean{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void parse() {
+		
+		doOpen();
+		doRead();
+		doClose();
+	}
 
 	@Override
 	public void doOpen() {
             try {
-				this.workbook = WorkbookFactory.create(this.settings.getResource().getFile());
+				this.workbook = WorkbookFactory.create(this.settings.getFile());
 			} catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -63,13 +71,15 @@ public class ExcelReader<T> implements SourceReader, InitializingBean{
 	public void doRead() {
 		Sheet selSheet = workbook.getSheetAt(0);
 		Iterator<Row> rowIterator = selSheet.iterator();
-		
+		CsvWriterUnivocityImpl writer = new CsvWriterUnivocityImpl("/Users/ac97583/Downloads/test/test.csv");
+
 		while (rowIterator.hasNext()) {
 			Row row = rowIterator.next();
-			CsvWriterUnivocityImpl writer = new CsvWriterUnivocityImpl("/Users/ac97583/Downloads/test/test.csv");
 			ArrayList<String> rowCsv = convertRowToCSV(row, formatter, evaluator);
 			writer.doWrite(rowCsv); 			
 		}
+		
+		writer.doClose();
 	}
 
 	 private  ArrayList<String> convertRowToCSV(Row row, DataFormatter formatter, FormulaEvaluator evaluator) {
