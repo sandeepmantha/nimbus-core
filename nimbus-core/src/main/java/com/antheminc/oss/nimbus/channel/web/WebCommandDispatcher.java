@@ -28,8 +28,10 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.converter.CsvFileImporter;
+import com.antheminc.oss.nimbus.converter.DefaultFileImportGateway;
 import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.ExcelParserSettings;
+import com.antheminc.oss.nimbus.converter.FileImportGateway;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
@@ -52,18 +54,14 @@ public class WebCommandDispatcher {
 	private final WebCommandBuilder builder;
 
 	private final CommandExecutorGateway gateway;
+	
+	private final FileImportGateway fileImportGateway;
 
-	private final ModelRepository modelRepository;
-	
-	private final CsvFileImporter csvFileImporter;
-	private final ExcelFileImporter excelFileImporter;	
-	
 	public WebCommandDispatcher(BeanResolverStrategy beanResolver) {
 		this.builder = beanResolver.get(WebCommandBuilder.class);
 		this.gateway = beanResolver.get(CommandExecutorGateway.class);
-		this.modelRepository =beanResolver.get(ModelRepository.class);
-		this.csvFileImporter = beanResolver.get(CsvFileImporter.class);
-		this.excelFileImporter = beanResolver.get(ExcelFileImporter.class);
+		this.fileImportGateway = beanResolver.get(DefaultFileImportGateway.class);
+		
 	}
 	
 	public Object handle(HttpServletRequest httpReq, ModelEvent<String> event) {
@@ -88,29 +86,11 @@ public class WebCommandDispatcher {
 			String name = fileItem.getName();
 			try {
 				String ext = FilenameUtils.getExtension(name);
-				switch (ext) {
-				
-				case "xlsx":
-					getExcelFileImporter().setExcelParserSettings(new ExcelParserSettings());
-					getExcelFileImporter().doImport(fileItem.getInputStream(), getModelRepository(), "mypojo");
-					break;
-					
-				case "csv":
-					getCsvFileImporter().setParserSettings(new CsvParserSettings());
-					getCsvFileImporter().doImport(fileItem.getInputStream(), getModelRepository(), "mypojo");
-
-					break;
-					
-				default:
-					throw new InvalidConfigException("File type \"." + ext + "\" is not supported.");
-			}
+				getFileImportGateway().getFileImporter(ext).doImport(fileItem.getInputStream(), "mypojo");
 				message = "You successfully uploaded file=" + name;
 			} catch (Exception e) {
 				message = "You failed to upload " + name + " => " + e.getMessage();
 			}
-		} else {
-			message = "You failed to upload " 
-					+ " because the file was empty.";
 		}
 		return message;
 	}

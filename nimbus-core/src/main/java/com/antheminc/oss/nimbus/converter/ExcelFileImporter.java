@@ -53,23 +53,29 @@ public class ExcelFileImporter extends FileImporter {
 	private ExcelParserSettings excelParserSettings;
 
 	@Override
-	public <T> void doImport(File file, ModelRepository modelRepository, String domainAlias) {
+	public <T> void doImport(File file, String domainAlias) {
 		try {
 			File csvFile = getToCsvConverter().convert(file, getExcelParserSettings());
 
-			getCsvFileImporter().doImport(new FileSystemResource(csvFile), modelRepository, domainAlias);
+			getCsvFileImporter().doImport(csvFile, domainAlias);
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
 	}
 	
 	@Override
-	public <T> void doImport(InputStream inpStream, ModelRepository modelRepository, String domainAlias) {
+	public <T> void doImport(InputStream inpStream, String domainAlias) {
 		try {
 			File csvFile = getToCsvConverter().convert(inpStream, getExcelParserSettings());
-			getCsvFileImporter().doImport(new FileSystemResource(csvFile), modelRepository, domainAlias);
+			getCsvFileImporter().doImport(csvFile, domainAlias);
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
+	}
+
+	@Override
+	public boolean supports(String extension) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
