@@ -18,6 +18,7 @@ package com.antheminc.oss.nimbus.converter;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -46,6 +47,8 @@ import lombok.Setter;
 @Setter
 public class ExcelFileImporter extends FileImporter {
 
+	public final static String[] SUPPORTED_EXTENSIONS = new String[] { "xlsx" };
+
 	private final ExcelToCsvConverter toCsvConverter;
 	private final CsvFileImporter csvFileImporter;
 
@@ -59,5 +62,10 @@ public class ExcelFileImporter extends FileImporter {
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
+	}
+
+	@Override
+	public boolean supports(String extension) {
+		return ArrayUtils.contains(SUPPORTED_EXTENSIONS, extension);
 	}
 }

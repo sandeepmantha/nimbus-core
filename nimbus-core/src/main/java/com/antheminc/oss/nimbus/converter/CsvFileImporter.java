@@ -17,6 +17,7 @@ package com.antheminc.oss.nimbus.converter;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
@@ -48,9 +49,11 @@ import lombok.Setter;
 @Setter
 public class CsvFileImporter extends FileImporter {
 
+	public final static String[] SUPPORTED_EXTENSIONS = new String[] { "csv" };
+
 	private final DomainConfigBuilder domainConfigBuilder;
 	private final ModelRepositoryFactory modelRepositoryFactory;
-	
+
 	@Getter
 	public class PersistenceProcessor<S> extends BeanProcessor<S> {
 
@@ -82,5 +85,9 @@ public class CsvFileImporter extends FileImporter {
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
+	}
+
+	public boolean supports(String extension) {
+		return ArrayUtils.contains(SUPPORTED_EXTENSIONS, extension);
 	}
 }

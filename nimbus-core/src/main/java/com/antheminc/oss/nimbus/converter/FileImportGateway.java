@@ -16,18 +16,10 @@
 package com.antheminc.oss.nimbus.converter;
 
 /**
- * <p>A base importer interface for handling the import of data from a file.
- * 
  * @author Tony Lopez
- * @author Sandeep Mantha
  *
  */
-public abstract class FileImporter implements Importer {
+public interface FileImportGateway {
 
-	/**
-	 * <p>Tell whether or not this importer supports the given file type extension
-	 * @param extension the file type extension to check
-	 * @return {@code true} if supported, {@code false} otherwise
-	 */
-	public abstract boolean supports(String extension);
+	FileImporter getFileImporter(String extension);
 }
