@@ -20,13 +20,16 @@ import java.io.IOException;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.univocity.parsers.common.ParsingContext;
 import com.univocity.parsers.common.processor.BeanProcessor;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -40,10 +43,14 @@ import lombok.Setter;
  * @author Sandeep Mantha
  *
  */
+@RequiredArgsConstructor
 @Getter
 @Setter
 public class CsvFileImporter extends FileImporter {
 
+	private final DomainConfigBuilder domainConfigBuilder;
+	private final ModelRepositoryFactory modelRepositoryFactory;
+	
 	@Getter
 	public class PersistenceProcessor<S> extends BeanProcessor<S> {
 
@@ -62,15 +69,16 @@ public class CsvFileImporter extends FileImporter {
 		}
 	}
 
-	private CsvParserSettings parserSettings;
+	private CsvParserSettings parserSettings = new CsvParserSettings();
 
 	@Override
-	public <T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias) {
-		// TODO load rootModelConfig using domainAlias.
-//		BeanProcessor<?> rowProcessor = new PersistenceProcessor<>(modelRepository, rootModelConfig);
-//		parserSettings.setProcessor(rowProcessor);
+	public <T> void doImport(Resource resource, String domainAlias) {
+		ModelConfig<?> rootModelConfig = getDomainConfigBuilder().getModel(domainAlias);
+		ModelRepository modelRepository = getModelRepositoryFactory().get(rootModelConfig.getRepo());
+		BeanProcessor<?> rowProcessor = new PersistenceProcessor<>(modelRepository, rootModelConfig);
+		getParserSettings().setProcessor(rowProcessor);
 		try {
-			new com.univocity.parsers.csv.CsvParser(parserSettings).parse(resource.getFile());
+			new com.univocity.parsers.csv.CsvParser(getParserSettings()).parse(resource.getFile());
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}

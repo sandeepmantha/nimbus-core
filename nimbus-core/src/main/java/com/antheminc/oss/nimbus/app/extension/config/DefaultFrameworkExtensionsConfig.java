@@ -25,6 +25,7 @@ import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.converter.CsvFileImporter;
 import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.UnivocityExcelToCsvConverter;
+import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.defn.extension.ValidateConditional.ValidationScope;
 import com.antheminc.oss.nimbus.domain.model.config.extension.LabelStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.AccessConditionalStateEventHandler;
@@ -51,6 +52,7 @@ import com.antheminc.oss.nimbus.domain.model.state.extension.VisibleConditionalS
 import com.antheminc.oss.nimbus.domain.model.state.extension.validateconditional.ChildrenValidationAssignmentStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.extension.validateconditional.SiblingValidationAssignmentStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.internal.IdParamConverter;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 
 /**
  * @author Soham Chakravarti
@@ -178,13 +180,13 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public CsvFileImporter csvFileImporter() {
-		return new CsvFileImporter();
+	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, ModelRepositoryFactory modelRepositoryFactory) {
+		return new CsvFileImporter(domainConfigBuilder, modelRepositoryFactory);
 	}
 	
 	@Bean
-	public ExcelFileImporter excelFileImporter() {
-		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter());
+	public ExcelFileImporter excelFileImporter(CsvFileImporter csvFileImporter) {
+		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter);
 	}
 	
 }

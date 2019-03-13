@@ -70,7 +70,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 
 		validate(eCtx, actionParameter);
 		
-		ModelRepository modelRepository = getModelRepositoryFactory().get(actionParameter.getRootDomain().getConfig().getRepo());
+//		ModelRepository modelRepository = getModelRepositoryFactory().get(actionParameter.getRootDomain().getConfig().getRepo());
 		
 		if (shouldHandleAsFile(eCtx)) {
 			final String filename = eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_FILE);
@@ -82,7 +82,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 			
 //			Param<T> associatedParam = (Param<T>)response.getSingleResult();
 			
-			handleFile(filename, modelRepository, assocParamUri);
+			handleFile(filename, assocParamUri);
 		}
 		
 		return null;
@@ -108,7 +108,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 		return StringUtils.isNotEmpty(eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_FILE));
 	}
 
-	private void handleFile(String filename, ModelRepository modelRepository, String domainAlias) {
+	private void handleFile(String filename, String domainAlias) {
 		
 		File file = FileUtils.getFile(filename);
 		Resource resource = new FileSystemResource(file);
@@ -118,12 +118,12 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 		
 			case "xlsx":
 				getExcelFileImporter().setExcelParserSettings(new ExcelParserSettings());
-				getExcelFileImporter().doImport(resource, modelRepository, domainAlias);
+				getExcelFileImporter().doImport(resource, domainAlias);
 				break;
 				
 			case "csv":
 				getCsvFileImporter().setParserSettings(new CsvParserSettings());
-				getCsvFileImporter().doImport(resource, modelRepository, domainAlias);
+				getCsvFileImporter().doImport(resource, domainAlias);
 
 				break;
 				

@@ -52,10 +52,10 @@ public class ExcelFileImporter extends FileImporter {
 	private ExcelParserSettings excelParserSettings;
 
 	@Override
-	public <T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias) {
+	public <T> void doImport(Resource resource, String domainAlias) {
 		try {
 			File csvFile = getToCsvConverter().convert(resource.getFile(), getExcelParserSettings());
-			getCsvFileImporter().doImport(new FileSystemResource(csvFile), modelRepository, domainAlias);
+			getCsvFileImporter().doImport(new FileSystemResource(csvFile), domainAlias);
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
