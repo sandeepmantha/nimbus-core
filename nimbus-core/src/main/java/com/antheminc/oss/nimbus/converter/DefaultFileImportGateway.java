@@ -15,19 +15,32 @@
  */
 package com.antheminc.oss.nimbus.converter;
 
+import java.util.Collection;
+
+import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+
+import lombok.Getter;
+
 /**
- * <p>A base importer interface for handling the import of data from a file.
- * 
  * @author Tony Lopez
- * @author Sandeep Mantha
  *
  */
-public abstract class FileImporter implements Importer {
+@Getter
+public class DefaultFileImportGateway implements FileImportGateway {
 
-	/**
-	 * <p>Tell whether or not this importer supports the given file type extension
-	 * @param extension the file type extension to check
-	 * @return {@code true} if supported, {@code false} otherwise
-	 */
-	public abstract boolean supports(String extension);
+	private final Collection<FileImporter> fileImporters;
+	
+	public DefaultFileImportGateway(BeanResolverStrategy beanResolver) {
+		this.fileImporters = beanResolver.getMultiple(FileImporter.class);
+	}
+
+	@Override
+	public FileImporter getFileImporter(String extension) {
+		for(FileImporter fileImporter: getFileImporters()) {
+			if (fileImporter.supports(extension)) {
+				return fileImporter;
+			}
+		}
+		return null;
+	}
 }

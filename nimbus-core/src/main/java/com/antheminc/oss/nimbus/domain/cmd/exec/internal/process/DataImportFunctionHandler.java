@@ -20,21 +20,17 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
-import com.antheminc.oss.nimbus.converter.CsvFileImporter;
-import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.ExcelParserSettings;
-import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
+import com.antheminc.oss.nimbus.converter.DefaultFileImportGateway;
 import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContext;
 import com.antheminc.oss.nimbus.domain.cmd.exec.FunctionHandler;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Model;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
-import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.univocity.parsers.csv.CsvParserSettings;
 
@@ -50,18 +46,13 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 
 	public static final String ARG_FILE = "file";
 	public static final String ARG_PARAM = "associatedParam";
-
-	@Autowired CommandExecutorGateway executorGateway;
 	
 	private final ModelRepositoryFactory modelRepositoryFactory;
-	
-	private final CsvFileImporter csvFileImporter;
-	private final ExcelFileImporter excelFileImporter;
+	private final DefaultFileImportGateway fileImportGateway;
 	
 	public DataImportFunctionHandler(ModelRepositoryFactory modelRepositoryFactory, BeanResolverStrategy beanResolver) {
 		this.modelRepositoryFactory = modelRepositoryFactory;
-		this.csvFileImporter = beanResolver.get(CsvFileImporter.class);
-		this.excelFileImporter = beanResolver.get(ExcelFileImporter.class);
+		this.fileImportGateway = beanResolver.get(DefaultFileImportGateway.class);
 }
 
 	// /p/domain/_process?fn=_dataImport&file=sample.xlsx
@@ -70,7 +61,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 
 		validate(eCtx, actionParameter);
 		
-		ModelRepository modelRepository = getModelRepositoryFactory().get(actionParameter.getRootDomain().getConfig().getRepo());
+//		ModelRepository modelRepository = getModelRepositoryFactory().get(actionParameter.getRootDomain().getConfig().getRepo());
 		
 		if (shouldHandleAsFile(eCtx)) {
 			final String filename = eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_FILE);
@@ -82,7 +73,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 			
 //			Param<T> associatedParam = (Param<T>)response.getSingleResult();
 			
-			handleFile(filename, modelRepository, assocParamUri);
+			handleFile(filename, assocParamUri);
 		}
 		
 		return null;
@@ -108,27 +99,12 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 		return StringUtils.isNotEmpty(eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_FILE));
 	}
 
-	private void handleFile(String filename, ModelRepository modelRepository, String domainAlias) {
+	private void handleFile(String filename, String domainAlias) {
 		
 		File file = FileUtils.getFile(filename);
 		Resource resource = new FileSystemResource(file);
 		
 		String extension = FilenameUtils.getExtension(filename);
-		switch (extension) {
-		
-			case "xlsx":
-				getExcelFileImporter().setExcelParserSettings(new ExcelParserSettings());
-				getExcelFileImporter().doImport(resource, modelRepository, domainAlias);
-				break;
-				
-			case "csv":
-				getCsvFileImporter().setParserSettings(new CsvParserSettings());
-				getCsvFileImporter().doImport(resource, modelRepository, domainAlias);
-
-				break;
-				
-			default:
-				throw new InvalidConfigException("File type \"." + extension + "\" is not supported.");
-		}
+		getFileImportGateway().getFileImporter(extension).doImport(resource, domainAlias);
 	}
 }
