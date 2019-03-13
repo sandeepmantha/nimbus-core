@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -52,6 +53,8 @@ public class ExcelFileImporter extends FileImporter {
 
 	private ExcelParserSettings excelParserSettings;
 
+	public final static String[] SUPPORTED_EXTENSIONS = new String[] { "xlsx" , "xls"};
+	
 	@Override
 	public <T> void doImport(File file, String domainAlias) {
 		try {
@@ -75,7 +78,6 @@ public class ExcelFileImporter extends FileImporter {
 
 	@Override
 	public boolean supports(String extension) {
-		// TODO Auto-generated method stub
-		return false;
+		return ArrayUtils.contains(SUPPORTED_EXTENSIONS, extension);
 	}
 }

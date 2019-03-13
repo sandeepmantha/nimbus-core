@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.converter.CsvFileImporter;
+import com.antheminc.oss.nimbus.converter.DefaultFileImportGateway;
 import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.UnivocityExcelToCsvConverter;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
@@ -187,6 +188,11 @@ public class DefaultFrameworkExtensionsConfig {
 	@Bean
 	public ExcelFileImporter excelFileImporter(CsvFileImporter csvFileImporter) {
 		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter);
+	}
+	
+	@Bean
+	public DefaultFileImportGateway defaultFileImportGateway(BeanResolverStrategy beanResolver) {
+		return new DefaultFileImportGateway(beanResolver);
 	}
 	
 }
