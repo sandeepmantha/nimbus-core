@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.univocity.parsers.common.ParsingContext;
@@ -43,7 +44,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CsvFileImporter extends FileImporter {
-
+	
+	private DomainConfigBuilder domainConfigBuilder;
+	
+	public CsvFileImporter(DomainConfigBuilder domainConfigBuilder) {
+		this.domainConfigBuilder = domainConfigBuilder;
+	}
+	
 	@Getter
 	public class PersistenceProcessor<S> extends BeanProcessor<S> {
 
@@ -66,9 +73,9 @@ public class CsvFileImporter extends FileImporter {
 
 	@Override
 	public <T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias) {
-		// TODO load rootModelConfig using domainAlias.
-//		BeanProcessor<?> rowProcessor = new PersistenceProcessor<>(modelRepository, rootModelConfig);
-//		parserSettings.setProcessor(rowProcessor);
+		ModelConfig<?> modelConfig = getDomainConfigBuilder().getModel(domainAlias);
+		BeanProcessor<?> rowProcessor = new PersistenceProcessor<>(modelRepository, modelConfig);
+		parserSettings.setProcessor(rowProcessor);
 		try {
 			new com.univocity.parsers.csv.CsvParser(parserSettings).parse(resource.getFile());
 		} catch (IOException e) {

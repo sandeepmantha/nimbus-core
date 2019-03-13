@@ -15,6 +15,9 @@
  */
 package com.antheminc.oss.nimbus.converter;
 
+import java.io.File;
+import java.io.InputStream;
+
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
@@ -39,5 +42,7 @@ public interface Importer {
 	 * @param domainAlias the alias that will mandate the conversion rules for
 	 *            converting {@code resource} into to a Java object
 	 */
-	<T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias);
+	<T> void doImport(File file, ModelRepository modelRepository, String domainAlias);
+	
+	<T> void doImport(InputStream inputStream, ModelRepository modelRepository, String domainAlias);
 }

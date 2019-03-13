@@ -17,6 +17,7 @@ package com.antheminc.oss.nimbus.converter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -52,9 +53,20 @@ public class ExcelFileImporter extends FileImporter {
 	private ExcelParserSettings excelParserSettings;
 
 	@Override
-	public <T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias) {
+	public <T> void doImport(File file, ModelRepository modelRepository, String domainAlias) {
 		try {
-			File csvFile = getToCsvConverter().convert(resource.getFile(), getExcelParserSettings());
+			File csvFile = getToCsvConverter().convert(file, getExcelParserSettings());
+
+			getCsvFileImporter().doImport(new FileSystemResource(csvFile), modelRepository, domainAlias);
+		} catch (IOException e) {
+			throw new FrameworkRuntimeException(e);
+		}
+	}
+	
+	@Override
+	public <T> void doImport(InputStream inpStream, ModelRepository modelRepository, String domainAlias) {
+		try {
+			File csvFile = getToCsvConverter().convert(inpStream, getExcelParserSettings());
 			getCsvFileImporter().doImport(new FileSystemResource(csvFile), modelRepository, domainAlias);
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);

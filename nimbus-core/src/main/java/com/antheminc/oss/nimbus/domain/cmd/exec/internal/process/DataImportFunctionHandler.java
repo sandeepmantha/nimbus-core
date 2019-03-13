@@ -62,7 +62,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 		this.modelRepositoryFactory = modelRepositoryFactory;
 		this.csvFileImporter = beanResolver.get(CsvFileImporter.class);
 		this.excelFileImporter = beanResolver.get(ExcelFileImporter.class);
-}
+	}
 
 	// /p/domain/_process?fn=_dataImport&file=sample.xlsx
 	@Override
@@ -74,14 +74,7 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 		
 		if (shouldHandleAsFile(eCtx)) {
 			final String filename = eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_FILE);
-			final String assocParamUri = eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_PARAM);
-//			assocParamUri = eCtx.getCommandMessage().getCommand().getRelativeUri(assocParamUri);
-//			Command command = CommandBuilder.withUri(assocParamUri).getCommand();
-//			CommandMessage newCommandMessage = new CommandMessage(command, eCtx.getCommandMessage().hasPayload() ?  eCtx.getCommandMessage().getRawPayload() :null);
-//			MultiOutput response = getExecutorGateway().execute(newCommandMessage);
-			
-//			Param<T> associatedParam = (Param<T>)response.getSingleResult();
-			
+			final String assocParamUri = eCtx.getCommandMessage().getCommand().getFirstParameterValue(ARG_PARAM);	
 			handleFile(filename, modelRepository, assocParamUri);
 		}
 		
@@ -110,20 +103,18 @@ public class DataImportFunctionHandler<T> implements FunctionHandler<T, Void> {
 
 	private void handleFile(String filename, ModelRepository modelRepository, String domainAlias) {
 		
-		File file = FileUtils.getFile(filename);
-		Resource resource = new FileSystemResource(file);
-		
+		File file = FileUtils.getFile(filename);		
 		String extension = FilenameUtils.getExtension(filename);
 		switch (extension) {
 		
 			case "xlsx":
 				getExcelFileImporter().setExcelParserSettings(new ExcelParserSettings());
-				getExcelFileImporter().doImport(resource, modelRepository, domainAlias);
+				getExcelFileImporter().doImport(file, modelRepository, domainAlias);
 				break;
 				
 			case "csv":
 				getCsvFileImporter().setParserSettings(new CsvParserSettings());
-				getCsvFileImporter().doImport(resource, modelRepository, domainAlias);
+				getCsvFileImporter().doImport(file, modelRepository, domainAlias);
 
 				break;
 				

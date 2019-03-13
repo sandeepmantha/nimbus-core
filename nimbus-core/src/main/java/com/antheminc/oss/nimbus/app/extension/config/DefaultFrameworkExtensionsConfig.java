@@ -25,6 +25,7 @@ import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.converter.CsvFileImporter;
 import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.UnivocityExcelToCsvConverter;
+import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.defn.extension.ValidateConditional.ValidationScope;
 import com.antheminc.oss.nimbus.domain.model.config.extension.LabelStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.AccessConditionalStateEventHandler;
@@ -178,13 +179,13 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public CsvFileImporter csvFileImporter() {
-		return new CsvFileImporter();
+	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder) {
+		return new CsvFileImporter(domainConfigBuilder);
 	}
 	
 	@Bean
-	public ExcelFileImporter excelFileImporter() {
-		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter());
+	public ExcelFileImporter excelFileImporter(DomainConfigBuilder domainConfigBuilder) {
+		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter(domainConfigBuilder));
 	}
 	
 }

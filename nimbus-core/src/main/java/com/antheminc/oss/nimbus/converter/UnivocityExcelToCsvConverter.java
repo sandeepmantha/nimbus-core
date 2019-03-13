@@ -71,6 +71,7 @@ public class UnivocityExcelToCsvConverter implements ExcelToCsvConverter {
 		FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 		DataFormatter formatter = new DataFormatter(true);
 
+		//TODO - loop over all sheets in the workbook
 		Sheet selSheet = workbook.getSheetAt(0);
 		Iterator<Row> rowIterator = selSheet.iterator();
 

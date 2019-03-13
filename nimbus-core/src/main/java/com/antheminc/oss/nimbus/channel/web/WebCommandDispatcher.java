@@ -20,12 +20,24 @@ package com.antheminc.oss.nimbus.channel.web;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.converter.CsvFileImporter;
+import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
+import com.antheminc.oss.nimbus.converter.ExcelParserSettings;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.antheminc.oss.nimbus.support.EnableLoggingInterceptor;
+import com.univocity.parsers.csv.CsvParserSettings;
 
 import lombok.Getter;
 
@@ -41,9 +53,17 @@ public class WebCommandDispatcher {
 
 	private final CommandExecutorGateway gateway;
 
+	private final ModelRepository modelRepository;
+	
+	private final CsvFileImporter csvFileImporter;
+	private final ExcelFileImporter excelFileImporter;	
+	
 	public WebCommandDispatcher(BeanResolverStrategy beanResolver) {
 		this.builder = beanResolver.get(WebCommandBuilder.class);
 		this.gateway = beanResolver.get(CommandExecutorGateway.class);
+		this.modelRepository =beanResolver.get(ModelRepository.class);
+		this.csvFileImporter = beanResolver.get(CsvFileImporter.class);
+		this.excelFileImporter = beanResolver.get(ExcelFileImporter.class);
 	}
 	
 	public Object handle(HttpServletRequest httpReq, ModelEvent<String> event) {
@@ -60,4 +80,38 @@ public class WebCommandDispatcher {
 		return getGateway().execute(cmd, payload);
 	}
 
+	public Object handle(HttpServletRequest httpReq, CommonsMultipartFile file) {
+		String message = "";
+		
+		if (!file.isEmpty()) {
+			FileItem fileItem = file.getFileItem();
+			String name = fileItem.getName();
+			try {
+				String ext = FilenameUtils.getExtension(name);
+				switch (ext) {
+				
+				case "xlsx":
+					getExcelFileImporter().setExcelParserSettings(new ExcelParserSettings());
+					getExcelFileImporter().doImport(fileItem.getInputStream(), getModelRepository(), "mypojo");
+					break;
+					
+				case "csv":
+					getCsvFileImporter().setParserSettings(new CsvParserSettings());
+					getCsvFileImporter().doImport(fileItem.getInputStream(), getModelRepository(), "mypojo");
+
+					break;
+					
+				default:
+					throw new InvalidConfigException("File type \"." + ext + "\" is not supported.");
+			}
+				message = "You successfully uploaded file=" + name;
+			} catch (Exception e) {
+				message = "You failed to upload " + name + " => " + e.getMessage();
+			}
+		} else {
+			message = "You failed to upload " 
+					+ " because the file was empty.";
+		}
+		return message;
+	}
 }

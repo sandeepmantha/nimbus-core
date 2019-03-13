@@ -15,13 +15,19 @@
  */
 package com.antheminc.oss.nimbus.channel.web;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +38,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import com.antheminc.oss.nimbus.converter.ExcelParser;
+import com.antheminc.oss.nimbus.converter.CsvFileImporter;
+import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.ExcelParserSettings;
+import com.antheminc.oss.nimbus.converter.ExcelToCsvConverter;
+import com.antheminc.oss.nimbus.converter.UnivocityExcelToCsvConverter;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
@@ -196,24 +206,9 @@ public class WebActionController {
 	
 	
 	@RequestMapping(value=URI_PATTERN_P+"/event/upload",consumes = MediaType.MULTIPART_FORM_DATA_VALUE,  produces="application/json", method=RequestMethod.POST)
-	public Object handleUpload(HttpServletRequest req, @RequestParam("pfu") MultipartFile file) {
-		String message = "";
-		if (!file.isEmpty()) {
-			String name = file.getName();
-			try {
-				ExcelParserSettings settings = new ExcelParserSettings();
-				settings.setInpStream(file.getInputStream());
-				ExcelParser excelParser = new ExcelParser(settings);
-				excelParser.parse();
-				message = "You successfully uploaded file=" + name;
-			} catch (Exception e) {
-				message = "You failed to upload " + name + " => " + e.getMessage();
-			}
-		} else {
-			message = "You failed to upload " 
-					+ " because the file was empty.";
-		}
-		Holder<Object> output = new Holder<>(message);
+	public Object handleUpload(HttpServletRequest req, @RequestParam("pfu") CommonsMultipartFile file) {
+		Object obj = dispatcher.handle(req, file);
+		Holder<Object> output = new Holder<>(obj);
 		return output;
 	}
 	protected Object handleInternal(HttpServletRequest req, RequestMethod httpMethod, String v, String json) {
