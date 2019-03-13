@@ -15,14 +15,7 @@
  */
 package com.antheminc.oss.nimbus.domain.cmd.exec.internal.fn;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -31,17 +24,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.antheminc.oss.nimbus.domain.AbstractFrameworkIngerationPersistableTests;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
-import com.antheminc.oss.nimbus.domain.defn.Constants;
-import com.antheminc.oss.nimbus.domain.model.state.EntityState.ListParam;
-import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
-import com.antheminc.oss.nimbus.test.domain.support.utils.ExtractResponseOutputUtils;
 import com.antheminc.oss.nimbus.test.domain.support.utils.MockHttpRequestBuilder;
-import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreEntity;
-import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreNestedEntity;
-import com.antheminc.oss.nimbus.test.scenarios.s0.view.VPSampleViewPageBlue.Section_ConvertedNestedEntity;
-import com.antheminc.oss.nimbus.test.scenarios.s0.view.VPSampleViewPageGreen;
-import com.antheminc.oss.nimbus.test.scenarios.s0.view.VPSampleViewPageGreen.ConvertedNestedEntity;
-import com.antheminc.oss.nimbus.test.scenarios.s0.view.VPSampleViewPageRed.Form_ConvertedNestedEntity;
 
 /**
  * @author Sandeep Mantha

@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,14 +17,27 @@ package com.antheminc.oss.nimbus.converter;
 
 import org.springframework.core.io.Resource;
 
-import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 
 /**
+ * <p>A base importer interface for handling the import of data.
+ * 
  * @author Tony Lopez
+ * @author Sandeep Mantha
  *
  */
-public interface Importer<T> {
+public interface Importer {
 
-	void doImport(Resource resource, ModelRepository modelRepository, String domainAlias, T settings);
+	/**
+	 * <p>Import data from the provided {@code resource} object by converting to
+	 * each record of data into a Java object and then insert that data into the
+	 * given {@code modelRepository}. The java object each record of data will
+	 * be converted to is determined by the configuration found for
+	 * {@code domainAlias}.
+	 * @param resource the object containing the data to import
+	 * @param modelRepository the repository to store the imported data into
+	 * @param domainAlias the alias that will mandate the conversion rules for
+	 *            converting {@code resource} into to a Java object
+	 */
+	<T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias);
 }
