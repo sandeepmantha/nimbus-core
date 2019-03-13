@@ -19,8 +19,11 @@ import org.activiti.engine.impl.el.ExpressionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.converter.CSVFileImporter;
+import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.domain.bpm.BPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiBPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiExpressionManager;
@@ -30,6 +33,7 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.internal.DefaultParamFunctionHan
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.nav.DefaultActionNewInitEntityFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.nav.PageIdEchoNavHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.AddFunctionHandler;
+import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.DataImportFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.EvalFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.SetByRuleFunctionalHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.SetFunctionHandler;
@@ -38,6 +42,7 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.UpdateFunctionH
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerExample;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerLookup;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.search.DefaultSearchFunctionHandlerQuery;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.antheminc.oss.nimbus.support.expr.ExpressionEvaluator;
 import com.antheminc.oss.nimbus.support.expr.SpelExpressionEvaluator;
 
@@ -126,9 +131,31 @@ public class DefaultProcessConfig {
 		return new DefaultSearchFunctionHandlerQuery<>();
 	}
 
+	@Bean(name="default._process$execute?fn=_dataImport")
+	public FunctionHandler<?,?> dataImportFunctionHandler(ModelRepositoryFactory modelRepositoryFactory, BeanResolverStrategy beanResolver) {
+		return new DataImportFunctionHandler<>(modelRepositoryFactory, beanResolver);
+	}
+	
 	@Bean(name="default._process$execute?fn=_eval")
 	public EvalFunctionHandler<?,?> evalFunctionHandler(ExpressionManager expressionManager){
 		return new EvalFunctionHandler(expressionManager);
 	}
 
+	@Bean(name = "multipartResolver")
+    public CommonsMultipartResolver multipartResolver() {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(-1);
+        return multipartResolver;
+    }
+
+	
+	@Bean
+	public ExcelFileImporter excelFileImporter(BeanResolverStrategy beanResolver) {
+		return new ExcelFileImporter(beanResolver);
+	}
+	
+	@Bean
+	public CSVFileImporter csvFileImporter(BeanResolverStrategy beanResolver) {
+		return new CSVFileImporter(beanResolver);
+	}
 }

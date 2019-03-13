@@ -22,6 +22,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.converter.CSVFileImporter;
+import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.domain.defn.extension.ValidateConditional.ValidationScope;
 import com.antheminc.oss.nimbus.domain.model.config.extension.LabelStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.AccessConditionalStateEventHandler;
@@ -169,4 +171,13 @@ public class DefaultFrameworkExtensionsConfig {
 		return new StaticCodeValueBasedCodeToLabelConverter(beanResolver);
 	}
 	
+	@Bean
+	public ExcelFileImporter excelFileImporter(BeanResolverStrategy beanResolver) {
+		return new ExcelFileImporter(beanResolver);
+	}
+	
+	@Bean
+	public CSVFileImporter csvFileImporter(BeanResolverStrategy beanResolver) {
+		return new CSVFileImporter(beanResolver);
+	}
 }
