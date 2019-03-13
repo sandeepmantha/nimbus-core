@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,36 +15,49 @@
  */
 package com.antheminc.oss.nimbus.converter;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
-import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
-import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 /**
+ * <p>An excel file importer interface that imports data from an excel file into
+ * the provided {@link ModelRepository}.
+ * 
+ * <p>This implementation first converts the excel file into a .csv equivalent
+ * to make use of generic CSV parsing features.
+ * 
  * @author Tony Lopez
  * @author Sandeep Mantha
- *
+ * @see com.antheminc.oss.nimbus.converter.ExcelToCsvConverter
+ * @see com.antheminc.oss.nimbus.converter.CsvFileImporter
+ * 
  */
-public class ExcelFileImporter extends FileImporter<ExcelParserSettings> {
-		
-	public ExcelFileImporter(BeanResolverStrategy beanResolver) {
-		
-	}
-	
+@RequiredArgsConstructor
+@Getter
+@Setter
+public class ExcelFileImporter extends FileImporter {
+
+	private final ExcelToCsvConverter toCsvConverter;
+	private final CsvFileImporter csvFileImporter;
+
+	private ExcelParserSettings excelParserSettings;
+
 	@Override
-	public void doImport(Resource resource, ModelRepository modelRepository, String domainAlias, ExcelParserSettings settings) {
+	public <T> void doImport(Resource resource, ModelRepository modelRepository, String domainAlias) {
 		try {
-			settings.setFile(resource.getFile());
-			new ExcelParser(settings).parse();
-			
-		}
-		catch(IOException e) {
+			File csvFile = getToCsvConverter().convert(resource.getFile(), getExcelParserSettings());
+			getCsvFileImporter().doImport(new FileSystemResource(csvFile), modelRepository, domainAlias);
+		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
 	}
-
 }

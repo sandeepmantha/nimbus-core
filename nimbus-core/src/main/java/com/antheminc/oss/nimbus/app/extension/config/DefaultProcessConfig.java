@@ -22,8 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
-import com.antheminc.oss.nimbus.converter.CSVFileImporter;
-import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
 import com.antheminc.oss.nimbus.domain.bpm.BPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiBPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiExpressionManager;
@@ -147,15 +145,4 @@ public class DefaultProcessConfig {
         multipartResolver.setMaxUploadSize(-1);
         return multipartResolver;
     }
-
-	
-	@Bean
-	public ExcelFileImporter excelFileImporter(BeanResolverStrategy beanResolver) {
-		return new ExcelFileImporter(beanResolver);
-	}
-	
-	@Bean
-	public CSVFileImporter csvFileImporter(BeanResolverStrategy beanResolver) {
-		return new CSVFileImporter(beanResolver);
-	}
 }

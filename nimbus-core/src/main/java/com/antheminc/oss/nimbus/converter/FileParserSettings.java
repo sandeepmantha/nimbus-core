@@ -16,12 +16,12 @@
 package com.antheminc.oss.nimbus.converter;
 
 /**
- * <p>A parser settings class for how to handle parsing Excel files.
+ * <p>A base implementation for file parser settings.
  * 
  * @author Tony Lopez
  * @author Sandeep Mantha
  *
  */
-public class ExcelParserSettings implements FileParserSettings {
+public interface FileParserSettings {
 
 }
