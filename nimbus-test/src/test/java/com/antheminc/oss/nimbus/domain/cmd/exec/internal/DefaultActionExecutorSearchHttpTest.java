@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -33,6 +34,12 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.antheminc.oss.nimbus.domain.AbstractFrameworkIngerationPersistableTests;
@@ -50,6 +57,7 @@ import com.antheminc.oss.nimbus.support.Holder;
 import com.antheminc.oss.nimbus.test.domain.support.utils.ExtractResponseOutputUtils;
 import com.antheminc.oss.nimbus.test.domain.support.utils.MockHttpRequestBuilder;
 import com.antheminc.oss.nimbus.test.domain.support.utils.ParamUtils;
+import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreEntity;
 import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreEntityAccess;
 import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreNestedEntity;
 import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleTask;
@@ -479,6 +487,38 @@ public class DefaultActionExecutorSearchHttpTest extends AbstractFrameworkIngera
 		Assert.assertEquals("Groom", pSorted.getValues().get(0).getLabel());
 		Assert.assertEquals("1", pSorted.getValues().get(1).getCode());
 		Assert.assertEquals("Play", pSorted.getValues().get(1).getLabel());
+	}
+	
+	@Test
+	public void test() {
+
+		TestCore user1 = new TestCore();
+		user1.setDate1(LocalDateTime.now());
+		user1.setDate2(LocalDateTime.now().plusMinutes(16));
+
+		TestCore user2 = new TestCore();
+		user2.setDate1(LocalDateTime.now());
+		user2.setDate2(LocalDateTime.now().plusMinutes(14));
+		
+		TestCore user3 = new TestCore();
+
+		user3.setDate1(LocalDateTime.now());
+		user3.setDate2(LocalDateTime.now().plusMinutes(13));
+		
+		mongo.save(user1);
+		mongo.save(user2);
+		mongo.save(user3);
+
+		MatchOperation matchStage = Aggregation.match(new Criteria("foo").is("bar"));
+		ProjectionOperation projectStage = Aggregation.project("date1", "date2");
+		         
+		Aggregation aggregation 
+		  = Aggregation.newAggregation(matchStage, projectStage);
+		
+		AggregationResults<Test> results = mongo.aggregate(aggregation, Test.class, Test.class);
+
+		List<Test> mappedResults = results.getMappedResults();
+		
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -64,6 +64,8 @@ public class ExcelFileImporter extends FileImporter {
 	public <T> void doImport(Command command, InputStream stream) {
 		try {
 			File csvFile = getToCsvConverter().convert(stream, getExcelParserSettings());
+			
+			//TODO - after csv import is done - delete the file
 			getCsvFileImporter().doImport(command, new FileInputStream(csvFile));
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);

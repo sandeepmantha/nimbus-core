@@ -101,11 +101,11 @@ public class CsvFileImporter extends FileImporter {
 	};
 
 	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
-			ObjectMapper om, UnivocityCsvParser univocityCsvParser, ModelRepositoryFactory modelRepositoryFactory) {
+			ObjectMapper om, FileParser fileParser, ModelRepositoryFactory modelRepositoryFactory) {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;
 		this.om = om;
-		this.fileParser = univocityCsvParser;
+		this.fileParser = fileParser;
 		this.modelRepositoryFactory = modelRepositoryFactory;
 
 	}
@@ -115,6 +115,8 @@ public class CsvFileImporter extends FileImporter {
 		prepareRowProcessing(command);
 		prepareErrorHandling(command);
 		getFileParser().parse(stream, command);
+		//TODO - update the entry to when the file is processed
+
 	}
 
 	protected void prepareRowProcessing(Command command) {

@@ -94,7 +94,7 @@ public class WebCommandDispatcher {
 			Command uploadCommand = CommandBuilder.withPlatformRelativePath(command, Type.PlatformMarker, "/" + domain).getCommand();
 			uploadCommand.setRequestParams(command.getRequestParams());
 			uploadCommand.setAction(Action._new);
-			
+			//TODO - add an entry to db when the file starts to process
 			importer.doImport(uploadCommand, file.getInputStream());
 			return true;
 		} catch (Exception e) {
