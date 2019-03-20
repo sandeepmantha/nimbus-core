@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.converter;
+package com.antheminc.oss.nimbus.converter.excel;
 
 import java.io.File;
 import java.io.IOException;

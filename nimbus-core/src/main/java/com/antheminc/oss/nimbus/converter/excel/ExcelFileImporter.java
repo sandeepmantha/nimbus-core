@@ -13,9 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.converter;
+package com.antheminc.oss.nimbus.converter.excel;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,6 +25,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.converter.FileImporter;
+import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter;
+import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 
 import lombok.Getter;
@@ -39,7 +43,7 @@ import lombok.Setter;
  * 
  * @author Tony Lopez
  * @author Sandeep Mantha
- * @see com.antheminc.oss.nimbus.converter.ExcelToCsvConverter
+ * @see com.antheminc.oss.nimbus.converter.excel.ExcelToCsvConverter
  * @see com.antheminc.oss.nimbus.converter.CsvFileImporter
  * 
  */
@@ -55,22 +59,12 @@ public class ExcelFileImporter extends FileImporter {
 
 	public final static String[] SUPPORTED_EXTENSIONS = new String[] { "xlsx" , "xls"};
 	
-	@Override
-	public <T> void doImport(File file, String domainAlias) {
-		try {
-			File csvFile = getToCsvConverter().convert(file, getExcelParserSettings());
-
-			getCsvFileImporter().doImport(csvFile, domainAlias);
-		} catch (IOException e) {
-			throw new FrameworkRuntimeException(e);
-		}
-	}
 	
 	@Override
-	public <T> void doImport(InputStream inpStream, String domainAlias) {
+	public <T> void doImport(Command command, InputStream stream) {
 		try {
-			File csvFile = getToCsvConverter().convert(inpStream, getExcelParserSettings());
-			getCsvFileImporter().doImport(csvFile, domainAlias);
+			File csvFile = getToCsvConverter().convert(stream, getExcelParserSettings());
+			getCsvFileImporter().doImport(command, new FileInputStream(csvFile));
 		} catch (IOException e) {
 			throw new FrameworkRuntimeException(e);
 		}
@@ -80,4 +74,5 @@ public class ExcelFileImporter extends FileImporter {
 	public boolean supports(String extension) {
 		return ArrayUtils.contains(SUPPORTED_EXTENSIONS, extension);
 	}
+
 }

@@ -36,27 +36,15 @@ import com.antheminc.oss.nimbus.domain.cmd.Command;
 public interface Importer {
 
 	/**
-	 * <p>Import data from the provided {@code file} object by converting to
-	 * each record of data into a Java object and then insert that data into the
-	 * configured provided repository. The java object each record of data will
-	 * be converted to is determined by the configuration found for
-	 * {@code domainAlias}.
-	 * @param resource the object containing the data to import
-	 * @param domainAlias the alias that will mandate the conversion rules for
+	 * <p>Import data from the provided resource by converting each record of
+	 * data into a Java object and then saving that object. The java object each
+	 * record of data will be converted to is determined by the configuration in
+	 * the provided {@code Command}.
+	 * 
+	 * @param command the command that will mandate the conversion rules for
 	 *            converting {@code file} into to a Java object
+	 * @param stream the object containing the data to import
 	 */
-	<T> void doImport(File file, String domainAlias);
-	
-	/**
-	 * <p>Import data from the provided {@code stream} object by converting to
-	 * each record of data into a Java object and then insert that data into the
-	 * configured provided repository. The java object each record of data will
-	 * be converted to is determined by the configuration found for
-	 * {@code domainAlias}.
-	 * @param resource the object containing the data to import
-	 * @param domainAlias the alias that will mandate the conversion rules for
-	 *            converting {@code stream} into to a Java object
-	 */
-	<T> void doImport(InputStream inputStream, String domainAlias);
+	<T> void doImport(Command command, InputStream stream);
 
 }

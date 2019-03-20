@@ -31,7 +31,6 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.internal.DefaultParamFunctionHan
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.nav.DefaultActionNewInitEntityFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.nav.PageIdEchoNavHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.AddFunctionHandler;
-import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.DataImportFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.EvalFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.SetByRuleFunctionalHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.SetFunctionHandler;
@@ -127,11 +126,6 @@ public class DefaultProcessConfig {
 	@Bean(name="default._search$execute?fn=query")
 	public FunctionHandler<?, ?> queryFunctionHandler(){
 		return new DefaultSearchFunctionHandlerQuery<>();
-	}
-
-	@Bean(name="default._process$execute?fn=_dataImport")
-	public FunctionHandler<?,?> dataImportFunctionHandler(ModelRepositoryFactory modelRepositoryFactory, BeanResolverStrategy beanResolver) {
-		return new DataImportFunctionHandler<>(modelRepositoryFactory, beanResolver);
 	}
 	
 	@Bean(name="default._process$execute?fn=_eval")

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.converter;
+package com.antheminc.oss.nimbus.converter.excel;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +45,7 @@ import com.univocity.parsers.csv.CsvWriterSettings;
  * @author Tony Lopez
  * @author Sandeep Mantha
  */
-public class UnivocityExcelToCsvConverter implements ExcelToCsvConverter {
+public class ExcelToCSVConversion implements ExcelToCsvConverter {
 
 	@Override
 	public File convert(File file, ExcelParserSettings settings) throws IOException {

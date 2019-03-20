@@ -24,6 +24,7 @@ import com.antheminc.oss.nimbus.converter.FileImporter;
 import com.antheminc.oss.nimbus.converter.FileParser;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
+import com.antheminc.oss.nimbus.converter.excel.ExcelToCSVConversion;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowErrorHandler;
 import com.antheminc.oss.nimbus.converter.writer.CommandHandlingBeanWriter;
 import com.antheminc.oss.nimbus.converter.writer.ModelRepositoryBeanWriter;
@@ -99,13 +100,11 @@ public class CsvFileImporter extends FileImporter {
 	};
 
 	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
-			ObjectMapper om) {
+			ObjectMapper om, UnivocityCsvParser univocityCsvParser) {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;
 		this.om = om;
-
-		// TODO consider moving this to a bean
-		this.fileParser = new UnivocityCsvParser(domainConfigBuilder);
+		this.fileParser = univocityCsvParser;
 	}
 
 	@Override

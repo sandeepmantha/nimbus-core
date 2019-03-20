@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.converter;
+package com.antheminc.oss.nimbus.converter.excel;
 
 /**
  * <p>A parser settings class for how to handle parsing Excel files.
@@ -22,6 +22,6 @@ package com.antheminc.oss.nimbus.converter;
  * @author Sandeep Mantha
  *
  */
-public class ExcelParserSettings implements FileParserSettings {
+public class ExcelParserSettings {
 
 }

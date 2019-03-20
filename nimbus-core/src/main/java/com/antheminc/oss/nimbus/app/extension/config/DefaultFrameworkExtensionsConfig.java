@@ -22,10 +22,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
-import com.antheminc.oss.nimbus.converter.CsvFileImporter;
 import com.antheminc.oss.nimbus.converter.DefaultFileImportGateway;
-import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
-import com.antheminc.oss.nimbus.converter.UnivocityExcelToCsvConverter;
+import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter;
+import com.antheminc.oss.nimbus.converter.csv.UnivocityCsvParser;
+import com.antheminc.oss.nimbus.converter.excel.ExcelFileImporter;
+import com.antheminc.oss.nimbus.converter.excel.ExcelToCSVConversion;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.defn.extension.ValidateConditional.ValidationScope;
@@ -178,18 +179,23 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public UnivocityExcelToCsvConverter excelToCsvConverter() {
-		return new UnivocityExcelToCsvConverter();
-	}
-	
-	@Bean
-	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, ModelRepositoryFactory modelRepositoryFactory) {
-		return new CsvFileImporter(domainConfigBuilder, modelRepositoryFactory);
+	public ExcelToCSVConversion excelToCsvConverter() {
+		return new ExcelToCSVConversion();
 	}
 	
 	@Bean
 	public ExcelFileImporter excelFileImporter(CsvFileImporter csvFileImporter) {
 		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter);
+	}
+	
+	@Bean
+	public UnivocityCsvParser univocityCsvParser(DomainConfigBuilder domainConfigBuilder) {
+		return new UnivocityCsvParser(domainConfigBuilder);
+	}
+	
+	@Bean
+	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ObjectMapper om, UnivocityCsvParser univocityCsvParser) {
+		return new CsvFileImporter(commandGateway, domainConfigBuilder, om, univocityCsvParser);
 	}
 	
 	@Bean
