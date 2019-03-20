@@ -24,13 +24,13 @@ package com.antheminc.oss.nimbus.converter;
 public interface RowProcessable {
 
 	/**
-	 * <p>A strategy interface for writing bean data.
+	 * <p>A strategy interface for handling row processing.
 	 * 
 	 * @author Tony Lopez
 	 *
 	 */
 	@FunctionalInterface
-	public static interface BeanWriter {
+	public static interface RowProcessingHandler {
 		void write(Object bean);
 	}
 
@@ -50,7 +50,7 @@ public interface RowProcessable {
 	 * deserialized row data as a Java object.
 	 * @param beanConsumer the consumer to execute
 	 */
-	void onRowProcess(BeanWriter writer);
+	void onRowProcess(RowProcessingHandler writer);
 
 	/**
 	 * <p>Execute a consumer that executes error handling instructions. The

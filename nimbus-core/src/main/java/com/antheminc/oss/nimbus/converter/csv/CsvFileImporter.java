@@ -23,7 +23,7 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.converter.FileImporter;
 import com.antheminc.oss.nimbus.converter.FileParser;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
-import com.antheminc.oss.nimbus.converter.RowProcessable.BeanWriter;
+import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowErrorHandler;
 import com.antheminc.oss.nimbus.converter.writer.CommandHandlingBeanWriter;
 import com.antheminc.oss.nimbus.converter.writer.ModelRepositoryBeanWriter;
@@ -117,7 +117,7 @@ public class CsvFileImporter extends FileImporter {
 
 	protected void prepareRowProcessing(Command command) {
 		WriteStrategy writeStrategy = getEnumFromRequestParam(command, ARG_WRITE_STRATEGY, WriteStrategy.COMMAND_DSL);
-		final BeanWriter onRowProcess;
+		final RowProcessingHandler onRowProcess;
 		if (WriteStrategy.COMMAND_DSL == writeStrategy) {
 			onRowProcess = new CommandHandlingBeanWriter(getOm(), getCommandGateway(), command);
 		} else if (WriteStrategy.MODEL_REPOSITORY == writeStrategy) {

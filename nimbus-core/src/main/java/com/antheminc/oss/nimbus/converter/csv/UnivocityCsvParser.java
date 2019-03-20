@@ -50,7 +50,7 @@ import lombok.Setter;
 public class UnivocityCsvParser implements FileParser, RowProcessable {
 
 	/**
-	 * <p>A simple row processor that invokes the provided {@link BeanWriter}
+	 * <p>A simple row processor that invokes the provided {@link RowProcessingHandler}
 	 * strategy to write bean data.
 	 * 
 	 * @author Tony Lopez
@@ -60,9 +60,9 @@ public class UnivocityCsvParser implements FileParser, RowProcessable {
 	@Getter
 	public class BeanWritingRowProcessor<S> extends BeanProcessor<S> {
 
-		private final BeanWriter writer;
+		private final RowProcessingHandler writer;
 
-		public BeanWritingRowProcessor(Class<S> clazz, BeanWriter writer) {
+		public BeanWritingRowProcessor(Class<S> clazz, RowProcessingHandler writer) {
 			super(clazz);
 			this.writer = writer;
 		}
@@ -96,13 +96,13 @@ public class UnivocityCsvParser implements FileParser, RowProcessable {
 
 	private final DomainConfigBuilder domainConfigBuilder;
 
-	private BeanWriter onRowProcess;
+	private RowProcessingHandler onRowProcess;
 	private RowErrorHandler onError;
 	@Setter
 	private boolean parallel;
 
 	@Override
-	public void onRowProcess(BeanWriter writer) {
+	public void onRowProcess(RowProcessingHandler writer) {
 		this.onRowProcess = writer;
 	}
 

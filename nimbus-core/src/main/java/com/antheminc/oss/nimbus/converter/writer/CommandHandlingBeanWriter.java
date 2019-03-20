@@ -16,7 +16,7 @@
 package com.antheminc.oss.nimbus.converter.writer;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
-import com.antheminc.oss.nimbus.converter.RowProcessable.BeanWriter;
+import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
  *
  */
 @RequiredArgsConstructor
-public class CommandHandlingBeanWriter implements BeanWriter {
+public class CommandHandlingBeanWriter implements RowProcessingHandler {
 
 	private final ObjectMapper om;
 	private final CommandExecutorGateway commandGateway;
