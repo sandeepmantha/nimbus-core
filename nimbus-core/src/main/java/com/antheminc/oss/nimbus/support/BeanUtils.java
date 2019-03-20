@@ -16,6 +16,9 @@
 package com.antheminc.oss.nimbus.support;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -30,9 +33,14 @@ public class BeanUtils {
 		if (null == properties || src == null) {
 			return;
 		}
-		Field[] fields = src.getClass().getDeclaredFields();
+		List<Field> fields = new ArrayList<>();
+        Class<?> clazz = src.getClass();
+        while (clazz != Object.class) {
+            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            clazz = clazz.getSuperclass();
+        }
 		for(Entry<String, String> entry: properties.entrySet()) {
-			if (Stream.of(fields).filter(f -> f.getName().equals(entry.getKey())).count() == 1) {
+			if (fields.stream().filter(f -> f.getName().equals(entry.getKey())).count() == 1) {
 				try {
 					org.apache.commons.beanutils.BeanUtils.copyProperty(src, entry.getKey(), entry.getValue());
 				} catch (Throwable e) {
@@ -41,4 +49,5 @@ public class BeanUtils {
 			}
 		}
 	}
+	
 }
