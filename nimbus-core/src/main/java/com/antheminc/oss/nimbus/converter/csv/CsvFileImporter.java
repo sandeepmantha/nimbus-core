@@ -16,7 +16,6 @@
 package com.antheminc.oss.nimbus.converter.csv;
 
 import java.io.InputStream;
-import java.util.function.BiConsumer;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -24,6 +23,7 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.converter.FileImporter;
 import com.antheminc.oss.nimbus.converter.FileParser;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
+import com.antheminc.oss.nimbus.converter.RowProcessable.RowErrorHandler;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
@@ -49,7 +49,17 @@ import lombok.Setter;
 public class CsvFileImporter extends FileImporter {
 
 	public static enum ErrorHandling {
-		SILENT, STRICT;
+		/**
+		 * <p>Re-throws any thrown data parsing exception when an error parsing
+		 * row data occurs.
+		 */
+		SILENT,
+
+		/**
+		 * <p>Silently continues processing when an error parsing row data
+		 * occurs.
+		 */
+		STRICT;
 	}
 
 	public static final JustLogit LOG = new JustLogit();
@@ -65,9 +75,9 @@ public class CsvFileImporter extends FileImporter {
 
 	private FileParser fileParser;
 
-	private BiConsumer<RuntimeException, Object[]> silentErrorHandler = (e, rowData) -> {
+	private RowErrorHandler silentErrorHandler = (e, rowData) -> {
 	};
-	private BiConsumer<RuntimeException, Object[]> strictErrorHandler = (e, rowData) -> {
+	private RowErrorHandler strictErrorHandler = (e, rowData) -> {
 		throw new FrameworkRuntimeException(e);
 	};
 
@@ -76,7 +86,7 @@ public class CsvFileImporter extends FileImporter {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;
 		this.om = om;
-		
+
 		// TODO consider moving this to a bean
 		this.fileParser = new UnivocityCsvParser(domainConfigBuilder);
 	}
@@ -89,7 +99,8 @@ public class CsvFileImporter extends FileImporter {
 	}
 
 	protected void prepareRowProcessing(Command command) {
-		((RowProcessable) getFileParser()).onRowProcess((Object bean) -> {
+		RowProcessable fileParser = (RowProcessable) getFileParser(); 
+		fileParser.onRowProcess((Object bean) -> {
 			String payload;
 			try {
 				payload = om.writeValueAsString(bean);
@@ -98,7 +109,7 @@ public class CsvFileImporter extends FileImporter {
 			}
 			commandGateway.execute(command, payload);
 		});
-		((RowProcessable) getFileParser()).setParallel(Boolean.valueOf(command.getFirstParameterValue(ARG_PARALLEL)));
+		fileParser.setParallel(Boolean.valueOf(command.getFirstParameterValue(ARG_PARALLEL)));
 	}
 
 	protected void prepareErrorHandling(Command command) {
@@ -109,7 +120,7 @@ public class CsvFileImporter extends FileImporter {
 					.or(ErrorHandling.SILENT);
 		}
 
-		final BiConsumer<RuntimeException, Object[]> onErrorHandler;
+		final RowErrorHandler onErrorHandler;
 		if (ErrorHandling.SILENT == errorHandling) {
 			onErrorHandler = getSilentErrorHandler();
 		} else if (ErrorHandling.STRICT == errorHandling) {

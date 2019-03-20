@@ -19,8 +19,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import com.antheminc.oss.nimbus.converter.FileParser;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
@@ -51,52 +49,65 @@ import lombok.Setter;
 @Getter
 public class UnivocityCsvParser implements FileParser, RowProcessable {
 
+	/**
+	 * <p>A simple row processor that invokes the provided {@link BeanWriter}
+	 * strategy to write bean data.
+	 * 
+	 * @author Tony Lopez
+	 *
+	 * @param <S> the bean type
+	 */
 	@Getter
-	public class BeanConsumingRowProcessor<S> extends BeanProcessor<S> {
+	public class BeanWritingRowProcessor<S> extends BeanProcessor<S> {
 
-		private final Consumer<S> consumer;
+		private final BeanWriter writer;
 
-		public BeanConsumingRowProcessor(Class<S> clazz, Consumer<S> consumer) {
+		public BeanWritingRowProcessor(Class<S> clazz, BeanWriter writer) {
 			super(clazz);
-			this.consumer = consumer;
+			this.writer = writer;
 		}
 
 		@Override
 		public void beanProcessed(S bean, ParsingContext context) {
-			consumer.accept(bean);
+			writer.write(bean);
 		}
 	}
 
+	/**
+	 * <p>A simple wrapper for that invokes the provided {@link RowErrorHandler}
+	 * strategy to handle errors when an exception related to parsing row data occurs.
+	 * 
+	 * @author Tony Lopez
+	 *
+	 * @param <S> the bean type
+	 */
+	@RequiredArgsConstructor
 	@Getter
-	public class ConsumingRowProcessorErrorHandler implements RowProcessorErrorHandler {
+	public class RowProcessorErrorHandlerWrapper implements RowProcessorErrorHandler {
 
-		private BiConsumer<RuntimeException, Object[]> consumer;
-
-		public ConsumingRowProcessorErrorHandler(BiConsumer<RuntimeException, Object[]> consumer) {
-			this.consumer = consumer;
-		}
+		private final RowErrorHandler errorHandler;
 
 		@Override
 		public void handleError(DataProcessingException error, Object[] inputRow, ParsingContext context) {
-			consumer.accept(error, inputRow);
+			errorHandler.handleError(error, inputRow);
 		}
 
 	}
 
 	private final DomainConfigBuilder domainConfigBuilder;
 
-	private Consumer<Object> onRowProcess;
-	private BiConsumer<RuntimeException, Object[]> onError;
+	private BeanWriter onRowProcess;
+	private RowErrorHandler onError;
 	@Setter
 	private boolean parallel;
 
 	@Override
-	public void onRowProcess(Consumer<Object> rowProcessor) {
-		this.onRowProcess = rowProcessor;
+	public void onRowProcess(BeanWriter writer) {
+		this.onRowProcess = writer;
 	}
 
 	@Override
-	public void onRowProcessError(BiConsumer<RuntimeException, Object[]> onError) {
+	public void onRowProcessError(RowErrorHandler onError) {
 		this.onError = onError;
 	}
 
@@ -127,7 +138,7 @@ public class UnivocityCsvParser implements FileParser, RowProcessable {
 
 	protected void prepareErrorHandling(Command command, CsvParserSettings settings) {
 		if (null != this.onError) {
-			settings.setProcessorErrorHandler(new ConsumingRowProcessorErrorHandler(this.onError));
+			settings.setProcessorErrorHandler(new RowProcessorErrorHandlerWrapper(this.onError));
 		}
 	}
 
@@ -135,7 +146,7 @@ public class UnivocityCsvParser implements FileParser, RowProcessable {
 	protected void prepareRowProcessing(Command command, CsvParserSettings settings) {
 		if (null != this.onRowProcess) {
 			Class<?> beanClass = getDomainConfigBuilder().getModel(command.getRootDomainAlias()).getReferredClass();
-			RowProcessor rowProcessor = new BeanConsumingRowProcessor(beanClass, this.onRowProcess);
+			RowProcessor rowProcessor = new BeanWritingRowProcessor(beanClass, this.onRowProcess);
 			if (this.parallel) {
 				rowProcessor = new ConcurrentRowProcessor(rowProcessor);
 			}

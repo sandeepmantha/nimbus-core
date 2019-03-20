@@ -15,9 +15,6 @@
  */
 package com.antheminc.oss.nimbus.converter;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 /**
  * <p>A base interface for processing rows of a data file.
  * 
@@ -27,11 +24,33 @@ import java.util.function.Consumer;
 public interface RowProcessable {
 
 	/**
+	 * <p>A strategy interface for writing bean data.
+	 * 
+	 * @author Tony Lopez
+	 *
+	 */
+	@FunctionalInterface
+	public static interface BeanWriter {
+		void write(Object bean);
+	}
+
+	/**
+	 * <p>A strategy interface for handling row errors.
+	 * 
+	 * @author Tony Lopez
+	 *
+	 */
+	@FunctionalInterface
+	public static interface RowErrorHandler {
+		void handleError(RuntimeException exception, Object[] rowData);
+	}
+
+	/**
 	 * <p>Execute a consumer that receives an argument containing the
 	 * deserialized row data as a Java object.
 	 * @param beanConsumer the consumer to execute
 	 */
-	void onRowProcess(Consumer<Object> beanConsumer);
+	void onRowProcess(BeanWriter writer);
 
 	/**
 	 * <p>Execute a consumer that executes error handling instructions. The
@@ -39,7 +58,7 @@ public interface RowProcessable {
 	 * error data</li></ul>.
 	 * @param onError the consumer to execute
 	 */
-	void onRowProcessError(BiConsumer<RuntimeException, Object[]> onError);
+	void onRowProcessError(RowErrorHandler onError);
 
 	/**
 	 * <p>Set whether or not the rows should be processed in parallel.
