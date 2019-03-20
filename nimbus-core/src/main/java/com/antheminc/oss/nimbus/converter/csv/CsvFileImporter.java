@@ -23,13 +23,15 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.converter.FileImporter;
 import com.antheminc.oss.nimbus.converter.FileParser;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
+import com.antheminc.oss.nimbus.converter.RowProcessable.BeanWriter;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowErrorHandler;
+import com.antheminc.oss.nimbus.converter.writer.CommandHandlingBeanWriter;
+import com.antheminc.oss.nimbus.converter.writer.ModelRepositoryBeanWriter;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.support.JustLogit;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Enums;
 
@@ -62,10 +64,25 @@ public class CsvFileImporter extends FileImporter {
 		STRICT;
 	}
 
+	public static enum WriteStrategy {
+		/**
+		 * <p>Use Command DSL's _new implementation to write each record of row
+		 * data processed.
+		 */
+		COMMAND_DSL,
+
+		/**
+		 * <p>Use the provided domain's {@link ModelRepository} implementation
+		 * to write each record of row data processed.
+		 */
+		MODEL_REPOSITORY;
+	}
+
 	public static final JustLogit LOG = new JustLogit();
 
 	public static final String ARG_ERROR_HANDLING = "errors";
 	public static final String ARG_PARALLEL = "parallel";
+	public static final String ARG_WRITE_STRATEGY = "writeStrategy";
 	public static final String CSV = "csv";
 	public static final String[] SUPPORTED_EXTENSIONS = new String[] { CSV };
 
@@ -99,27 +116,23 @@ public class CsvFileImporter extends FileImporter {
 	}
 
 	protected void prepareRowProcessing(Command command) {
-		RowProcessable fileParser = (RowProcessable) getFileParser(); 
-		fileParser.onRowProcess((Object bean) -> {
-			String payload;
-			try {
-				payload = om.writeValueAsString(bean);
-			} catch (JsonProcessingException e) {
-				throw new FrameworkRuntimeException("Failed to convert row data to JSON during import.", e);
-			}
-			commandGateway.execute(command, payload);
-		});
+		WriteStrategy writeStrategy = getEnumFromRequestParam(command, ARG_WRITE_STRATEGY, WriteStrategy.COMMAND_DSL);
+		final BeanWriter onRowProcess;
+		if (WriteStrategy.COMMAND_DSL == writeStrategy) {
+			onRowProcess = new CommandHandlingBeanWriter(getOm(), getCommandGateway(), command);
+		} else if (WriteStrategy.MODEL_REPOSITORY == writeStrategy) {
+			onRowProcess = new ModelRepositoryBeanWriter();
+		} else {
+			throw new UnsupportedOperationException("Write strategy for" + writeStrategy + " is not supported.");
+		}
+		
+		RowProcessable fileParser = (RowProcessable) getFileParser();
+		fileParser.onRowProcess(onRowProcess);
 		fileParser.setParallel(Boolean.valueOf(command.getFirstParameterValue(ARG_PARALLEL)));
 	}
 
 	protected void prepareErrorHandling(Command command) {
-		ErrorHandling errorHandling = ErrorHandling.SILENT;
-		String sErrorHandling = command.getFirstParameterValue(ARG_ERROR_HANDLING);
-		if (null != sErrorHandling) {
-			errorHandling = Enums.getIfPresent(ErrorHandling.class, sErrorHandling.toUpperCase())
-					.or(ErrorHandling.SILENT);
-		}
-
+		ErrorHandling errorHandling = getEnumFromRequestParam(command, ARG_ERROR_HANDLING, ErrorHandling.SILENT);
 		final RowErrorHandler onErrorHandler;
 		if (ErrorHandling.SILENT == errorHandling) {
 			onErrorHandler = getSilentErrorHandler();
@@ -132,6 +145,16 @@ public class CsvFileImporter extends FileImporter {
 		((RowProcessable) getFileParser()).onRowProcessError(onErrorHandler);
 	}
 
+	@SuppressWarnings("unchecked")
+	private <T extends Enum<?>> T getEnumFromRequestParam(Command command, String argumentName, T defaultValue) {
+		String sRequestParamValue = command.getFirstParameterValue(argumentName);
+		if (null == sRequestParamValue) {
+			return defaultValue;
+		}
+		return (T) Enums.getIfPresent(defaultValue.getClass(), sRequestParamValue.toUpperCase())
+				.or(defaultValue);
+	}
+	
 	@Override
 	public boolean supports(String extension) {
 		return ArrayUtils.contains(SUPPORTED_EXTENSIONS, extension);

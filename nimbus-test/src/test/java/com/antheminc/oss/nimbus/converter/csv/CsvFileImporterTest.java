@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.channel.web;
+package com.antheminc.oss.nimbus.converter.csv;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,8 +30,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
-import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter;
 import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter.ErrorHandling;
+import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter.WriteStrategy;
 import com.antheminc.oss.nimbus.domain.AbstractFrameworkIngerationPersistableTests;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
@@ -43,7 +43,7 @@ import com.antheminc.oss.nimbus.test.scenarios.s0.core.MyPojo;
  * @author Tony Lopez
  *
  */
-public class WebCommandDispatcherUploadTest extends AbstractFrameworkIngerationPersistableTests {
+public class CsvFileImporterTest extends AbstractFrameworkIngerationPersistableTests {
 
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
@@ -51,26 +51,14 @@ public class WebCommandDispatcherUploadTest extends AbstractFrameworkIngerationP
 	@Autowired
 	private CsvFileImporter csvFileImporter;
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testUpload() throws FileNotFoundException, IOException {
-		MockHttpServletRequest req = MockHttpRequestBuilder.withUri(PLATFORM_ROOT).addNested("/event/upload").getMock();
-		MockMultipartFile csvFile = new MockMultipartFile("sample-upload-data.csv",
-				new FileInputStream("src/test/resources/sample-upload-data.csv"));
-		this.controller.handleUpload(req, csvFile, "mypojo");
+	public void testUploadCommandDSL() throws FileNotFoundException, IOException {
+		uploadSampleCsv(WriteStrategy.COMMAND_DSL);
+	}
 
-		MockHttpServletRequest getReq = MockHttpRequestBuilder.withUri(PLATFORM_ROOT).addNested("/mypojo")
-				.addAction(Action._search).addParam("fn", "example").getMock();
-		Holder<MultiOutput> response = (Holder<MultiOutput>) this.controller.handleGet(getReq, null);
-		List<MyPojo> actual = (List<MyPojo>) response.getState().getSingleResult();
-
-		Assert.assertEquals(3, actual.size());
-		Assert.assertEquals("A", actual.get(0).getMyColumn1());
-		Assert.assertEquals(1, actual.get(0).getMyColumn2());
-		Assert.assertEquals("B", actual.get(1).getMyColumn1());
-		Assert.assertEquals(2, actual.get(1).getMyColumn2());
-		Assert.assertNull(actual.get(2).getMyColumn1());
-		Assert.assertEquals(3, actual.get(2).getMyColumn2());
+	@Test
+	public void testUploadModelRepository() throws FileNotFoundException, IOException {
+		uploadSampleCsv(WriteStrategy.MODEL_REPOSITORY);
 	}
 
 	@Test
@@ -92,6 +80,28 @@ public class WebCommandDispatcherUploadTest extends AbstractFrameworkIngerationP
 	public void testUploadStrictErrorHandler() throws FileNotFoundException, IOException {
 		exception.expect(FrameworkRuntimeException.class);
 		uploadMismatchedCsv(ErrorHandling.STRICT);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void uploadSampleCsv(WriteStrategy writeStrategy) throws FileNotFoundException, IOException {
+		MockHttpServletRequest req = MockHttpRequestBuilder.withUri(PLATFORM_ROOT).addNested("/event/upload")
+				.addParam(CsvFileImporter.ARG_WRITE_STRATEGY, writeStrategy.toString()).getMock();
+		MockMultipartFile csvFile = new MockMultipartFile("sample-upload-data.csv",
+				new FileInputStream("src/test/resources/sample-upload-data.csv"));
+		this.controller.handleUpload(req, csvFile, "mypojo");
+
+		MockHttpServletRequest getReq = MockHttpRequestBuilder.withUri(PLATFORM_ROOT).addNested("/mypojo")
+				.addAction(Action._search).addParam("fn", "example").getMock();
+		Holder<MultiOutput> response = (Holder<MultiOutput>) this.controller.handleGet(getReq, null);
+		List<MyPojo> actual = (List<MyPojo>) response.getState().getSingleResult();
+
+		Assert.assertEquals(3, actual.size());
+		Assert.assertEquals("A", actual.get(0).getMyColumn1());
+		Assert.assertEquals(1, actual.get(0).getMyColumn2());
+		Assert.assertEquals("B", actual.get(1).getMyColumn1());
+		Assert.assertEquals(2, actual.get(1).getMyColumn2());
+		Assert.assertNull(actual.get(2).getMyColumn1());
+		Assert.assertEquals(3, actual.get(2).getMyColumn2());
 	}
 
 	@SuppressWarnings("unchecked")
