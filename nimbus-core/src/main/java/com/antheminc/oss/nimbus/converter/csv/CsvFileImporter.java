@@ -65,13 +65,20 @@ public class CsvFileImporter extends FileImporter {
 
 	private FileParser fileParser;
 
+	private BiConsumer<RuntimeException, Object[]> silentErrorHandler = (e, rowData) -> {
+	};
+	private BiConsumer<RuntimeException, Object[]> strictErrorHandler = (e, rowData) -> {
+		throw new FrameworkRuntimeException(e);
+	};
+
 	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
 			ObjectMapper om) {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;
 		this.om = om;
-
-		this.fileParser = new UnivocityCsvParser(domainConfigBuilder); // TODO move to bean?
+		
+		// TODO consider moving this to a bean
+		this.fileParser = new UnivocityCsvParser(domainConfigBuilder);
 	}
 
 	@Override
@@ -112,16 +119,6 @@ public class CsvFileImporter extends FileImporter {
 		}
 
 		((RowProcessable) getFileParser()).onRowProcessError(onErrorHandler);
-	}
-
-	protected BiConsumer<RuntimeException, Object[]> getSilentErrorHandler() {
-		return (exception, inputRow) -> {};
-	}
-	
-	protected BiConsumer<RuntimeException, Object[]> getStrictErrorHandler() {
-		return (exception, inputRow) -> {
-			throw new FrameworkRuntimeException(exception);
-		};
 	}
 
 	@Override

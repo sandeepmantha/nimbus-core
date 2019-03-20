@@ -18,12 +18,14 @@ package com.antheminc.oss.nimbus.channel.web;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -45,7 +47,10 @@ public class WebCommandDispatcherUploadTest extends AbstractFrameworkIngerationP
 
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
-	
+
+	@Autowired
+	private CsvFileImporter csvFileImporter;
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testUpload() throws FileNotFoundException, IOException {
@@ -59,11 +64,23 @@ public class WebCommandDispatcherUploadTest extends AbstractFrameworkIngerationP
 		Holder<MultiOutput> response = (Holder<MultiOutput>) this.controller.handleGet(getReq, null);
 		List<MyPojo> actual = (List<MyPojo>) response.getState().getSingleResult();
 
-		Assert.assertEquals(2, actual.size());
+		Assert.assertEquals(3, actual.size());
 		Assert.assertEquals("A", actual.get(0).getMyColumn1());
 		Assert.assertEquals(1, actual.get(0).getMyColumn2());
 		Assert.assertEquals("B", actual.get(1).getMyColumn1());
 		Assert.assertEquals(2, actual.get(1).getMyColumn2());
+		Assert.assertNull(actual.get(2).getMyColumn1());
+		Assert.assertEquals(3, actual.get(2).getMyColumn2());
+	}
+
+	@Test
+	public void testUploadOverrideOnError() throws FileNotFoundException, IOException {
+		List<Object[]> failureData = new ArrayList<>();
+		csvFileImporter.setSilentErrorHandler((e, rowData) -> {
+			failureData.add(rowData);
+		});
+		uploadMismatchedCsv(ErrorHandling.SILENT);
+		Assert.assertEquals(1, failureData.size());
 	}
 
 	@Test
