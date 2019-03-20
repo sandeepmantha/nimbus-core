@@ -30,8 +30,8 @@ public interface RowProcessable {
 	 *
 	 */
 	@FunctionalInterface
-	public static interface RowProcessingHandler {
-		void write(Object bean);
+	public static interface RowProcessingHandler<T> {
+		void write(T bean);
 	}
 
 	/**
@@ -50,7 +50,7 @@ public interface RowProcessable {
 	 * deserialized row data as a Java object.
 	 * @param beanConsumer the consumer to execute
 	 */
-	void onRowProcess(RowProcessingHandler writer);
+	void onRowProcess(RowProcessingHandler<?> writer);
 
 	/**
 	 * <p>Execute a consumer that executes error handling instructions. The

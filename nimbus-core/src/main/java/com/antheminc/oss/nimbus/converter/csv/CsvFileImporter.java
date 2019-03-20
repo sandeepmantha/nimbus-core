@@ -31,6 +31,7 @@ import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.antheminc.oss.nimbus.support.CommandUtils;
 import com.antheminc.oss.nimbus.support.JustLogit;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,6 +89,7 @@ public class CsvFileImporter extends FileImporter {
 
 	private final CommandExecutorGateway commandGateway;
 	private final DomainConfigBuilder domainConfigBuilder;
+	private final ModelRepositoryFactory modelRepositoryFactory;
 	private final ObjectMapper om;
 
 	private FileParser fileParser;
@@ -98,11 +100,12 @@ public class CsvFileImporter extends FileImporter {
 		throw new FrameworkRuntimeException(e);
 	};
 
-	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
-			ObjectMapper om) {
+	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder, 
+			ModelRepositoryFactory modelRepositoryFactory, ObjectMapper om) {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;
 		this.om = om;
+		this.modelRepositoryFactory = modelRepositoryFactory;
 
 		// TODO consider moving this to a bean
 		this.fileParser = new UnivocityCsvParser(domainConfigBuilder);
@@ -118,11 +121,11 @@ public class CsvFileImporter extends FileImporter {
 	protected void prepareRowProcessing(Command command) {
 		WriteStrategy writeStrategy = CommandUtils.getEnumFromRequestParam(command, ARG_WRITE_STRATEGY,
 				WriteStrategy.COMMAND_DSL);
-		final RowProcessingHandler onRowProcess;
+		final RowProcessingHandler<?> onRowProcess;
 		if (WriteStrategy.COMMAND_DSL == writeStrategy) {
 			onRowProcess = new CommandHandlingBeanWriter(getOm(), getCommandGateway(), command);
 		} else if (WriteStrategy.MODEL_REPOSITORY == writeStrategy) {
-			onRowProcess = new ModelRepositoryBeanWriter();
+			onRowProcess = new ModelRepositoryBeanWriter<Object>(getDomainConfigBuilder(), getModelRepositoryFactory());
 		} else {
 			throw new UnsupportedOperationException("Write strategy for" + writeStrategy + " is not supported.");
 		}

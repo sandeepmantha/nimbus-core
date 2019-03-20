@@ -52,6 +52,7 @@ import com.antheminc.oss.nimbus.domain.model.state.extension.VisibleConditionalS
 import com.antheminc.oss.nimbus.domain.model.state.extension.validateconditional.ChildrenValidationAssignmentStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.extension.validateconditional.SiblingValidationAssignmentStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.internal.IdParamConverter;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -175,8 +176,8 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ObjectMapper om) {
-		return new CsvFileImporter(commandGateway, domainConfigBuilder, om);
+	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ModelRepositoryFactory modelRepositoryFactory, ObjectMapper om) {
+		return new CsvFileImporter(commandGateway, domainConfigBuilder, modelRepositoryFactory, om);
 	}
 	
 	@Bean

@@ -55,9 +55,9 @@ public class UnivocityCsvParser implements FileParser, RowProcessable {
 	@Getter
 	public class BeanWritingRowProcessor<S> extends BeanProcessor<S> {
 
-		private final RowProcessingHandler writer;
+		private final RowProcessingHandler<S> writer;
 
-		public BeanWritingRowProcessor(Class<S> clazz, RowProcessingHandler writer) {
+		public BeanWritingRowProcessor(Class<S> clazz, RowProcessingHandler<S> writer) {
 			super(clazz);
 			this.writer = writer;
 		}
@@ -70,13 +70,13 @@ public class UnivocityCsvParser implements FileParser, RowProcessable {
 
 	private final DomainConfigBuilder domainConfigBuilder;
 
-	private RowProcessingHandler onRowProcess;
+	private RowProcessingHandler<?> onRowProcess;
 	private RowErrorHandler onError;
 	@Setter
 	private boolean parallel;
 
 	@Override
-	public void onRowProcess(RowProcessingHandler writer) {
+	public void onRowProcess(RowProcessingHandler<?> writer) {
 		this.onRowProcess = writer;
 	}
 
