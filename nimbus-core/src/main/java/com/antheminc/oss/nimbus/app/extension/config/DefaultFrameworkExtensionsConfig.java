@@ -194,8 +194,8 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ObjectMapper om, UnivocityCsvParser univocityCsvParser) {
-		return new CsvFileImporter(commandGateway, domainConfigBuilder, om, univocityCsvParser);
+	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ObjectMapper om, UnivocityCsvParser univocityCsvParser,  ModelRepositoryFactory modelRepositoryFactory) {
+		return new CsvFileImporter(commandGateway, domainConfigBuilder, om, univocityCsvParser, modelRepositoryFactory);
 	}
 	
 	@Bean

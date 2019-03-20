@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
  *
  */
 @RequiredArgsConstructor
-public class CommandHandlingBeanWriter implements RowProcessingHandler {
+public class CommandHandlingBeanWriter implements RowProcessingHandler<Object> {
 
 	private final ObjectMapper om;
 	private final CommandExecutorGateway commandGateway;

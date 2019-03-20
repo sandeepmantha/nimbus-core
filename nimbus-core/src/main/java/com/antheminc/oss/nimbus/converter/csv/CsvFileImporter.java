@@ -23,18 +23,18 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.converter.FileImporter;
 import com.antheminc.oss.nimbus.converter.FileParser;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
-import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
-import com.antheminc.oss.nimbus.converter.excel.ExcelToCSVConversion;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowErrorHandler;
+import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
 import com.antheminc.oss.nimbus.converter.writer.CommandHandlingBeanWriter;
 import com.antheminc.oss.nimbus.converter.writer.ModelRepositoryBeanWriter;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
+import com.antheminc.oss.nimbus.support.CommandUtils;
 import com.antheminc.oss.nimbus.support.JustLogit;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Enums;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -89,6 +89,7 @@ public class CsvFileImporter extends FileImporter {
 
 	private final CommandExecutorGateway commandGateway;
 	private final DomainConfigBuilder domainConfigBuilder;
+	private final ModelRepositoryFactory modelRepositoryFactory;
 	private final ObjectMapper om;
 
 	private FileParser fileParser;
@@ -100,11 +101,13 @@ public class CsvFileImporter extends FileImporter {
 	};
 
 	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
-			ObjectMapper om, UnivocityCsvParser univocityCsvParser) {
+			ObjectMapper om, UnivocityCsvParser univocityCsvParser, ModelRepositoryFactory modelRepositoryFactory) {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;
 		this.om = om;
 		this.fileParser = univocityCsvParser;
+		this.modelRepositoryFactory = modelRepositoryFactory;
+
 	}
 
 	@Override
@@ -115,23 +118,26 @@ public class CsvFileImporter extends FileImporter {
 	}
 
 	protected void prepareRowProcessing(Command command) {
-		WriteStrategy writeStrategy = getEnumFromRequestParam(command, ARG_WRITE_STRATEGY, WriteStrategy.COMMAND_DSL);
-		final RowProcessingHandler onRowProcess;
+		WriteStrategy writeStrategy = CommandUtils.getEnumFromRequestParam(command, ARG_WRITE_STRATEGY,
+				WriteStrategy.COMMAND_DSL);
+		final RowProcessingHandler<?> onRowProcess;
+
 		if (WriteStrategy.COMMAND_DSL == writeStrategy) {
 			onRowProcess = new CommandHandlingBeanWriter(getOm(), getCommandGateway(), command);
 		} else if (WriteStrategy.MODEL_REPOSITORY == writeStrategy) {
-			onRowProcess = new ModelRepositoryBeanWriter();
+			onRowProcess = new ModelRepositoryBeanWriter<Object>(getDomainConfigBuilder(), getModelRepositoryFactory());
 		} else {
 			throw new UnsupportedOperationException("Write strategy for" + writeStrategy + " is not supported.");
 		}
-		
+
 		RowProcessable fileParser = (RowProcessable) getFileParser();
 		fileParser.onRowProcess(onRowProcess);
 		fileParser.setParallel(Boolean.valueOf(command.getFirstParameterValue(ARG_PARALLEL)));
 	}
 
 	protected void prepareErrorHandling(Command command) {
-		ErrorHandling errorHandling = getEnumFromRequestParam(command, ARG_ERROR_HANDLING, ErrorHandling.SILENT);
+		ErrorHandling errorHandling = CommandUtils.getEnumFromRequestParam(command, ARG_ERROR_HANDLING,
+				ErrorHandling.SILENT);
 		final RowErrorHandler onErrorHandler;
 		if (ErrorHandling.SILENT == errorHandling) {
 			onErrorHandler = getSilentErrorHandler();
@@ -144,16 +150,6 @@ public class CsvFileImporter extends FileImporter {
 		((RowProcessable) getFileParser()).onRowProcessError(onErrorHandler);
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends Enum<?>> T getEnumFromRequestParam(Command command, String argumentName, T defaultValue) {
-		String sRequestParamValue = command.getFirstParameterValue(argumentName);
-		if (null == sRequestParamValue) {
-			return defaultValue;
-		}
-		return (T) Enums.getIfPresent(defaultValue.getClass(), sRequestParamValue.toUpperCase())
-				.or(defaultValue);
-	}
-	
 	@Override
 	public boolean supports(String extension) {
 		return ArrayUtils.contains(SUPPORTED_EXTENSIONS, extension);

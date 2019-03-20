@@ -15,18 +15,39 @@
  */
 package com.antheminc.oss.nimbus.converter.writer;
 
+
+import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
+import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
+import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepositoryFactory;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Tony Lopez
  *
  */
-public class ModelRepositoryBeanWriter implements RowProcessingHandler {
 
+@RequiredArgsConstructor
+@Getter
+public class ModelRepositoryBeanWriter<T> implements RowProcessingHandler<T> {
+
+	private final DomainConfigBuilder domainConfigBuilder;
+	private final ModelRepositoryFactory modelRepositoryFactory;
+	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void write(Object bean) {
-		// TODO
-		throw new UnsupportedOperationException("Not yet supported.");
+	public void write(T bean) {
+		ModelConfig<T> modelConfig = (ModelConfig<T>) getDomainConfigBuilder().getModel(bean.getClass());
+		if (null == modelConfig) {
+			throw new FrameworkRuntimeException("Unable to find model config for " + bean);
+		}
+		ModelRepository modelRepository = getModelRepositoryFactory().get(modelConfig.getRepo());
+		T newState = modelRepository._new(modelConfig, bean);
+		modelRepository._save(modelConfig.getAlias(), newState);
 	}
 
 }
