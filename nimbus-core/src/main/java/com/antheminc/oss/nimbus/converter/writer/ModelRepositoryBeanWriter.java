@@ -15,13 +15,13 @@
  */
 package com.antheminc.oss.nimbus.converter.writer;
 
-import com.antheminc.oss.nimbus.converter.RowProcessable.BeanWriter;
+import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
 
 /**
  * @author Tony Lopez
  *
  */
-public class ModelRepositoryBeanWriter implements BeanWriter {
+public class ModelRepositoryBeanWriter implements RowProcessingHandler {
 
 	@Override
 	public void write(Object bean) {
