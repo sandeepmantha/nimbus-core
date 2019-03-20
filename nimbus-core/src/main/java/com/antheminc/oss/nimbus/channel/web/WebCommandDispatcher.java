@@ -20,19 +20,18 @@ package com.antheminc.oss.nimbus.channel.web;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.antheminc.oss.nimbus.InvalidConfigException;
+import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
-import com.antheminc.oss.nimbus.converter.CsvFileImporter;
 import com.antheminc.oss.nimbus.converter.DefaultFileImportGateway;
-import com.antheminc.oss.nimbus.converter.ExcelFileImporter;
-import com.antheminc.oss.nimbus.converter.ExcelParserSettings;
 import com.antheminc.oss.nimbus.converter.FileImportGateway;
+import com.antheminc.oss.nimbus.converter.FileImporter;
+import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
+import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
+import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
@@ -78,20 +77,28 @@ public class WebCommandDispatcher {
 		return getGateway().execute(cmd, payload);
 	}
 
-	public Object handle(HttpServletRequest httpReq, CommonsMultipartFile file) {
-		String message = "";
-		
-		if (!file.isEmpty()) {
-			FileItem fileItem = file.getFileItem();
-			String name = fileItem.getName();
-			try {
-				String ext = FilenameUtils.getExtension(name);
-				getFileImportGateway().getFileImporter(ext).doImport(fileItem.getInputStream(), "mypojo");
-				message = "You successfully uploaded file=" + name;
-			} catch (Exception e) {
-				message = "You failed to upload " + name + " => " + e.getMessage();
-			}
+
+	public boolean handleUpload(HttpServletRequest httpReq, MultipartFile file, String domain) {
+		if (file.isEmpty()) {
+			return false;
 		}
-		return message;
+
+		try {
+			String ext = FilenameUtils.getExtension(file.getName());
+			FileImporter importer = getFileImportGateway().getFileImporter(ext);
+			if (null == importer) {
+				throw new UnsupportedOperationException("Upload for file types of \"" + ext +"\" is not supported.");
+			}
+			
+			Command command = getBuilder().build(httpReq);
+			Command uploadCommand = CommandBuilder.withPlatformRelativePath(command, Type.PlatformMarker, "/" + domain).getCommand();
+			uploadCommand.setRequestParams(command.getRequestParams());
+			uploadCommand.setAction(Action._new);
+			
+			importer.doImport(uploadCommand, file.getInputStream());
+			return true;
+		} catch (Exception e) {
+			throw new FrameworkRuntimeException("Failed to upload file.", e);
+		}
 	}
 }

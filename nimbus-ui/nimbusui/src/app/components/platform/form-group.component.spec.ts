@@ -1,9 +1,26 @@
+/**
+ * @license
+ * Copyright 2016-2018 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 'use strict';
 import { TestBed, async } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { GrowlModule, AccordionModule, PickListModule, ListboxModule, CalendarModule, 
     DataTableModule, DropdownModule, FileUploadModule, RadioButtonModule, CheckboxModule,
-    InputSwitchModule, TreeTableModule, InputMaskModule, EditorModule } from 'primeng/primeng';
+    InputSwitchModule, TreeTableModule, InputMaskModule, TabViewModule, EditorModule, AutoCompleteModule } from 'primeng/primeng';
     
 import { HttpClientModule } from '@angular/common/http';
 import { HttpModule } from '@angular/http';
@@ -77,22 +94,18 @@ import { By } from '@angular/platform-browser';
 import { formGroupNmElementInputParam, formGroupNmButtonParam, formGroupnmParagraphParam, formGroupParam, formGroupNmLinkParam, formGroupNmHeaderParam, formGroupNmPickListParam, formGroupNmFormGridFiller, formGroupNestedFrmGrpEle} from 'mockdata';
 import { TableHeader } from './grid/table-header.component';
 import { InputMaskComp } from './form/elements/input-mask.component';
+import { Tab } from './content/tab.component';
 
 import { RichText } from './form/elements/rich-text.component';
 import { ChartModule } from 'primeng/chart';
 import { NmChart } from './charts/chart.component';
 import { NmMessageService } from './../../services/toastmessage.service';
+import { NmAutocomplete } from './form/elements/autocomplete.component';
 
 let param: Param;
 
 class MockWebContentSvc {
-    findLabelContent(param) {
-        const test = {
-            text: 'tText',
-            helpText: 'tHelpText'
-        }
-        return test;
-    }
+
 }
 
 @Component({
@@ -166,6 +179,7 @@ const declarations = [
   TreeGrid,
   InputSwitch,
   FormGridFiller,
+  NmAutocomplete,
   DisplayValueDirective,
   InputLabel,
   Label,
@@ -174,6 +188,7 @@ const declarations = [
   FormErrorMessage,
   PrintDirective,
   InputMaskComp,
+  Tab,
   NmChart,
   RichText
  ];
@@ -200,6 +215,8 @@ const declarations = [
      TreeTableModule,
      StorageServiceModule,
      InputMaskModule,
+     TabViewModule,
+     AutoCompleteModule,
      ChartModule,
      EditorModule
  ];
@@ -277,7 +294,7 @@ describe('FrmGroupCmp', () => {
     fixture.detectChanges();
     const debugElement = fixture.debugElement;
     const spanEle = debugElement.query(By.css('span'));
-    expect(spanEle.nativeElement.classList[0]).toEqual('testing-span-cssClass');
+    expect(spanEle).toBeTruthy();
   }));
 
   it('nm-input-legend inside should be created', async(() => {
@@ -497,8 +514,9 @@ describe('FrmGroupCmp', () => {
     hostComponent.element = formGroupNestedFrmGrpEle as Param;
     hostComponent.element.visible = false;
     fixture.detectChanges();
-    const spanEle: any = document.getElementsByClassName('testing-span-cssClass');
-    expect(spanEle[0].attributes[2].name).toEqual('hidden');
+    const debugElement = fixture.debugElement;
+    const spanEle: any = debugElement.query(By.css('span'));
+    expect(spanEle.nativeElement.attributes[0].name).toEqual('hidden');
   }));
 
 });

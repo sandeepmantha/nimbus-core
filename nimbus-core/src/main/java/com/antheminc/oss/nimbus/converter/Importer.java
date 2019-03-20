@@ -15,10 +15,16 @@
  */
 package com.antheminc.oss.nimbus.converter;
 
+
 import java.io.File;
 import java.io.InputStream;
 
 import org.springframework.core.io.Resource;
+
+import java.io.InputStream;
+
+import com.antheminc.oss.nimbus.domain.cmd.Command;
+
 
 /**
  * <p>A base importer interface for handling the import of data.

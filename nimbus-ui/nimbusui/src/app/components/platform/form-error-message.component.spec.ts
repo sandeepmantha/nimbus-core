@@ -19,7 +19,7 @@ import { TestBed, async } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule, ValidatorFn, Validators, FormGroup, FormControl } from '@angular/forms';
 import { DropdownModule, GrowlModule, MessagesModule, DialogModule, AccordionModule, 
     DataTableModule, FileUploadModule, PickListModule, ListboxModule, CheckboxModule, 
-    RadioButtonModule, CalendarModule, InputSwitchModule, TreeTableModule, InputMaskModule } from 'primeng/primeng';
+    RadioButtonModule, CalendarModule, InputSwitchModule, TreeTableModule, InputMaskModule, TabViewModule, AutoCompleteModule } from 'primeng/primeng';
 import { TableModule } from 'primeng/table';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { HttpModule } from '@angular/http';
@@ -92,6 +92,7 @@ import { FormErrorMessage } from './form-error-message.component';
 import { PrintDirective } from '../../directives/print.directive';
 import { formErrorMessageParam } from 'mockdata';
 import { InputMaskComp } from './form/elements/input-mask.component';
+import { Tab } from './content/tab.component';
 
 import { RichText } from './form/elements/rich-text.component';
 import { ChartModule } from 'primeng/chart';
@@ -99,6 +100,7 @@ import { NmChart } from './charts/chart.component';
 import { EditorModule } from 'primeng/editor';
 import { TableHeader } from './grid/table-header.component';
 import { By } from '@angular/platform-browser';
+import { NmAutocomplete } from './form/elements/autocomplete.component';
 /**
  * \@author Sandeep.Mantha
  * \@whatItDoes 
@@ -180,6 +182,8 @@ const declarations = [ Form,
     InputLegend ,
     PrintDirective,
     InputMaskComp,
+    NmAutocomplete,
+    Tab,
     NmChart,
     RichText
 ];
@@ -207,6 +211,8 @@ const imports = [   FormsModule, ReactiveFormsModule,
     InputSwitchModule, 
     TreeTableModule,
     InputMaskModule,
+    TabViewModule,
+    AutoCompleteModule,
     ChartModule,
     EditorModule
  ];

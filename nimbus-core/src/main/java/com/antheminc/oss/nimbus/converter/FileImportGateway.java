@@ -16,6 +16,7 @@
 package com.antheminc.oss.nimbus.converter;
 
 /**
+ * <p>A bean registry for holding file importer objects.
  * @author Tony Lopez
  *
  */

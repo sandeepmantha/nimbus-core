@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016-2018 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { Param } from './../../../shared/param-state';
 'use strict';
 import { TestBed, async } from '@angular/core/testing';
@@ -47,6 +64,7 @@ import { SessionStoreService, CUSTOM_STORAGE } from '../../../services/session.s
 import { AppInitService } from '../../../services/app.init.service';
 import { PrintService } from '../../../services/print.service';
 import { cardDetailsGridElement, cardDetailsGridNewElement } from 'mockdata';
+import { InputLegend } from '../../platform/form/elements/input-legend.component';
 
 class MockPageService {
     eventUpdate$: Subject<any>;
@@ -104,7 +122,8 @@ const declarations = [
     Button,
     Image,
     SvgComponent,
-    PrintDirective
+    PrintDirective,
+    InputLegend
     ];
 const imports = [ 
     FormsModule,

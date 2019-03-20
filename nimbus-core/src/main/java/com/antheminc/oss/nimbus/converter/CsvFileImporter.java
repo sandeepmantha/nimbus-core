@@ -94,6 +94,6 @@ public class CsvFileImporter extends FileImporter {
 	@Override
 	public <T> void doImport(InputStream inputStream, String domainAlias) {
 		new com.univocity.parsers.csv.CsvParser(getParserSettings()).parse(inputStream);
-		
 	}
+	
 }

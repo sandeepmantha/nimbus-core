@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016-2018 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 export const tableParams: any = [
     {
         "active": false,
@@ -8346,5 +8363,106 @@ export const tableElement: any = {
             "helpText": "testing tooltip"
         }
     ],
+    "elemLabels": {}
+};
+
+
+export const tableGridValue: any = {
+    "config":{
+   
+        "active": false,
+        "required": false,
+        "id": "650",
+        "code": "pets",
+        "validations": null,
+        "uiNatures": [],
+        "uiStyles": {
+            "isLink": false,
+            "isHidden": false,
+            "name": "ViewConfig.Grid",
+            "attributes": {
+                "hidden": false,
+                "readOnly": false,
+                "submitButton": true,
+                "showName": true,
+                "pageSize": 25,
+                "browserBack": false,
+                "showAsLink": false,
+                "headerCheckboxToggleAllPages": false,
+                "rowSelection": false,
+                "postButtonUrl": "",
+                "pagination": true,
+                "postButtonTargetPath": "",
+                "dataEntryField": true,
+                "postButtonUri": "",
+                "expandableRows": false,
+                "showHeader": true,
+                "postEventOnChange": false,
+                "lazyLoad": false,
+                "url": "",
+                "dataKey": "id",
+                "cssClass": "",
+                "clearAllFilters": false,
+                "postButtonLabel": "",
+                "alias": "Grid",
+                "onLoad": true,
+                "postButtonAlias": "",
+                "isTransient": false,
+                "postButton": false,
+                "export": false
+            }
+        },
+        "type": {
+            "collection": true,
+            "nested": true,
+            "name": "ArrayList",
+            "collectionType": "list",
+            "model": {
+                "paramConfigIds": []
+            },
+            "elementConfig": {
+                "id": "653",
+                "type": {
+                    "collection": false,
+                    "nested": true,
+                    "name": "PetLineItemOwnerLanding",
+                    "model": {
+                        "paramConfigIds": ["655", "656"]
+                    }
+                }
+            }
+        }
+    },
+    "enabled": true,
+    "visible": true,
+    "activeValidationGroups": [],
+    "collectionParams": [],
+    "configId": "650",
+    "path": "/ownerlandingview/vpOwners/vtOwners/vsOwners/owners/0/expandedRowContent/pets",
+    "type": {
+        "model": {
+            "params": []
+        }
+    },
+    "page": {
+        "pageable": "INSTANCE",
+        "last": true,
+        "totalPages": 1,
+        "totalElements": 0,
+        "size": 0,
+        "number": 0,
+        "numberOfElements": 0,
+        "first": true
+    },
+    "gridData": {
+        "leafState": [],
+        "stateMap": []
+    },
+    "message": [],
+    "values": [],
+    "labels": [{
+        "locale": "en-US",
+        "text": "Pets"
+    }],
     "elemLabels": {}
 };

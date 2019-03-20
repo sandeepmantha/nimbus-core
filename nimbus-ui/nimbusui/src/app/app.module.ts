@@ -41,8 +41,8 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { APP_BASE_HREF } from '@angular/common';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
-import { DataTableModule, SharedModule, OverlayPanelModule, PickListModule, DragDropModule, CalendarModule, 
-    FileUpload, FileUploadModule, ListboxModule, DialogModule, CheckboxModule, DropdownModule, InputMaskModule, RadioButtonModule, 
+import { DataTableModule, SharedModule, OverlayPanelModule, PickListModule, DragDropModule, CalendarModule, TabViewModule,
+    FileUpload, FileUploadModule, ListboxModule, DialogModule, CheckboxModule, DropdownModule, InputMaskModule, AutoCompleteModule, RadioButtonModule, 
     ProgressBarModule, ProgressSpinnerModule, AccordionModule, GrowlModule, InputSwitchModule, TreeTableModule } from 'primeng/primeng';
 import { TableModule } from 'primeng/table';
 import { EditorModule } from 'primeng/editor';
@@ -75,6 +75,8 @@ import { RadioButton } from './components/platform/form/elements/radio.component
 import { Signature } from './components/platform/form/elements/signature.component';
 import { InputText } from './components/platform/form/elements/textbox.component';
 import { InputMaskComp } from './components/platform/form/elements/input-mask.component';
+import { NmAutocomplete } from './components/platform/form/elements/autocomplete.component';
+import { Tab } from './components/platform/content/tab.component';
 import { CheckBoxGroup } from './components/platform/form/elements/checkbox-group.component';
 import { MultiselectCard } from './components/platform/form/elements/multi-select-card.component';
 import { ActionDropdown, ActionLink } from './components/platform/form/elements/action-dropdown.component';
@@ -188,6 +190,8 @@ export function init_app(appinitservice: AppInitService) {
         FormsModule,
         DropdownModule,
         InputMaskModule,
+        AutoCompleteModule,
+        TabViewModule,
         DataTableModule,
         TableModule,
         TreeTableModule,
@@ -218,7 +222,7 @@ export function init_app(appinitservice: AppInitService) {
         EditorModule
     ],
     declarations: [ AppComponent, STOMPStatusComponent, FlowWrapper, PageContent, PageNotfoundComponent, StaticText,
-        Tile, Section, Header, Form, FormElement, InputText, InputMaskComp, ComboBox, RadioButton, Signature, CheckBoxGroup,
+        Tile, Section, Header, Form, FormElement, InputText, InputMaskComp, NmAutocomplete, Tab, ComboBox, RadioButton, Signature, CheckBoxGroup,
         InPlaceEditorComponent, Paragraph, Value, BaseElement, FormGridFiller, 
         MultiselectCard, Link, Menu, CardDetailsComponent, CardDetailsFieldGroupComponent, CardDetailsFieldComponent, CardDetailsGrid, FieldValue,
         Accordion, AccordionTab, FrmGroupCmp, Button, ButtonGroup, FilterButton, OrderablePickList,

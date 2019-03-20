@@ -25,6 +25,8 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.Past;
 
 import com.antheminc.oss.nimbus.domain.Event;
+import com.antheminc.oss.nimbus.domain.defn.Execution.Config;
+import com.antheminc.oss.nimbus.domain.defn.ViewConfig.Autocomplete;
 import com.antheminc.oss.nimbus.domain.defn.event.StateEvent.OnStateLoad;
 import com.antheminc.oss.nimbus.domain.defn.extension.ParamContext;
 
@@ -404,7 +406,7 @@ public class ViewConfig {
 			 * surrounding this component. <p>This can be used to apply
 			 * additional styling, if necessary.
 			 */
-			String cssClass() default "";
+			String cssClass() default "fourColumn";
 		}
 
 		/**
@@ -633,6 +635,52 @@ public class ViewConfig {
 		boolean postEventOnChange() default false;
 
 		boolean readOnly() default false;
+
+	}
+	
+	
+	/**
+	 * <p>Autocomplete is a text input component.
+	 * 
+	 * <p><b>Expected Field Structure</b>
+	 * 
+	 * <p>Autocomplete will be rendered when annotating a field nested under one of
+	 * the following components: <ul> <li>{@link Section}</li> <li>{@link Form}</li> </ul>
+	 * 
+	 * <p>
+	 *  Example config:
+	 * <pre>
+	 * &#64;Autocomplete(display="label", postEventOnChange = true, minLength = 2)
+	 * &#64;Config(url = "/p/owner/_search?fn=lookup&where=owner.firstName.containsIgnoreCase('<!autocompletesearchvalue!>')&projection.mapsTo=code:id,label:firstName")
+	 * </pre>
+	 * 
+	 * 
+	 * @since 1.3
+	 */
+	
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD })
+	@ViewStyle
+	public @interface Autocomplete {
+		
+		String alias() default "Autocomplete";
+				
+		/**
+		 * <p> display represents the projection variable in the mongo query, the values of which will be 
+		 * 	   displayed to the user as suggestions.
+		 * 
+		 */
+		String display() default "";
+		
+		/**
+		 * <p> The minimum number of characters user should type to activate
+		 * 	   the autocomplete feature.
+		 */
+		int minLength() default 1;
+
+		boolean postEventOnChange() default false;
+
+		boolean dataEntryField() default true;
 
 	}
 
@@ -922,7 +970,7 @@ public class ViewConfig {
 	 * <li>{@link Paragraph}</li> <li>{@link PickList}</li>
 	 * <li>{@link Radio}</li> <li>{@link Signature}</li>
 	 * <li>{@link TextArea}</li> <li>{@link TextBox}</li>
-	 * <li>{@link InputMask}</li> </ul>
+	 * <li>{@link InputMask}</li> <li>{@link Autocomplete}</li> </ul>
 	 * <li>{@link Radio}</li>  <li>{@link RichText}</li> 
 	 * <li>{@link Signature}</li> <li>{@link TextArea}</li>
 	 * <li>{@link TextBox}</li> </ul>
@@ -1581,7 +1629,7 @@ public class ViewConfig {
 		 * 
 		 */
 		public enum Type {
-			DEFAULT, LEFT, RIGHT
+			DEFAULT, LEFT, RIGHT, DOWN
 		}
 
 		String alias() default "InputSwitch";
@@ -1600,7 +1648,7 @@ public class ViewConfig {
 		/**
 		 * It describes the Type of orientation, Accepted values can be
 		 * InputSwitch.Type.LEFT, InputSwitch.Type.RIGHT,
-		 * InputSwitch.Type.DEFAULT
+		 * InputSwitch.Type.DOWN, InputSwitch.Type.DEFAULT
 		 * 
 		 */
 		InputSwitch.Type orientation() default InputSwitch.Type.DEFAULT;
@@ -2505,10 +2553,10 @@ public class ViewConfig {
 	 * <p>Section will render nested fields that are decorated with: <ul>
 	 * <li>{@link Accordion}</li> <li>{@link Button}</li>
 	 * <li>{@link ButtonGroup}</li> <li>{@link CardDetail}</li>
-	 * <li>{@link CardDetailsGrid}</li> <li>{@link ComboBox}</li>
+	 * <li>{@link CardDetailsGrid}</li> <li>{@link Tab}</li> <li>{@link ComboBox}</li>
 	 * <li>{@link Form}</li> <li>{@link Grid}</li> <li>{@link Link}</li>
 	 * <li>{@link Menu}</li> <li>{@link Paragraph}</li><li>{@link Chart}</li>
-	 * <li>{@link StaticText}</li> <li>{@link TextBox}</li> </ul>
+	 * <li>{@link StaticText}</li> <li>{@link TextBox}</li> <li>{@link Autocomplete}</li> </ul>
 	 * 
 	 * @since 1.0
 	 */
@@ -2862,7 +2910,52 @@ public class ViewConfig {
 		String maskPlaceHolder() default "";		
 		
 	}
+	
+	
+	
+	/**
+	 * <p> Tab groups a collection of TabPanels in tabs.
+	 * 
+	 * <p> <b>Expected Field Structure</b>
+	 * 
+	 * <p> Tab will be rendered when annotating a field nested under one
+	 * of the following components: <ul> <li>{@link Tile}</li>
+	 * <li>{@link Section}</li> </ul>
+	 * 
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD })
+	@ViewStyle
+	public @interface Tab {
+		
+		String alias() default "Tab";		
+	}
+	
+	
+	
+	/**
+	 * <p> TabPanel is used to display content for the tabs.
+	 * <p>TabPanel will render nested fields that are decorated with: <ul>
+	 * <li>{@link Tab}</li> <li>{@link Section}</li> </ul>
+	 * We can have a section within a TabPanel or even a Tab to create a nested structure.
+	 * 
+	 * <p> <b>Expected Field Structure</b>
+	 * 
+	 * <p> TabPanel will be rendered when annotating a field nested under one
+	 * of the following components: <ul> <li>{@link Tab}</li> </ul>
+	 * 
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD })
+	@ViewStyle
+	public @interface TabPanel {
 
+		String alias() default "TabPanel";
+		
+		boolean closable() default false;		
+		
+	}
+	
 	/**
 	 * <p>Tile is a container component that groups a collection of contents.
 	 * 
@@ -2873,7 +2966,7 @@ public class ViewConfig {
 	 * 
 	 * <p>Tile will render nested fields that are decorated with: <ul>
 	 * <li>{@link Header}</li> <li>{@link Modal}</li> <li>{@link Section}</li>
-	 * <li>{@link Tile}</li> </ul>
+	 * <li>{@link Tile}</li> <li>{@link Tab}</li></ul>
 	 * 
 	 * @since 1.0
 	 */

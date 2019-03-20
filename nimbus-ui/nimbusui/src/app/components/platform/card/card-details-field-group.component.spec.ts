@@ -1,3 +1,21 @@
+/**
+ * @license
+ * Copyright 2016-2018 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 'use strict';
 import { TestBed, async } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
@@ -36,6 +54,7 @@ import { AppInitService } from '../../../services/app.init.service';
 import { cardDetailsFieldGroupElement, newCardDetailsFieldGroupElement } from 'mockdata';
 import { Paragraph } from '../content/paragraph.component';
 import { NmMessageService } from './../../../services/toastmessage.service';
+import { InputLegend } from '../../platform/form/elements/input-legend.component';
 
 let fixture,hostComponent;
 
@@ -51,7 +70,8 @@ const declarations = [
   SelectItemPipe,
   DisplayValueDirective,
   InputLabel,
-  Paragraph
+  Paragraph,
+  InputLegend
 ];
 const imports = [
     FormsModule, 
@@ -84,29 +104,30 @@ describe('CardDetailsFieldGroupComponent', () => {
   beforeEach(() => {
    fixture = TestBed.createComponent(CardDetailsFieldGroupComponent);
    hostComponent = fixture.debugElement.componentInstance;
-   hostComponent.element = cardDetailsFieldGroupElement as Param;;
+   hostComponent.element = cardDetailsFieldGroupElement as Param;
   });
 
   it('should create the CardDetailsFieldGroupComponent',  async(() => {
     expect(hostComponent).toBeTruthy(); 
   }));
 
-  it('Label should be created on providing the element.labelconfig display the value provided',async(() => {
+  it('legend should be created on providing the element.labelconfig display the value provided',async(() => {
+    hostComponent.element = newCardDetailsFieldGroupElement as Param;
     ServiceConstants.LOCALE_LANGUAGE = 'en-US';
     fixture.detectChanges();
     const debugElement = fixture.debugElement;
-    const labelEle = debugElement.query(By.css('nm-input-label'));
-    expect(labelEle.name).toEqual('nm-input-label');
-    expect(labelEle.nativeElement.innerText.toString().trim()).toEqual('Case ID');
+    const legendEle = debugElement.query(By.css('nm-input-legend'));
+    expect(legendEle).toBeTruthy();
+    expect(legendEle.nativeElement.innerText.toString().trim()).toEqual('Case ID');
   }));
 
-  it('Label should not be created on if element.labelconfig is empty',async(() => {
+  it('legend should not be created on if element.labelconfig is empty',async(() => {
     ServiceConstants.LOCALE_LANGUAGE = 'en-US';
     hostComponent.element.type.model.params[0].labels = [];
     fixture.detectChanges();
     const debugElement = fixture.debugElement;
-    const labelEle = debugElement.query(By.css('nm-input-label'))
-    expect(labelEle.nativeElement.innerText.toString()).toEqual('');
+    const legendEle = debugElement.query(By.css('nm-input-legend'))
+    expect(legendEle).toBeFalsy();
   }));
 
   it('nm-card-details-field should be created if element?.type?.model?.params[0].config?.uiStyles?.attributes?.alias === FieldValue',async(() => {

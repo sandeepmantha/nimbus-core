@@ -26,5 +26,5 @@ public class MyPojo extends AbstractEntity.IdLong{
 
     @Trim
     @Parsed(field="Comments")
-    private String myColumn2;
+    private int myColumn2;
 }
