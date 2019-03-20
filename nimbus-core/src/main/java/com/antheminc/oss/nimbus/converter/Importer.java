@@ -47,4 +47,10 @@ public interface Importer {
 	 */
 	<T> void doImport(Command command, InputStream stream);
 
+	/**
+	 * <p>Tell whether or not this importer supports the given file type extension
+	 * @param extension the file type extension to check
+	 * @return {@code true} if supported, {@code false} otherwise
+	 */
+	public boolean supports(String extension);
 }

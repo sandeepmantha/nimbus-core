@@ -21,12 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
-import com.antheminc.oss.nimbus.converter.FileImporter;
-import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter;
+import com.antheminc.oss.nimbus.converter.Importer;
+import com.antheminc.oss.nimbus.converter.tabular.TabularDataFileImporter;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 
@@ -44,16 +42,16 @@ import lombok.Setter;
  * @author Tony Lopez
  * @author Sandeep Mantha
  * @see com.antheminc.oss.nimbus.converter.excel.ExcelToCsvConverter
- * @see com.antheminc.oss.nimbus.converter.CsvFileImporter
+ * @see com.antheminc.oss.nimbus.converter.TabularDataFileImporter
  * 
  */
 @RequiredArgsConstructor
 @Getter
 @Setter
-public class ExcelFileImporter extends FileImporter {
+public class ExcelFileImporter implements Importer {
 
 	private final ExcelToCsvConverter toCsvConverter;
-	private final CsvFileImporter csvFileImporter;
+	private final TabularDataFileImporter csvFileImporter;
 
 	private ExcelParserSettings excelParserSettings;
 

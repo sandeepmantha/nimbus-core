@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.converter.csv;
+package com.antheminc.oss.nimbus.converter.tabular;
 
 import java.io.InputStream;
 

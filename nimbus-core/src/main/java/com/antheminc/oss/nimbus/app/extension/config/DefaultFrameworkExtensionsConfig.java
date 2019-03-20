@@ -23,10 +23,10 @@ import org.springframework.context.annotation.Configuration;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.converter.DefaultFileImportGateway;
-import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter;
-import com.antheminc.oss.nimbus.converter.csv.UnivocityCsvParser;
 import com.antheminc.oss.nimbus.converter.excel.ExcelFileImporter;
 import com.antheminc.oss.nimbus.converter.excel.ExcelToCSVConversion;
+import com.antheminc.oss.nimbus.converter.tabular.TabularDataFileImporter;
+import com.antheminc.oss.nimbus.converter.tabular.UnivocityCsvParser;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
 import com.antheminc.oss.nimbus.domain.defn.extension.ValidateConditional.ValidationScope;
@@ -184,7 +184,7 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public ExcelFileImporter excelFileImporter(CsvFileImporter csvFileImporter) {
+	public ExcelFileImporter excelFileImporter(TabularDataFileImporter csvFileImporter) {
 		return new ExcelFileImporter(excelToCsvConverter(), csvFileImporter);
 	}
 	
@@ -194,8 +194,8 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public CsvFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ObjectMapper om, UnivocityCsvParser univocityCsvParser,  ModelRepositoryFactory modelRepositoryFactory) {
-		return new CsvFileImporter(commandGateway, domainConfigBuilder, om, univocityCsvParser, modelRepositoryFactory);
+	public TabularDataFileImporter csvFileImporter(DomainConfigBuilder domainConfigBuilder, CommandExecutorGateway commandGateway, ObjectMapper om, UnivocityCsvParser univocityCsvParser,  ModelRepositoryFactory modelRepositoryFactory) {
+		return new TabularDataFileImporter(commandGateway, domainConfigBuilder, om, univocityCsvParser, modelRepositoryFactory);
 	}
 	
 	@Bean

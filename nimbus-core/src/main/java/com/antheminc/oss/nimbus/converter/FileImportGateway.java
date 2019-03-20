@@ -22,5 +22,5 @@ package com.antheminc.oss.nimbus.converter;
  */
 public interface FileImportGateway {
 
-	FileImporter getFileImporter(String extension);
+	Importer getFileImporter(String extension);
 }

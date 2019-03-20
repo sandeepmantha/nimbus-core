@@ -13,15 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.converter.csv;
+package com.antheminc.oss.nimbus.converter.tabular;
 
 import java.io.InputStream;
 
 import org.apache.commons.lang.ArrayUtils;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
-import com.antheminc.oss.nimbus.converter.FileImporter;
 import com.antheminc.oss.nimbus.converter.FileParser;
+import com.antheminc.oss.nimbus.converter.Importer;
 import com.antheminc.oss.nimbus.converter.RowProcessable;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowErrorHandler;
 import com.antheminc.oss.nimbus.converter.RowProcessable.RowProcessingHandler;
@@ -49,7 +49,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class CsvFileImporter extends FileImporter {
+public class TabularDataFileImporter implements Importer {
 
 	public static enum ErrorHandling {
 		/**
@@ -100,7 +100,7 @@ public class CsvFileImporter extends FileImporter {
 		throw new FrameworkRuntimeException(e);
 	};
 
-	public CsvFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
+	public TabularDataFileImporter(CommandExecutorGateway commandGateway, DomainConfigBuilder domainConfigBuilder,
 			ObjectMapper om, FileParser fileParser, ModelRepositoryFactory modelRepositoryFactory) {
 		this.commandGateway = commandGateway;
 		this.domainConfigBuilder = domainConfigBuilder;

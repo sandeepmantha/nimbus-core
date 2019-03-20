@@ -28,15 +28,15 @@ import lombok.Getter;
 @Getter
 public class DefaultFileImportGateway implements FileImportGateway {
 
-	private final Collection<FileImporter> fileImporters;
+	private final Collection<Importer> fileImporters;
 	
 	public DefaultFileImportGateway(BeanResolverStrategy beanResolver) {
-		this.fileImporters = beanResolver.getMultiple(FileImporter.class);
+		this.fileImporters = beanResolver.getMultiple(Importer.class);
 	}
 
 	@Override
-	public FileImporter getFileImporter(String extension) {
-		for(FileImporter fileImporter: getFileImporters()) {
+	public Importer getFileImporter(String extension) {
+		for(Importer fileImporter: getFileImporters()) {
 			if (fileImporter.supports(extension)) {
 				return fileImporter;
 			}

@@ -30,8 +30,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
-import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter.ErrorHandling;
-import com.antheminc.oss.nimbus.converter.csv.CsvFileImporter.WriteStrategy;
+import com.antheminc.oss.nimbus.converter.tabular.TabularDataFileImporter;
+import com.antheminc.oss.nimbus.converter.tabular.TabularDataFileImporter.ErrorHandling;
+import com.antheminc.oss.nimbus.converter.tabular.TabularDataFileImporter.WriteStrategy;
 import com.antheminc.oss.nimbus.domain.AbstractFrameworkIngerationPersistableTests;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
@@ -49,7 +50,7 @@ public class CsvFileImporterTest extends AbstractFrameworkIngerationPersistableT
 	public ExpectedException exception = ExpectedException.none();
 
 	@Autowired
-	private CsvFileImporter csvFileImporter;
+	private TabularDataFileImporter csvFileImporter;
 
 	@Test
 	public void testUploadCommandDSL() throws FileNotFoundException, IOException {
@@ -85,7 +86,7 @@ public class CsvFileImporterTest extends AbstractFrameworkIngerationPersistableT
 	@SuppressWarnings("unchecked")
 	private void uploadSampleCsv(WriteStrategy writeStrategy) throws FileNotFoundException, IOException {
 		MockHttpServletRequest req = MockHttpRequestBuilder.withUri(PLATFORM_ROOT).addNested("/event/upload")
-				.addParam(CsvFileImporter.ARG_WRITE_STRATEGY, writeStrategy.toString()).getMock();
+				.addParam(TabularDataFileImporter.ARG_WRITE_STRATEGY, writeStrategy.toString()).getMock();
 		MockMultipartFile csvFile = new MockMultipartFile("sample-upload-data.csv",
 				new FileInputStream("src/test/resources/sample-upload-data.csv"));
 		this.controller.handleUpload(req, csvFile, "mypojo");
@@ -107,7 +108,7 @@ public class CsvFileImporterTest extends AbstractFrameworkIngerationPersistableT
 	@SuppressWarnings("unchecked")
 	private void uploadMismatchedCsv(ErrorHandling errorHandling) throws FileNotFoundException, IOException {
 		MockHttpServletRequest req = MockHttpRequestBuilder.withUri(PLATFORM_ROOT).addNested("/event/upload")
-				.addParam(CsvFileImporter.ARG_ERROR_HANDLING, errorHandling.toString()).getMock();
+				.addParam(TabularDataFileImporter.ARG_ERROR_HANDLING, errorHandling.toString()).getMock();
 		MockMultipartFile csvFile = new MockMultipartFile("sample-upload-data-mismatch.csv",
 				new FileInputStream("src/test/resources/sample-upload-data-mismatch.csv"));
 		this.controller.handleUpload(req, csvFile, "mypojo");
