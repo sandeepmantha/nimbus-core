@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2016-2018 the original author or authors.
@@ -31,6 +30,7 @@ import { WebContentSvc } from './../../../services/content-management.service';
 import { LoggerService } from './../../../services/logger.service';
 import { Message } from '../../../shared/message';
 import { ServiceConstants } from './../../../services/service.constants';
+import { FileUpload } from 'primeng/primeng';
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
 	provide: NG_VALUE_ACCESSOR,
@@ -54,13 +54,37 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
 	encapsulation: ViewEncapsulation.None,
 	template: `
 			<p-fileUpload #pfu name="pfileupload" 
-				[showUploadButton]="false" 
+				[showUploadButton]="true" 
 				[showCancelButton]="false"
 				[customUpload]="true"
+				[multiple]="element?.config?.uiStyles?.attributes?.multiple"
 				(onSelect)="addFiles($event)"
 				(onRemove)="removeFiles($event)"
+				[disabled]="disabled"
+				(uploadHandler)="customUpload($event)"
 				url="{{element?.config?.uiStyles?.attributes?.url}}" 
 				accept="{{element?.config?.uiStyles?.attributes?.type}}">
+				<ng-template pTemplate="toolbar" [ngIf]="element?.config?.uiStyles?.attributes?.behavior == 'CONVERSION'">
+					<p-dropdown 
+						[options]="element.values | selectItemPipe" 
+						[disabled]="!element.enabled"
+						(onChange)="evalUpload()"
+						[(ngModel)] = "dropdownValue"
+						class="form-control">
+					</p-dropdown>
+       			</ng-template>
+				<ng-template pTemplate="content"  [ngIf]="element?.config?.uiStyles?.attributes?.behavior == 'CONVERSION'">
+					<div>Custom UI to manage uploaded files</div>
+				</ng-template>
+				<ng-template let-file pTemplate="file" [ngIf]="element?.config?.uiStyles?.attributes?.behavior == 'CONVERSION'">
+						<div class="ui-fileupload-row">
+							<div>{{file.name}}</div>
+							<div>{{file.domain}}</div>
+							<div>
+								<button type="button" icon="pi pi-times" pButton (click)="pfu.remove($event,hasFile(file))" [disabled]="file.upload"></button>
+							</div>
+						</div>
+				</ng-template>
 			</p-fileUpload>
 	`
 })
@@ -69,13 +93,13 @@ export class FileUploadComponent extends BaseElement implements ControlValueAcce
 
 	@Input() element: Param;
 	@Input() form: FormGroup;
-	@Input('value') _value;
+	@Input('value') _value: File[];
+	dropdownValue: any;
 	selectedFiles: File[];
-	multipleFiles: boolean = false;
-	@ViewChild('pfu') pfu;
+	@ViewChild('pfu') pfu: FileUpload;	
+	disabled: boolean;
 
-
-	constructor(private fileService: FileService, private _wcs: WebContentSvc, private logger: LoggerService) {
+	constructor(private fileService: FileService, private _wcs: WebContentSvc, private logger: LoggerService,  protected cd: ChangeDetectorRef) {
 		super(_wcs);
 	}
 
@@ -106,7 +130,7 @@ export class FileUploadComponent extends BaseElement implements ControlValueAcce
 	}
 
 	ngOnInit() {
-
+		this.evalUpload();
 		this.selectedFiles = [];
 		this.fileService.metaData = this.element.config.uiStyles.attributes.metaData;
 	
@@ -121,27 +145,28 @@ export class FileUploadComponent extends BaseElement implements ControlValueAcce
 	}
 
 	addFiles(event) {
-
-		let files = event.originalEvent.dataTransfer ? event.originalEvent.dataTransfer.files : event.originalEvent.target.files;
+		let files = event.files;
 
 		for (var p = 0; p < files.length; p++) {
 			if (this.hasFile(files[p]) == -1) {
 
-				if (!this.multipleFiles) {
+				if (!this.element.config.uiStyles.attributes.multiple) {
 					this.selectedFiles = [];
 					this.value = this.selectedFiles;
 				}
-				if (this.pfu.isFileTypeValid(files[p])) {
-					let file = files[p];					
+				if (this.pfu.validate(files[p])) {
+					let file = files[p];
+					file['domain'] = this.dropdownValue;	
+					file['upload'] = false;
+					file['postUrl'] = this.element.config.uiStyles.attributes.url? this.element.config.uiStyles.attributes.url : ServiceConstants.FILE_IMPORT + '?domain='+this.dropdownValue;				
 					this.selectedFiles.push(file);
 					this.value = this.selectedFiles;
-
-					file['postUrl'] = this.element.config.uiStyles.attributes.url? this.element.config.uiStyles.attributes.url : ServiceConstants.PLATFORM_BASE_URL+ '/event/upload';
-
 				}
 			}
 
 		}
+		this.dropdownValue = null;
+		this.evalUpload();
 	}
 
 	removeFiles(event) {
@@ -164,4 +189,31 @@ export class FileUploadComponent extends BaseElement implements ControlValueAcce
 		return index;
 	}
 
+	evalUpload() {
+		if(this.element.config.uiStyles.attributes.behavior == 'CONVERSION' && this.element.enabled) {
+			if(this.dropdownValue) {
+				this.disabled = false;
+			} else {
+				this.disabled = true;
+			}
+		} else {
+			this.disabled = !this.element.enabled;
+		}
+		this.cd.detectChanges();
+			
+	}
+	customUpload(event) {
+		let files = this.value;
+		if(files) {
+			for(let p=0; p<files.length; p++){
+				this.fileService.uploadFile(files[p], this.form)
+					.subscribe(data => {
+						files[p]['upload'] = true;	
+					},
+					error => this.logger.error(error),
+					() => this.logger.info('File uploaded ..')
+				);
+			}
+		}
+	}
 }

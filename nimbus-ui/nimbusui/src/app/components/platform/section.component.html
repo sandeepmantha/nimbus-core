@@ -94,6 +94,9 @@
             <ng-template [ngIf]="element.alias == componentTypes.autocomplete.toString()">
                 <nm-autocomplete [element]="element" [(ngModel)]="element.leafState"></nm-autocomplete>
             </ng-template>
+            <ng-template [ngIf]="element.alias == componentTypes.fileUpload.toString()">
+                <nm-upload id="{{code}}" [element]="element" [(ngModel)]="element.leafState"></nm-upload>
+            </ng-template>
         </ng-template>
     </ng-template>
 </div>

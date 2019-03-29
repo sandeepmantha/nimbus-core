@@ -47,6 +47,7 @@ export class ServiceConstants {
     public static get LOGOUT_URL(): string { return this.APP_HOST_URL+this.APP_PORT+'/'+this.APP_CONTEXT+'/logout'; }
     public static get APP_REFRESH(): string { return this.APP_HOST_URL+this.APP_PORT+'/'+this.APP_CONTEXT+'/processLogin'; }
     public static get PLATFORM_BASE_URL(): string    { return this.APP_BASE_URL + this.APP_COMMAND_URL + this.PLATFORM_SEPARATOR; }
+    public static get FILE_IMPORT(): string { return this.PLATFORM_BASE_URL+'/event/upload'; }
     public static get CLIENT_BASE_URL(): string    { return this.APP_HOST_URL+this.APP_PORT+'/'; }
     public static get WS_BASE_URL(): string { return 'ws://'+this.APP_HOST+this.WS_PORT+'/updates'; }
     public static get APP_LOGS(): string { return this.APP_HOST_URL+this.APP_PORT+'/log'; }
