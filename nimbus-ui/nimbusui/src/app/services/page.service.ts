@@ -29,7 +29,7 @@ import { CustomHttpClient } from './httpclient.service';
 import { Subject } from 'rxjs';
 import { GenericDomain } from '../model/generic-domain.model';
 import { RequestContainer } from '../shared/requestcontainer';
-import { ExecuteException } from './../shared/app-config.interface';
+import { ExecuteException, ExecuteResponse } from './../shared/app-config.interface';
 import { ParamUtils } from './../shared/param-utils';
 import { ParamAttribute } from './../shared/command.enum';
 import { ViewConfig } from './../shared/param-annotations.enum';
@@ -42,6 +42,8 @@ import { Message } from './../shared/message';
 import { ComponentTypes } from './../shared/param-annotations.enum';
 import { DataGroup } from '../components/platform/charts/chartdata';
 import { NmMessageService } from './toastmessage.service';
+import { Observable } from 'rxjs/Observable';
+
 /**
  * \@author Dinakar.Meda
  * \@author Sandeep.Mantha
@@ -499,8 +501,9 @@ export class PageService {
                          this.logger.error('http method not supported');
                  }
         }
-        executeHttpGet(url, paramPath?: string) {
-                this.http.get(url).subscribe(
+
+        handleResponse(response: Observable<ExecuteResponse>, url: string, paramPath?: string) {
+                response.subscribe(
                         data => { 
                                 this.sessionStore.setSessionId(data.sessionId);
                                 this.processResponse(data.result); 
@@ -510,15 +513,19 @@ export class PageService {
                         );
         }
 
+        executeHttpGet(url, paramPath?: string) {
+                let response = this.http.get(url);
+                this.handleResponse(response, url, paramPath);
+        }
+
         executeHttpPost(url:string, model:GenericDomain, paramPath?: string) {
-                this.http.post(url, JSON.stringify(model)).subscribe(
-                        data => { 
-                                this.sessionStore.setSessionId(data.sessionId);
-                                this.processResponse(data.result);
-                        },
-                        err => { this.processError(err, paramPath); },
-                        () => { this.invokeFinally(url, paramPath); }
-                        );
+                let response = this.http.post(url, JSON.stringify(model));
+                this.handleResponse(response, url, paramPath);
+        }
+
+        executeHttpPut(url:string, model:GenericDomain, paramPath?: string) {
+                let response = this.http.put(url, JSON.stringify(model));
+                this.handleResponse(response, url, paramPath);
         }
 
         processError(err:any, paramPath?: string) {

@@ -1,3 +1,4 @@
+import { CustomHttpClient } from './../../../services/httpclient.service';
 /**
 * @license
 * Copyright 2016-2018 the original author or authors.
@@ -133,7 +134,8 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         protected _wcs: WebContentSvc,
         private gridService: GridService,
         private dtFormat: DateTimeFormatPipe,
-        protected cd: ChangeDetectorRef) {
+        protected cd: ChangeDetectorRef,
+        protected http: CustomHttpClient) {
 
         super(_wcs, cd);
     }
@@ -143,10 +145,36 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
     }
 
     onRowEditSave(rowData) {
-        // make a server call to updated rowdata and if elemId as -1 then it need to update grid data in serverside
-        // recieve the updated id and elemId and the current rowdata
-        this.dt.saveRowEdit(rowData, this.editableRow.nativeElement);
-        delete this.clonedRowData[rowData.id];
+        let isNewRow = rowData.elemId === `-1`;
+        // if (isNewRow) {
+        //     console.log('Sending new row entry to server...');
+        //     delete rowData.elemId; // remove -1.
+        //     let url = `${this.element.path}/_update`;
+        //     this.pageSvc.executeHttpPost(url, rowData, this.element.path);
+        // } else {
+        //     console.log(`Editing existing row entry for elemId: '${rowData.elemId}' to server...`);
+        //     let colElemPath = `${this.element.path}/${rowData.elemId}`;
+        //     let url = `${colElemPath}/_update?v=1`;
+        //     this.pageSvc.executeHttpPut(url, rowData, colElemPath);
+        // }
+        if (isNewRow) {
+            console.log('Sending new row entry to server...');
+            let colElemPath = `${this.element.path}/${rowData.elemId}`;
+            let url = `http://localhost:8082/petclinic/org/app/p${colElemPath}/action_inlineOnAdd/_get`;
+            this.pageSvc.executeHttpPost(url, rowData, colElemPath);
+        } else {
+            console.log(`Editing existing row entry for elemId: '${rowData.elemId}' to server...`);
+            let colElemPath = `${this.element.path}/${rowData.elemId}`;
+            let url = `http://localhost:8082/petclinic/org/app/p${colElemPath}/action_inlineOnEdit/_get`;
+            this.pageSvc.executeHttpPost(url, rowData, colElemPath);
+            // this.http.post(url, rowData)
+            //     .subscribe(res => {
+            //         this.dt.saveRowEdit(rowData, this.editableRow.nativeElement);
+            //         delete this.clonedRowData[rowData.id];
+            //     });
+        }
+        // this.dt.saveRowEdit(rowData, this.editableRow.nativeElement);
+        // delete this.clonedRowData[rowData.id];
     }
 
     onRowEditCancel(rowData, index: number) {

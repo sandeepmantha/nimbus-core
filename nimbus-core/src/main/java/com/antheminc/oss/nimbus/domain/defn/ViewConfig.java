@@ -1219,9 +1219,9 @@ public class ViewConfig {
 		 */
 		boolean headerCheckboxToggleAllPages() default false;
 		
-		boolean editableRows() default false;
+		boolean editRow() default false;
 
-		boolean addRows() default false;
+		boolean addRow() default false;
 	}
 
 	/**
