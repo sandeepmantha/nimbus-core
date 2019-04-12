@@ -139,10 +139,10 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
     }
 
     onRowEditInitialize(rowData) {
-        this.clonedRowData[rowData.id] = {...rowData};
+        this.clonedRowData[rowData.elemId] = {...rowData};
     }
 
-    onRowEditSave(rowData) {
+    onRowEditSave(rowData, index: number) {
         let elemPath = `${this.element.path}/${rowData.elemId}`;
         let relativeActionPath = this.element.config.uiStyles.attributes.onEdit;
         if (this.isNewRecord(rowData)) {
@@ -151,31 +151,40 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
             delete rowData['id'];
             delete rowData['elemId'];
         }
-        this.invokeGetAction(rowData, elemPath, relativeActionPath, () => {
-            // on success
+        this.postEditedRow(rowData, elemPath, relativeActionPath, () => {
             this.dt.cancelRowEdit(rowData);
-            delete this.clonedRowData[rowData.id];
+            delete this.clonedRowData[rowData.elemId];
         }, () => {
-            // on failure
+            this.replaceRecordWithSavedValue(rowData);
+            delete this.clonedRowData[rowData.elemId];
         });
     }
 
-    invokeGetAction(rowData, elemPath: string, relativeActionPath: string, onSuccess?: () => void, onFailure?: () => void) {
+    postEditedRow(rowData: any, elemPath: string, relativeActionPath: string, onSuccess?: () => void, onFailure?: () => void) {
         // TODO build URL from a standardized service method (not yet built at time of this change)
         let url = `${ServiceConstants.PLATFORM_BASE_URL}${elemPath}/${relativeActionPath}/_get`;
         return this.pageSvc.executeHttpPost(url, rowData, elemPath, onSuccess, onFailure);
     }
 
-    onRowEditCancel(rowData, index: number) {
+    onRowEditCancel(rowData: any, index: number) {
         if (this.isNewRecord(rowData)) {
-            delete this.clonedRowData[rowData.id];
+            delete this.clonedRowData[rowData.elemId];
             this.value.splice(0, 1);
             return;
         }
-        this.value[index] = this.clonedRowData[rowData.id];
-        delete this.clonedRowData[rowData.id];
+       this.replaceRecordWithSavedValue(rowData);
+
     }
 
+    replaceRecordWithSavedValue(rowData) {
+
+        for (var i = 0; i < this.value.length; i++) {
+            if(this.value[i].elemId == rowData.elemId) {
+                this.value[i] =  this.clonedRowData[rowData.elemId]
+            }
+        }
+        delete this.clonedRowData[rowData.elemId];
+    }
     isNewRecord(rowData: any): boolean {
         return rowData['elemId'] === '-1';
     }
