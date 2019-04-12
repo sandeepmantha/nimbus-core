@@ -1222,6 +1222,31 @@ public class ViewConfig {
 		boolean editRow() default false;
 
 		boolean addRow() default false;
+		
+		/**
+		 * <p>A param path relative to the collection element param being edited
+		 * on which to invoke an {@link Action._get} call whenever a grid record
+		 * is edited. {@link #editRow()} must be enabled for this behavior to
+		 * occur. <p>The default value of this field ({@code "/action_onEdit"})
+		 * mandates that a field named {@code action_onEdit} be created in the
+		 * generic type of the decorated collection parameter. It can of course
+		 * be overridden to point to another desired param, relative to the
+		 * collection element param being edited.
+		 */
+		String onEdit() default "action_onEdit";
+		
+		/**
+		 * <p>A param path relative to the Grid param created by this decorated
+		 * field, on which to invoke an {@link Action._get} call whenever a new
+		 * grid record is added. {@link #addRow()} must be enabled for this
+		 * behavior to occur. <p>The default value of this field
+		 * ({@code "/action_onAdd"}) mandates that a field named
+		 * {@code action_onAdd} be created in the generic type of the decorated
+		 * collection parameter. It can of course be overridden to point to
+		 * another desired param, relative to this param created for this
+		 * decorated field.
+		 */
+		String onAdd() default "../action_onAdd";
 	}
 
 	/**

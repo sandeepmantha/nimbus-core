@@ -502,30 +502,33 @@ export class PageService {
                  }
         }
 
-        handleResponse(response: Observable<ExecuteResponse>, url: string, paramPath?: string) {
-                response.subscribe(
+        handleResponse(response: Observable<ExecuteResponse>, url: string, paramPath?: string, onSuccess?: () => void, onFailure?: () => void) {
+                return response.subscribe(
                         data => { 
                                 this.sessionStore.setSessionId(data.sessionId);
                                 this.processResponse(data.result); 
+                                if (onSuccess) {
+                                        onSuccess();
+                                }
                         },
-                        err => { this.processError(err, paramPath); },
+                        err => { 
+                                this.processError(err, paramPath);
+                                if (onFailure) {
+                                        onFailure();
+                                }
+                        },
                         () => { this.invokeFinally(url, paramPath); }
                         );
         }
 
-        executeHttpGet(url, paramPath?: string) {
+        executeHttpGet(url, paramPath?: string, onSuccess?: () => void, onFailure?: () => void) {
                 let response = this.http.get(url);
-                this.handleResponse(response, url, paramPath);
+                this.handleResponse(response, url, paramPath, onSuccess, onFailure);
         }
 
-        executeHttpPost(url:string, model:GenericDomain, paramPath?: string) {
+        executeHttpPost(url: string, model: GenericDomain, paramPath?: string, onSuccess?: () => void, onFailure?: () => void) {
                 let response = this.http.post(url, JSON.stringify(model));
-                this.handleResponse(response, url, paramPath);
-        }
-
-        executeHttpPut(url:string, model:GenericDomain, paramPath?: string) {
-                let response = this.http.put(url, JSON.stringify(model));
-                this.handleResponse(response, url, paramPath);
+                this.handleResponse(response, url, paramPath, onSuccess, onFailure);
         }
 
         processError(err:any, paramPath?: string) {

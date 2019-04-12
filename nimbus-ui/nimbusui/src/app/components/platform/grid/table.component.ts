@@ -1,4 +1,3 @@
-import { CustomHttpClient } from './../../../services/httpclient.service';
 /**
 * @license
 * Copyright 2016-2018 the original author or authors.
@@ -134,8 +133,7 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         protected _wcs: WebContentSvc,
         private gridService: GridService,
         private dtFormat: DateTimeFormatPipe,
-        protected cd: ChangeDetectorRef,
-        protected http: CustomHttpClient) {
+        protected cd: ChangeDetectorRef) {
 
         super(_wcs, cd);
     }
@@ -145,41 +143,31 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
     }
 
     onRowEditSave(rowData) {
-        let isNewRow = rowData.elemId === `-1`;
-        // if (isNewRow) {
-        //     console.log('Sending new row entry to server...');
-        //     delete rowData.elemId; // remove -1.
-        //     let url = `${this.element.path}/_update`;
-        //     this.pageSvc.executeHttpPost(url, rowData, this.element.path);
-        // } else {
-        //     console.log(`Editing existing row entry for elemId: '${rowData.elemId}' to server...`);
-        //     let colElemPath = `${this.element.path}/${rowData.elemId}`;
-        //     let url = `${colElemPath}/_update?v=1`;
-        //     this.pageSvc.executeHttpPut(url, rowData, colElemPath);
-        // }
-        if (isNewRow) {
-            console.log('Sending new row entry to server...');
-            let colElemPath = `${this.element.path}/${rowData.elemId}`;
-            let url = `http://localhost:8082/petclinic/org/app/p${colElemPath}/action_inlineOnAdd/_get`;
-            this.pageSvc.executeHttpPost(url, rowData, colElemPath);
-        } else {
-            console.log(`Editing existing row entry for elemId: '${rowData.elemId}' to server...`);
-            let colElemPath = `${this.element.path}/${rowData.elemId}`;
-            let url = `http://localhost:8082/petclinic/org/app/p${colElemPath}/action_inlineOnEdit/_get`;
-            this.pageSvc.executeHttpPost(url, rowData, colElemPath);
-            // this.http.post(url, rowData)
-            //     .subscribe(res => {
-            //         this.dt.saveRowEdit(rowData, this.editableRow.nativeElement);
-            //         delete this.clonedRowData[rowData.id];
-            //     });
+        let elemPath = `${this.element.path}/${rowData.elemId}`;
+        let relativeActionPath = this.element.config.uiStyles.attributes.onEdit;
+        if (this.isNewRecord(rowData)) {
+            elemPath = this.element.path;
+            relativeActionPath = this.element.config.uiStyles.attributes.onAdd;
+            delete rowData['id'];
+            delete rowData['elemId'];
         }
-        // this.dt.saveRowEdit(rowData, this.editableRow.nativeElement);
-        // delete this.clonedRowData[rowData.id];
+        this.invokeGetAction(rowData, elemPath, relativeActionPath, () => {
+            // on success
+            this.dt.cancelRowEdit(rowData);
+            delete this.clonedRowData[rowData.id];
+        }, () => {
+            // on failure
+        });
+    }
+
+    invokeGetAction(rowData, elemPath: string, relativeActionPath: string, onSuccess?: () => void, onFailure?: () => void) {
+        // TODO build URL from a standardized service method (not yet built at time of this change)
+        let url = `${ServiceConstants.PLATFORM_BASE_URL}${elemPath}/${relativeActionPath}/_get`;
+        return this.pageSvc.executeHttpPost(url, rowData, elemPath, onSuccess, onFailure);
     }
 
     onRowEditCancel(rowData, index: number) {
-
-        if (rowData.elemId === '-1') {
+        if (this.isNewRecord(rowData)) {
             delete this.clonedRowData[rowData.id];
             this.value.splice(0, 1);
             return;
@@ -188,13 +176,16 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         delete this.clonedRowData[rowData.id];
     }
 
+    isNewRecord(rowData: any): boolean {
+        return rowData['elemId'] === '-1';
+    }
 
     isAdding (){
         if (!this.value  || this.value.length === 0) {
             return false;
         }
         for  (let i = 0; i < this.value.length; i++) {
-            if (this.value[i]['elemId'] === '-1') {
+            if (this.isNewRecord(this.value[i])) {
                 return true;
             }
         }
