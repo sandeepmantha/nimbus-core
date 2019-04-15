@@ -47,8 +47,6 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     multi: true
 };
 
-declare var $: any;
-
 /**
 * \@author Dinakar.Meda
 * \@whatItDoes
@@ -142,14 +140,12 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         this.clonedRowData[rowData.elemId] = {...rowData};
     }
 
-    onRowEditSave(rowData, index: number) {
+    onRowEditSave(rowData) {
         let elemPath = `${this.element.path}/${rowData.elemId}`;
         let relativeActionPath = this.element.config.uiStyles.attributes.onEdit;
         if (this.isNewRecord(rowData)) {
             elemPath = this.element.path;
             relativeActionPath = this.element.config.uiStyles.attributes.onAdd;
-            delete rowData['id'];
-            delete rowData['elemId'];
         }
         this.postEditedRow(rowData, elemPath, relativeActionPath, () => {
             this.dt.cancelRowEdit(rowData);
@@ -166,7 +162,7 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         return this.pageSvc.executeHttpPost(url, rowData, elemPath, onSuccess, onFailure);
     }
 
-    onRowEditCancel(rowData: any, index: number) {
+    onRowEditCancel(rowData: any) {
         if (this.isNewRecord(rowData)) {
             delete this.clonedRowData[rowData.elemId];
             this.value.splice(0, 1);
@@ -176,8 +172,7 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
 
     }
 
-    replaceRecordWithSavedValue(rowData) {
-
+    replaceRecordWithSavedValue(rowData: any) {
         for (var i = 0; i < this.value.length; i++) {
             if(this.value[i].elemId == rowData.elemId) {
                 this.value[i] =  this.clonedRowData[rowData.elemId]
@@ -185,8 +180,9 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         }
         delete this.clonedRowData[rowData.elemId];
     }
+
     isNewRecord(rowData: any): boolean {
-        return rowData['elemId'] === '-1';
+        return typeof rowData['elemId'] == 'undefined';
     }
 
     isAdding (){
@@ -206,20 +202,8 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
         if (this.isAdding()) {
            return ;
         }
-        const defObj = {
-            'elemId': '-1',
-            'rowId': 'new'
-        };
-
-        for (let i = 0; i < this.params.length; i++) {
-            defObj [this.params[i].code] = '';
-        }
-        defObj['id'] = defObj.elemId;
-        this.value.unshift(defObj);
-        // this.cd.detectChanges();
-        setTimeout(() => {
-            $('#' + 'new_row').click();
-        });
+        this.value.unshift({});
+        this.dt.initRowEdit(this.value[0]);
     }
 
     ngOnInit() {
