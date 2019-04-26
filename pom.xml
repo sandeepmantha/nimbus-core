@@ -506,7 +506,12 @@
 			<groupId>com.univocity</groupId>
 			<artifactId>univocity-parsers</artifactId>
 			<version>${univocity.version}</version>
-		</dependency>	
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.cloud.stream.module/spring-cloud-stream-modules-common-configuration -->
+		<dependency>
+		    <groupId>org.springframework.cloud</groupId>
+		    <artifactId>spring-cloud-stream</artifactId>
+		</dependency>
 	</dependencies>
 
     <distributionManagement>
