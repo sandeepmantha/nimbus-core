@@ -39,6 +39,7 @@ import com.antheminc.oss.nimbus.channel.web.WebCommandDispatcher;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.defn.ClassPropertyConverter;
 import com.antheminc.oss.nimbus.domain.defn.Repo;
+import com.antheminc.oss.nimbus.domain.model.state.mq.MQEventListener;
 import com.antheminc.oss.nimbus.domain.model.state.repo.DefaultModelRepositoryFactory;
 import com.antheminc.oss.nimbus.domain.model.state.repo.DefaultParamStateRepositoryDetached;
 import com.antheminc.oss.nimbus.domain.model.state.repo.DefaultParamStateRepositoryLocal;
@@ -112,6 +113,10 @@ public class DefaultCoreConfiguration {
 		return new ParamStateAtomicRemotePersistenceEventListener(repoFactory);
 	}
 	
+	@Bean(name="default.mqEventListener")
+	public MQEventListener mqEventListener() {
+		return new MQEventListener();
+	}
 	
 	@Bean(name="default.param.state.rep_local")
 	public DefaultParamStateRepositoryLocal defaultParamStateRepositoryLocal(JavaBeanHandler javaBeanHandler){

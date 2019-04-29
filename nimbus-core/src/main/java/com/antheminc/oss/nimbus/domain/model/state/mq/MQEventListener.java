@@ -19,7 +19,7 @@ import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
 
 import com.antheminc.oss.nimbus.InvalidConfigException;
-import com.antheminc.oss.nimbus.domain.model.state.CommandMessageEvent;
+import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
 import com.antheminc.oss.nimbus.domain.model.state.event.listener.EventListener;
 import com.antheminc.oss.nimbus.support.JustLogit;
 
@@ -27,28 +27,28 @@ import com.antheminc.oss.nimbus.support.JustLogit;
  * @author Tony Lopez
  *
  */
-public class MQEventListener implements EventListener<CommandMessageEvent<String>> {
+public class MQEventListener implements EventListener<ModelEvent<String>> {
 
 	public static final JustLogit LOG = new JustLogit(MQEventListener.class);
 
 	@Override
-	public boolean listen(CommandMessageEvent<String> event) {
+	public boolean listen(ModelEvent<String> event) {
 		LOG.debug(() -> "Received a command message to execute: " + event);
 		if (null == event.getSource()) {
 			throw new InvalidConfigException(
 					"Source must be provided with the event message to send to the message queue.");
 		}
 
-		return publish(event.getSource(), toSimpleCommandMessage(event));
+		return publish(event.getSource(), toMQMessage(event));
 	}
 
 	public boolean publish(Source source, Object payload) {
 		return source.output().send(MessageBuilder.withPayload(payload).build());
 	}
 
-	private SimpleCommandMessage toSimpleCommandMessage(CommandMessageEvent<String> event) {
-		SimpleCommandMessage cmdMsg = new SimpleCommandMessage();
-		cmdMsg.setCommandUrl(event.getCommandUrl());
+	private CommandMQMessage toMQMessage(ModelEvent<String> event) {
+		CommandMQMessage cmdMsg = new CommandMQMessage();
+		cmdMsg.setCommandUrl(event.getPath() + "/" + event.getType());
 		cmdMsg.setRawPayload(event.getPayload());
 		return cmdMsg;
 	}

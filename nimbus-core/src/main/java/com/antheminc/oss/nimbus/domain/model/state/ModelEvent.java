@@ -15,6 +15,8 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state;
 
+import org.springframework.cloud.stream.messaging.Source;
+
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.model.state.internal.AbstractEvent;
 
@@ -28,6 +30,8 @@ import lombok.ToString;
  */
 @Getter @Setter @ToString(callSuper=true)
 public class ModelEvent<P> extends AbstractEvent<String, P> {
+	
+	private Source source = null;
 	
 	public ModelEvent(Action a, String path, P payload) {
 		super(a.toString(), path, payload);

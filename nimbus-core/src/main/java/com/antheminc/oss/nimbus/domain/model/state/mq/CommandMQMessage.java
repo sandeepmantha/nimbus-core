@@ -24,7 +24,7 @@ import lombok.Data;
  *
  */
 @Data
-public class SimpleCommandMessage implements Serializable {
+public class CommandMQMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

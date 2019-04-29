@@ -62,17 +62,17 @@ public class MQInputReceiver {
 	private CommandExecutorGateway executorGateway;
 
 	@StreamListener(Sink.INPUT)
-	public void input(SimpleCommandMessage msg) {
+	public void input(CommandMQMessage msg) {
 		LOG.debug(() -> "MQInputReceiver received a message: " + msg);
 		validate(msg);
 		getExecutorGateway().execute(toCommandMessage(msg));
 	}
 	
-	private CommandMessage toCommandMessage(SimpleCommandMessage msg) {
+	private CommandMessage toCommandMessage(CommandMQMessage msg) {
 		return new CommandMessage(CommandBuilder.withUri(msg.getCommandUrl()).getCommand(), msg.getRawPayload());
 	}
 
-	private void validate(SimpleCommandMessage msg) {
+	private void validate(CommandMQMessage msg) {
 		if (null == msg) {
 			throw new InvalidConfigException("An event message must not be null.");
 		}
