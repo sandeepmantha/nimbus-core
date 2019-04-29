@@ -44,6 +44,7 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContextLoader;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
 import com.antheminc.oss.nimbus.support.Holder;
+import com.antheminc.oss.nimbus.support.JustLogit;
 import com.antheminc.oss.nimbus.support.LoggingLevelService;
 
 /**
@@ -100,13 +101,12 @@ import com.antheminc.oss.nimbus.support.LoggingLevelService;
 //@EnableResourceServer
 public class WebActionController {
 	
+	public static final JustLogit LOG = new JustLogit(WebActionController.class);
+	
 	public static final String URI_PATTERN_P = "/{clientCode}/**/p";
 	public static final String URI_PATTERN_P_OPEN = URI_PATTERN_P + "/**";
 
 	private static final Set<Action> notifyActionsToMatch = EnumSet.of(Action._replace, Action._update);
-	
-	@Autowired
-	private Source source;
 	
 	@Autowired WebCommandDispatcher dispatcher;
 	
@@ -114,10 +114,11 @@ public class WebActionController {
 	
 	@Autowired WebCommandBuilder builder;
 	
+	@Autowired Source source;
+	
 	@RequestMapping(value=URI_PATTERN_P+"/event/mq", produces="application/json", method=RequestMethod.POST)
-	public void doSomething(@RequestBody UrlBasedCommandMessage msg) {
-		System.out.println("WebActionController received a message! -> " + msg);
-		System.out.println("Sending message to message broker...");
+	public void handleMQEvent(@RequestBody UrlBasedCommandMessage msg) {
+		LOG.debug(() -> "WebActionController received a message: " + msg);
 		source.output().send(MessageBuilder.withPayload(msg).build());
 	}
 	

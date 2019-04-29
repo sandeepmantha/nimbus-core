@@ -22,9 +22,11 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
 
+import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
 import com.antheminc.oss.nimbus.domain.cmd.CommandMessage;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
+import com.antheminc.oss.nimbus.support.JustLogit;
 
 import lombok.Data;
 import lombok.Getter;
@@ -57,22 +59,6 @@ import lombok.Setter;
 @Getter @Setter
 public class MQListener {
 
-	@Autowired
-	private CommandExecutorGateway executorGateway;
-	
-	@StreamListener(Sink.INPUT)
-	public void input(UrlBasedCommandMessage msg) {
-		System.out.println("Received message from message broker...: " + msg);
-		System.out.println("Converting and executing as CommandMessage...");
-		// TODO Validations?
-		getExecutorGateway().execute(toCommandMessage(msg));
-	}
-
-	private CommandMessage toCommandMessage(UrlBasedCommandMessage msg) {
-		return new CommandMessage(CommandBuilder.withUri(msg.getCommandUrl()).getCommand(), msg.getRawPayload());
-	}
-
-	// TODO Move to dedicated .java file
 	@Data
 	public static class UrlBasedCommandMessage implements Serializable {
 
@@ -80,5 +66,30 @@ public class MQListener {
 
 		private String commandUrl;
 		private String rawPayload;
+	}
+	
+	public static final JustLogit LOG = new JustLogit(MQListener.class);
+	
+	@Autowired
+	private CommandExecutorGateway executorGateway;
+
+	@StreamListener(Sink.INPUT)
+	public void input(UrlBasedCommandMessage msg) {
+		LOG.debug(() -> "MQListener received a message: " + msg);
+		validate(msg);
+		getExecutorGateway().execute(toCommandMessage(msg));
+	}
+	
+	private CommandMessage toCommandMessage(UrlBasedCommandMessage msg) {
+		return new CommandMessage(CommandBuilder.withUri(msg.getCommandUrl()).getCommand(), msg.getRawPayload());
+	}
+
+	private void validate(UrlBasedCommandMessage msg) {
+		if (null == msg) {
+			throw new InvalidConfigException("An event message must not be null.");
+		}
+		if (null == msg.getCommandUrl()) {
+			throw new InvalidConfigException("An event message must have a command that is not null.");
+		}
 	}
 }
