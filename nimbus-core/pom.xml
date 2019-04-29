@@ -14,6 +14,14 @@
 		<sonar.coverage.exclusions>src/main/java/com/antheminc/oss/nimbus/entity/**/*.java, src/main/java/com/antheminc/oss/nimbus/domain/defn/ViewConfig.java</sonar.coverage.exclusions>
 	</properties>
 
+	<!-- TODO: Remove, for testing only -->
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+		</dependency>
+	</dependencies>
+
     <build>
 	     <plugins>
 			<plugin>

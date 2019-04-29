@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,33 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.domain.defn;
+package com.antheminc.oss.nimbus.domain.model.state.mq;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.Serializable;
+
+import lombok.Data;
 
 /**
- * @author Soham Chakravarti
+ * @author Tony Lopez
  *
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.TYPE)
-@Model
-public @interface Domain {
+@Data
+public class SimpleCommandMessage implements Serializable {
 
-	String value();
-	
-	String lifecycle() default "";
-	
-	ListenerType[] includeListeners() default { };
-	
-	enum ListenerType {
-		none,
-		websocket,
-		persistence,
-		update,
-		MQ;
-	}
+	private static final long serialVersionUID = 1L;
+
+	private String commandUrl;
+	private String rawPayload;
 }

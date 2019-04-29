@@ -13,9 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.antheminc.oss.nimbus.channel.web;
-
-import java.io.Serializable;
+package com.antheminc.oss.nimbus.domain.model.state.mq;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -28,7 +26,6 @@ import com.antheminc.oss.nimbus.domain.cmd.CommandMessage;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.support.JustLogit;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -57,34 +54,25 @@ import lombok.Setter;
  */
 @EnableBinding(Sink.class)
 @Getter @Setter
-public class MQListener {
-
-	@Data
-	public static class UrlBasedCommandMessage implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		private String commandUrl;
-		private String rawPayload;
-	}
+public class MQInputReceiver {
 	
-	public static final JustLogit LOG = new JustLogit(MQListener.class);
+	public static final JustLogit LOG = new JustLogit(MQInputReceiver.class);
 	
 	@Autowired
 	private CommandExecutorGateway executorGateway;
 
 	@StreamListener(Sink.INPUT)
-	public void input(UrlBasedCommandMessage msg) {
-		LOG.debug(() -> "MQListener received a message: " + msg);
+	public void input(SimpleCommandMessage msg) {
+		LOG.debug(() -> "MQInputReceiver received a message: " + msg);
 		validate(msg);
 		getExecutorGateway().execute(toCommandMessage(msg));
 	}
 	
-	private CommandMessage toCommandMessage(UrlBasedCommandMessage msg) {
+	private CommandMessage toCommandMessage(SimpleCommandMessage msg) {
 		return new CommandMessage(CommandBuilder.withUri(msg.getCommandUrl()).getCommand(), msg.getRawPayload());
 	}
 
-	private void validate(UrlBasedCommandMessage msg) {
+	private void validate(SimpleCommandMessage msg) {
 		if (null == msg) {
 			throw new InvalidConfigException("An event message must not be null.");
 		}

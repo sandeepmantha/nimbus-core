@@ -22,11 +22,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.integration.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antheminc.oss.nimbus.channel.web.MQListener.UrlBasedCommandMessage;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
@@ -97,7 +93,6 @@ import com.antheminc.oss.nimbus.support.LoggingLevelService;
  *
  */
 @RestController
-@EnableBinding(Source.class)
 //@EnableResourceServer
 public class WebActionController {
 	
@@ -113,14 +108,6 @@ public class WebActionController {
 	@Autowired ExecutionContextLoader ctxLoader;
 	
 	@Autowired WebCommandBuilder builder;
-	
-	@Autowired Source source;
-	
-	@RequestMapping(value=URI_PATTERN_P+"/event/mq", produces="application/json", method=RequestMethod.POST)
-	public void handleMQEvent(@RequestBody UrlBasedCommandMessage msg) {
-		LOG.debug(() -> "WebActionController received a message: " + msg);
-		source.output().send(MessageBuilder.withPayload(msg).build());
-	}
 	
 	@RequestMapping(value=URI_PATTERN_P+"/clear", produces="application/json", method=RequestMethod.GET)
 	public void clear() {
