@@ -9,10 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 
+import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.integration.mq.ActiveMqConsumer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Sandeep Mantha
+ * @author Tony Lopez
  */
 @Configuration
 @EnableJms
@@ -39,7 +42,8 @@ public class DefaultActiveMqConsumerConfig {
 	}
 
 	@Bean
-	public ActiveMqConsumer mqconsumer() {
-		return new ActiveMqConsumer();
+	@ConditionalOnProperty(name = "activemq.inbound.channel")
+	public ActiveMqConsumer mqconsumer(CommandExecutorGateway executorGateway, ObjectMapper om) {
+		return new ActiveMqConsumer(executorGateway, om);
 	}
 }

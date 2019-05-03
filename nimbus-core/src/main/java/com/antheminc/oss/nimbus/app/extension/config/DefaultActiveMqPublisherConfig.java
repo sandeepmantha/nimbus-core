@@ -10,10 +10,11 @@ import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
 
 import com.antheminc.oss.nimbus.integration.mq.ActiveMqPublisher;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Sandeep Mantha
- * 
+ * @author Tony Lopez
  */
 @Configuration
 @ConditionalOnProperty(name = "spring.activemq.broker-url")
@@ -41,8 +42,9 @@ public class DefaultActiveMqPublisherConfig {
 	}
 
 	@Bean
-	public ActiveMqPublisher publisher() {
-		return new ActiveMqPublisher();
+	@ConditionalOnProperty(name = "activemq.outbound.channel")
+	public ActiveMqPublisher publisher(ObjectMapper om) {
+		return new ActiveMqPublisher(jmsTemplate(), om);
 	}
 
 }
