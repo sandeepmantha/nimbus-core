@@ -39,7 +39,8 @@ public @interface Domain {
 		none,
 		websocket,
 		persistence,
-		update
+		update,
+		queue
 		
 	}
 }
