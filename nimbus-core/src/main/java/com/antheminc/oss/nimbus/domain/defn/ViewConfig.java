@@ -718,6 +718,8 @@ public class ViewConfig {
 		
 		String cols() default "";
 		
+		String defaultLabel() default "";
+		
 		boolean dataEntryField() default true;
 
 	}
