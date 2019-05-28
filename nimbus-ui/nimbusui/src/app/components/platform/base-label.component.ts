@@ -19,6 +19,8 @@
 import { Input } from '@angular/core';
 import { Param } from './../../shared/param-state';
 import { ParamUtils } from './../../shared/param-utils';
+import { PageService } from '../../services/page.service';
+import { Subscription } from 'rxjs';
 
 /**
  * \@author Tony Lopez
@@ -32,28 +34,41 @@ export abstract class BaseLabel {
     @Input() element: Param;
     @Input() labelClass: Param;
 
-    constructor() {
+    private subscription: Subscription;
+    
+    helpText: string;
+    label: string;
+    cssClass: string;
+
+    constructor(protected pageService: PageService) {
 
     }
 
-    /**
-     * Get the tooltip help text for this element.
-     */
-    public get helpText(): string {
-        return ParamUtils.getHelpText(this.element);
+    ngOnInit() {
+        this.load();
+        this.subscription = this.pageService.eventUpdate$.subscribe(event => {
+            if(event.path == this.element.path) {
+                this.load();
+            }
+        });
     }
 
-    /**
-     * Get the label text for this element.
-     */
-    public get label(): string {
-        return ParamUtils.getLabelText(this.element);
+    ngOnDestroy() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
+    }
+
+    load() {
+        this.helpText = ParamUtils.getHelpText(this.element);
+        this.label = ParamUtils.getLabelText(this.element);
+        this.cssClass = this.loadCssClass();
     }
 
     /**
      * Get the css classes to apply for this element.
      */
-    public get cssClass(): string {
+    public loadCssClass(): string {
         let cssClass = ParamUtils.getLabelCss(this.element);
         if (this.labelClass) {
             cssClass += ' ' + this.labelClass;
