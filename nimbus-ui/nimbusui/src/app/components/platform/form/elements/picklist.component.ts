@@ -179,7 +179,7 @@ export class OrderablePickList extends BaseElement implements OnInit, ControlVal
                                 ValidationUtils.assessControlValidation(event,frmCtrl);
                             }
                         }
-                });
+                }));
                 this.subscribers.push(this.controlValueChanged.subscribe(($event) => {
                      if ($event.config.uiStyles.attributes.postEventOnChange) {
                         this.pageService.postOnChange($event.path , 'state', JSON.stringify($event.leafState));

@@ -46,7 +46,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
                     <div class="fieldsetFlex">
                         <nm-input-legend [element]="element"></nm-input-legend>
                         <ng-template ngFor let-frmElem [ngForOf]="element.type.model.params">
-                            <nm-frm-grp [element]="frmElem" [ngClass]="getElementClass(frmElem)" [hidden]="!frmElem.visible" [form]="form" [position]="position"> 
+                            <nm-frm-grp [element]="frmElem" [ngClass]="frmElem?.config?.uiStyles?.attributes?.cssClass?frmElem?.config?.uiStyles?.attributes?.cssClass:''" [hidden]="!frmElem.visible" [form]="form" [position]="position"> 
                             </nm-frm-grp>
                         </ng-template>
                     </div>
@@ -103,7 +103,7 @@ export class FrmGroupCmp extends BaseElement {
     ngOnInit() {
         super.ngOnInit();
         this.updatePosition();
-        this.formElementGroupCss = this.getCssClass()
+        this.formElementGroupCss = this.getCssClass();
     }
 
     getCssClass() {

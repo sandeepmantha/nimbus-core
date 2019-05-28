@@ -73,7 +73,7 @@ import { ViewComponent, ComponentTypes } from '../../../shared/param-annotations
                     <!-- Form Elements -->
                     <ng-template [ngIf]="form !== undefined">
                         <ng-template ngFor let-frmElem [ngForOf]="tab.type?.model?.params">
-                            <nm-frm-grp [element]="frmElem" [form]="form" [ngClass]="getElementClass(elementCss, frmElem)" [position]="position + 1"> 
+                            <nm-frm-grp [element]="frmElem" [form]="form" [ngClass]="frmElem?.config?.uiStyles?.attributes?.cssClass?frmElem?.config?.uiStyles?.attributes?.cssClass:elementCss" [position]="position + 1"> 
                             </nm-frm-grp>
                         </ng-template>
                     </ng-template>
@@ -145,6 +145,9 @@ export class Accordion extends BaseElement {
     ngOnInit() {
         super.ngOnInit();
         this.buildTabDatum();
+        if(this.elementCss==null || typeof this.elementCss == undefined) {
+            this.elementCss = '';
+        }
     }
 
     /** Handling model changes to Accordions **/
