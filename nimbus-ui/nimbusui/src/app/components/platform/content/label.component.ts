@@ -17,6 +17,7 @@
 'use strict';
 import { Component, Input } from '@angular/core';
 import { BaseLabel } from '../base-label.component';
+import { PageService } from '../../../services/page.service';
 
 /**
  * \@author Purnachander.Mashetty
@@ -42,9 +43,8 @@ export class Label extends BaseLabel {
 
     @Input() size: String;
 
-
-    constructor() {
-        super();
+    constructor(protected pageService: PageService) {
+        super(pageService);
     }
 }
 

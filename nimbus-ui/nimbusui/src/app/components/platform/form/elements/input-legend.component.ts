@@ -17,6 +17,7 @@
 'use strict';
 import { Component, Input } from '@angular/core';
 import { BaseLabel } from '../../base-label.component';
+import { PageService } from '../../../../services/page.service';
 
 /**
  * \@author Swetha Vemuri
@@ -41,7 +42,7 @@ import { BaseLabel } from '../../base-label.component';
   export class InputLegend extends BaseLabel {
     @Input() required: boolean;
 
-    constructor() {
-        super();
+    constructor(protected pageService: PageService) {
+        super(pageService);
     }
   }
