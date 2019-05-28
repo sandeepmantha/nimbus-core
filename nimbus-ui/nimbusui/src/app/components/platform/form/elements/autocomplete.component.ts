@@ -80,22 +80,21 @@ export class NmAutocomplete extends BaseControl<any> {
 
     ngOnInit() {
         super.ngOnInit();
-        this.searchService.search(this.searchTerm$, this.element.path)
-            .subscribe(data => {
-                this.results = [];
-                this.suggestionObj = data;
-                data.forEach(obj => {
-                    if (obj[this.element.config.uiStyles.attributes.display]) {
-                        this.results.push(obj[this.element.config.uiStyles.attributes.display])
-                    }
-                });
-            },
-                (error) => { this.logger.error('ERROR: Failure making server call : ' + JSON.stringify(error)); },
-            );
+        this.subscribers.push(this.searchService.search(this.searchTerm$, this.element.path).subscribe(data => {
+            this.results = [];
+            this.suggestionObj = data;
+            data.forEach(obj => {
+                if (obj[this.element.config.uiStyles.attributes.display]) {
+                    this.results.push(obj[this.element.config.uiStyles.attributes.display])
+                }
+            });
+        },
+            (error) => { this.logger.error('ERROR: Failure making server call : ' + JSON.stringify(error)); },
+        ));
 
-        this.pageSvc.validationUpdate$.subscribe(event => {
+        this.subscribers.push(this.pageSvc.validationUpdate$.subscribe(event => {
             ParamUtils.validate(event, this);
-        });
+        }));
     }
 
     search($event) {

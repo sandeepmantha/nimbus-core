@@ -92,28 +92,27 @@ export class MultiSelectListBox extends BaseElement{
             this.form.controls[this.element.config.code].setValue(this.targetList);
         }
         if( this.form.controls[this.element.config.code]!= null) {
-            this.form.controls[this.element.config.code].valueChanges.subscribe(
-                ($event) => { 
-                    this.setState($event,this); 
-                    if( this.form.controls[this.element.config.code].valid && this.sendEvent) {
-                        this.counterMessageService.evalCounterMessage(true);
-                        this.counterMessageService.evalFormParamMessages(this.element);
-                        this.sendEvent = false;
-                    } else if(this.form.controls[this.element.config.code].invalid && !this.form.controls[this.element.config.code].pristine) {
-                        this.counterMessageService.evalFormParamMessages(this.element);
-                        this.sendEvent = true;
-                        this.counterMessageService.evalCounterMessage(true);
-                    }
-                });
+            this.subscribers.push(this.form.controls[this.element.config.code].valueChanges.subscribe(($event) => { 
+                this.setState($event,this); 
+                if( this.form.controls[this.element.config.code].valid && this.sendEvent) {
+                    this.counterMessageService.evalCounterMessage(true);
+                    this.counterMessageService.evalFormParamMessages(this.element);
+                    this.sendEvent = false;
+                } else if(this.form.controls[this.element.config.code].invalid && !this.form.controls[this.element.config.code].pristine) {
+                    this.counterMessageService.evalFormParamMessages(this.element);
+                    this.sendEvent = true;
+                    this.counterMessageService.evalCounterMessage(true);
+                }
+            }));
         }
-        this.controlValueChanged.subscribe(($event) => {
+        this.subscribers.push(this.controlValueChanged.subscribe(($event) => {
             if ($event.config.uiStyles.attributes.postEventOnChange) {
                this.pageService.postOnChange($event.path, 'state', JSON.stringify($event.leafState));
             } else if($event.config.uiStyles.attributes.postButtonUrl) {
                let item: GenericDomain = new GenericDomain();
                this.pageService.processEvent(this.element.config.uiStyles.attributes.postButtonUrl, null, $event.leafState, HttpMethod.POST.value);
             }
-        });
+        }));
 
         this.subscribers.push(this.pageService.eventUpdate$.subscribe(event => {
             let frmCtrl = this.form.controls[event.config.code];
@@ -124,7 +123,7 @@ export class MultiSelectListBox extends BaseElement{
                     frmCtrl.reset();
             }
         }));
-        this.pageService.validationUpdate$.subscribe(event => {
+        this.subscribers.push(this.pageService.validationUpdate$.subscribe(event => {
             let frmCtrl = this.form.controls[event.config.code];
             if(frmCtrl!=null) {
                 if(event.path === this.element.path) {
@@ -140,7 +139,7 @@ export class MultiSelectListBox extends BaseElement{
                     ValidationUtils.assessControlValidation(event,frmCtrl);
                 }
             }
-        });
+        }));
     }
 
     setState(event:any, frmInp:any) {

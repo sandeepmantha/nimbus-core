@@ -136,11 +136,11 @@ export class Link extends BaseElement {
             }
 
         }
-        this.pageSvc.eventUpdate$.subscribe(event => {
+        this.subscribers.push(this.pageSvc.eventUpdate$.subscribe(event => {
             if (event.path == this.element.path && event.leafState && !this.rowData) {
                 this.url = this.resolveUrl();
             }
-        });
+        }));
     }
 
     resolveUrl() {

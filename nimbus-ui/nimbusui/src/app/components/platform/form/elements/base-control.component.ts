@@ -54,7 +54,7 @@ export abstract class BaseControl<T> extends BaseControlValueAccessor<T> {
     validationChangeSubscriber: Subscription;
     onChangeSubscriber: Subscription;
 
-    private subscribers: Subscription[] = []
+    subscribers: Subscription[] = []
 
     sendEvent = true;
     

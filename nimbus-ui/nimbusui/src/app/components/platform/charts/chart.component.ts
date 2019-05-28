@@ -20,6 +20,7 @@ import { Param } from '../../../shared/param-state';
 import { DataSets, ChartData, DataGroup, ChartType } from './chartdata';
 import { WebContentSvc } from './../../../services/content-management.service';
 import { PageService } from './../../../services/page.service';
+import { Subscription } from 'rxjs';
 /**
  * \@author Sandeep.Mantha
  * \@whatItDoes 
@@ -42,6 +43,8 @@ export class NmChart {
     @Input() data: any;
     chartType: String;
     options: any;
+    subscription: Subscription;
+
     constructor(private pageSvc: PageService) {}
     
     ngOnInit() {
@@ -75,11 +78,17 @@ export class NmChart {
         };
       }
 
-      this.pageSvc.eventUpdate$.subscribe(event => {
+      this.subscription = this.pageSvc.eventUpdate$.subscribe(event => {
         if(event.path === this.element.path) {
             this.data = this.createChartData(this.element.leafState);
         }
       });
+    }
+
+    ngOnDestroy() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     }
 
     private  createChartData(data: DataGroup[]): ChartData {

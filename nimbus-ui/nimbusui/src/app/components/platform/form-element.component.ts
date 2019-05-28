@@ -124,13 +124,13 @@ export class FormElement extends BaseElement {
         }));
     }
 
-    getElementStyle() {
-        if (this.element.config.uiStyles != null && this.element.config.uiStyles.attributes.alias === 'MultiSelectCard') {
-            return 'col-lg-12 col-md-6';
-        } else {
-            return '';
-        }
-    }
+    // getElementStyle() {
+    //     if (this.element.config.uiStyles != null && this.element.config.uiStyles.attributes.alias === 'MultiSelectCard') {
+    //         return 'col-lg-12 col-md-6';
+    //     } else {
+    //         return '';
+    //     }
+    // }
 
     /**
      * <p>Update all form controls belonging to this form instance that have validation errors present.

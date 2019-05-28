@@ -128,7 +128,7 @@ export class MultiselectCard  extends BaseElement implements ControlValueAccesso
         }
         if(this.form!=null && this.form.controls[this.element.config.code]!= null) {
             let frmCtrl =  this.form.controls[this.element.config.code];
-            frmCtrl.valueChanges.subscribe(($event) => {
+            this.subscribers.push(frmCtrl.valueChanges.subscribe(($event) => {
                 this.setState($event);
                 if(frmCtrl.valid && this.sendEvent) {
                     this.counterMessageService.evalCounterMessage(true);
@@ -139,7 +139,7 @@ export class MultiselectCard  extends BaseElement implements ControlValueAccesso
                     this.counterMessageService.evalCounterMessage(true);
                     this.sendEvent = true;
                 }
-            });
+            }));
             
             this.subscribers.push(this.pageService.eventUpdate$.subscribe(event => {
                 let frmCtrl = this.form.controls[event.config.code];

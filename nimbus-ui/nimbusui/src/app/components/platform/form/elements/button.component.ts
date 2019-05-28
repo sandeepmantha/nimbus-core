@@ -204,15 +204,14 @@ export class Button extends BaseElement {
             let files: File[] = item['fileControl'];
             delete item['fileControl'];
             for(let p=0; p<files.length; p++){
-                this.fileService.uploadFile(files[p], this.form)
-                    .subscribe(data => {
+                this.subscribers.push(this.fileService.uploadFile(files[p], this.form).subscribe(data => {
                         item['fileId'] = data;  
                         item['name'] = files[p]['name'];
                         this.pageService.processEvent( this.element.path, this.element.config.uiStyles.attributes.b, item, 'POST' );              
                     },
                     error => this.logger.error(error),
                     () => this.logger.info('File uploaded ..')
-                );
+                ));
                  
             }
             

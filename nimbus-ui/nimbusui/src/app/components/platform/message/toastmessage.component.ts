@@ -20,6 +20,7 @@ import { Component, Input, NgZone, ChangeDetectorRef } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { ComponentTypes } from '../../../shared/param-annotations.enum';
 import { NmMessageService } from './../../../services/toastmessage.service';
+import { Subscription } from 'rxjs';
 /**
  *  
  * \@author Sandeep Mantha
@@ -38,20 +39,24 @@ import { NmMessageService } from './../../../services/toastmessage.service';
 
 export class ToastMessageComponent { 
     componentTypes = ComponentTypes;
+    subscription: Subscription;
 
     constructor(private messageService: MessageService, private cdr: ChangeDetectorRef, private ngZone: NgZone, private _messageservice: NmMessageService) {}
 
     ngOnInit() {
-
-        this._messageservice.messageEvent$.subscribe(messages => {
+        this.subscription = this._messageservice.messageEvent$.subscribe(messages => {
             messages.forEach(msg => {
                 this.ngZone.run(() => {
                         this.messageService.addAll(msg.messageArray);
                 });
             });
-           
-
         });
+    }
+
+    ngOnDestroy() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     }
 
 }

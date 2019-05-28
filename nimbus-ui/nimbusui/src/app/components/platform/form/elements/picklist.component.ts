@@ -134,24 +134,23 @@ export class OrderablePickList extends BaseElement implements OnInit, ControlVal
                 if (this.element.activeValidationGroups != null && this.element.activeValidationGroups.length > 0) {
                     this.requiredCss = ValidationUtils.rebindValidations(frmCtrl,this.element.activeValidationGroups, this.element);
                 } 
-                frmCtrl.valueChanges.subscribe(
-                    ($event) => { 
-                        this.setState($event, this);
-                        // setting parent Picklist value manually since 
-                        parentCtrl.setValue(this.updateParentValue($event));
-                        let frmCtrl = this.form.controls[$event.config.code];
-                        if(frmCtrl) {
-                            if(frmCtrl.valid && this.sendEvent) {
-                                this.counterMessageService.evalCounterMessage(true);
-                                this.counterMessageService.evalFormParamMessages(this.element);
-                                this.sendEvent = false;
-                            } else if(frmCtrl.invalid && !frmCtrl.pristine) {
-                                this.counterMessageService.evalFormParamMessages(this.element);
-                                this.counterMessageService.evalCounterMessage(true);
-                                this.sendEvent = true;
-                            }
+                this.subscribers.push(frmCtrl.valueChanges.subscribe(($event) => { 
+                    this.setState($event, this);
+                    // setting parent Picklist value manually since 
+                    parentCtrl.setValue(this.updateParentValue($event));
+                    let frmCtrl = this.form.controls[$event.config.code];
+                    if(frmCtrl) {
+                        if(frmCtrl.valid && this.sendEvent) {
+                            this.counterMessageService.evalCounterMessage(true);
+                            this.counterMessageService.evalFormParamMessages(this.element);
+                            this.sendEvent = false;
+                        } else if(frmCtrl.invalid && !frmCtrl.pristine) {
+                            this.counterMessageService.evalFormParamMessages(this.element);
+                            this.counterMessageService.evalCounterMessage(true);
+                            this.sendEvent = true;
                         }
-                    });
+                    }
+                }));
 
                 this.subscribers.push(this.pageService.eventUpdate$.subscribe(event => {
                     const frmCtrl = this.form.controls[this.element.config.code];
@@ -163,28 +162,29 @@ export class OrderablePickList extends BaseElement implements OnInit, ControlVal
                         }
                     }
                 }));
-                this.pageService.validationUpdate$.subscribe(event => {
-                const frmCtrl = this.form.controls[this.element.config.code];
-                    if(frmCtrl != null) {
-                        if (event.path === this.element.path) {
-                           //bind dynamic validations on a param as a result of a state change of another param
-                            if (event.activeValidationGroups != null && event.activeValidationGroups.length > 0) {
-                                this.requiredCss = ValidationUtils.rebindValidations(frmCtrl,event.activeValidationGroups,this.element);
-                            } else {
-                                this.requiredCss = ValidationUtils.applyelementStyle(this.element);
-                                var staticChecks: ValidatorFn[] = [];
-                                staticChecks = ValidationUtils.buildStaticValidations(this.element);
-                                frmCtrl.setValidators(staticChecks);
+
+                this.subscribers.push(this.pageService.validationUpdate$.subscribe(event => {
+                    const frmCtrl = this.form.controls[this.element.config.code];
+                        if(frmCtrl != null) {
+                            if (event.path === this.element.path) {
+                            //bind dynamic validations on a param as a result of a state change of another param
+                                if (event.activeValidationGroups != null && event.activeValidationGroups.length > 0) {
+                                    this.requiredCss = ValidationUtils.rebindValidations(frmCtrl,event.activeValidationGroups,this.element);
+                                } else {
+                                    this.requiredCss = ValidationUtils.applyelementStyle(this.element);
+                                    var staticChecks: ValidatorFn[] = [];
+                                    staticChecks = ValidationUtils.buildStaticValidations(this.element);
+                                    frmCtrl.setValidators(staticChecks);
+                                }
+                                ValidationUtils.assessControlValidation(event,frmCtrl);
                             }
-                            ValidationUtils.assessControlValidation(event,frmCtrl);
                         }
-                    }
                 });
-                this.controlValueChanged.subscribe(($event) => {
+                this.subscribers.push(this.controlValueChanged.subscribe(($event) => {
                      if ($event.config.uiStyles.attributes.postEventOnChange) {
                         this.pageService.postOnChange($event.path , 'state', JSON.stringify($event.leafState));
                      }
-                 });
+                 }));
             }
         }
 
