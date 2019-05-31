@@ -32,6 +32,7 @@ import { PageNotfoundComponent } from './components/platform/content/page-notfou
 import { PageContent } from './components/platform/content/page-content.component';
 import { GridService } from './services/grid.service';
 import { GridMouseEventDirective } from './directives/gridhover.directive';
+import { NmValidator } from './directives/validateInput.directive';
 import { PrintDirective } from './directives/print.directive';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -127,7 +128,7 @@ import { RouteService } from './services/route.service';
 import { MessageService } from 'primeng/api';
 import { PrintService } from './services/print.service';
 import { AutoCompleteService } from './services/autocomplete.service';
-
+import { CounterMessageService } from './services/counter-message.service';
 
 //Utility Services
 import { GridUtils } from './shared/grid-utils';
@@ -234,7 +235,7 @@ export function init_app(appinitservice: AppInitService) {
         DomainFlowCmp, HeaderGlobal, FooterGlobal,
         BreadcrumbComponent, NavLinkRouter,
         Modal, ActionDropdown, ActionLink,
-        GridMouseEventDirective, DisplayValueDirective, PrintDirective,
+        GridMouseEventDirective, NmValidator,DisplayValueDirective, PrintDirective,
         HomeLayoutCmp, LoginCmp, LoginLayoutCmp, StyleGuideCmp, 
         KeysPipe, LinkPipe, DateTimeFormatPipe, SelectItemPipe, MultiSelectListBox, 
         CheckBox, FileUploadComponent, BreadcrumbComponent, TooltipComponent, Calendar, LoaderComponent, MessageComponent,
@@ -242,7 +243,7 @@ export function init_app(appinitservice: AppInitService) {
         MenuRouteLink, Label, InputLabel,InputSwitch,TreeGrid,InputLegend, FormErrorMessage, BaseTableElement, EventPropagationDirective, TableHeader, NavigationComponent
     ],
     entryComponents: [ FlowWrapper, PageContent, PageNotfoundComponent, LoginCmp, HomeLayoutCmp, SubDomainFlowCmp],
-    providers: [ PageService, ConfigService, WebContentSvc, HttpClient,  HttpClientModule, AppInitService,
+    providers: [ PageService, ConfigService, WebContentSvc, HttpClient,  HttpClientModule, AppInitService, CounterMessageService,
          CustomHttpClient, { provide: BrowserXhr, useClass: CustomBrowserXhr },
          { provide: APP_INITIALIZER, useFactory: init_app, deps: [AppInitService], multi: true },
          { provide: HTTP_INTERCEPTORS, useClass: CustomHttpClientInterceptor, multi: true },
