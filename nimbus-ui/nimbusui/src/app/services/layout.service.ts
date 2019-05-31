@@ -1,5 +1,3 @@
-import { ParamUtils } from './../shared/param-utils';
-import { URLUtils } from './../shared/url-utils';
 /**
  * @license
  * Copyright 2016-2018 the original author or authors.
@@ -36,6 +34,8 @@ import { LoggerService } from './logger.service';
 import { MenuItem } from '../shared/menuitem';
 import { Action, Behavior } from './../shared/command.enum';
 import { SessionStoreService, CUSTOM_STORAGE } from './session.store';
+import { ParamUtils } from './../shared/param-utils';
+import { URLUtils } from './../shared/url-utils';
 /**
  * \@author Dinakar.Meda
  * \@whatItDoes 
@@ -249,6 +249,7 @@ export class LayoutService {
                 menuItem.routerLink =  this.createRouterLink(element);
                 menuItem.command = (event: Event) => { this.processClick(event, menuItem)};
                 menuItem.code = element.config.code;
+                menuItem.queryParams = {p: param.config.uiStyles.attributes.flow};
                // menuItem.routerLinkActiveOptions = {'exact':true};
                 menuItems.push(menuItem);
             } else if (element.config.uiStyles.attributes.alias ===ViewComponent.menupanel.toString()){
@@ -268,6 +269,7 @@ export class LayoutService {
             if (element.config.uiStyles.attributes.alias === ViewComponent.menulink.toString()) {
                 item.command = (event: Event) => { this.processClick(event, item)};
                 item.routerLink =  this.createRouterLink(element, true);
+                item.queryParams = {p:param.config.uiStyles.attributes.flow};
                 subMenuItems.push(item);
             } else if (element.config.uiStyles.attributes.alias ===ViewComponent.menupanel.toString()){
                 this.buildSubMenu(element, item);

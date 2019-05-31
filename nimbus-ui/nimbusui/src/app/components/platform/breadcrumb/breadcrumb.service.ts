@@ -49,6 +49,15 @@ export class BreadcrumbService {
         } as Breadcrumb;
         return crumb;
     }
+    public addBreadCrumb(cr: Breadcrumb) : Breadcrumb {
+        let crumb = {
+            id: cr.id,
+            label: cr.label,
+            params: null,
+            url: cr.url
+        } as Breadcrumb;
+        return crumb;
+    }
 
     public push(pageId: string, label: string, path: string): boolean {
         /** Push the first crumb as home crumb */

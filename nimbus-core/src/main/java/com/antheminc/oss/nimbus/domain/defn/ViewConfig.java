@@ -632,7 +632,7 @@ public class ViewConfig {
 		 * rendered combo box with the provided value displayed as the label
 		 * text. The default value will always be {@code null}.
 		 */
-		String defaultLabel() default "";
+		String breadcrumbLabel() default "";
 		
 		String help() default "";
 
@@ -2048,6 +2048,12 @@ public class ViewConfig {
 		 * component.
 		 */
 		String url() default "";
+		
+		/**
+		 * <p>{@code flow} attribute when given for breadcrumb navigation will be set appropriately.
+		 * flow needs to be the domain alias of which it is a sub process.
+		 */
+		String flow() default "";
 	}
 
 	/**
@@ -2224,6 +2230,8 @@ public class ViewConfig {
 		String imgSrc() default "";
 
 		String route() default ""; // remove
+		
+		String breadcrumbLabel() default "";
 		
 		boolean fixLayout() default false;
 	}
@@ -3200,6 +3208,8 @@ public class ViewConfig {
 		String alias() default "root";
 
 		String layout() default "";
+		
+		String subdomainLevel() default "";
 	}
 
 	/**
