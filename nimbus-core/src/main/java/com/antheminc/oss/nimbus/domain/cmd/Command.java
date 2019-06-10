@@ -32,6 +32,7 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.defn.Constants;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantID;
 import com.antheminc.oss.nimbus.support.pojo.CollectionsTemplate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -438,4 +439,11 @@ public class Command implements Serializable {
 		return requestParams != null && requestParams.containsKey(Constants.KEY_FUNCTION.code);
 	}
 	
+	public TenantID getTenantID() {
+		TenantID id = new TenantID();
+		id.setClientId(getAlias(Type.ClientAlias));
+		id.setOrgId(getAlias(Type.ClientOrgAlias));
+		id.setAppCode(getAlias(Type.AppAlias));
+		return id;
+	}
 }

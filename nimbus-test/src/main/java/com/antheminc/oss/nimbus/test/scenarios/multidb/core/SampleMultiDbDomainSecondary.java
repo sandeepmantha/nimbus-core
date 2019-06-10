@@ -22,6 +22,7 @@ import com.antheminc.oss.nimbus.domain.defn.Domain;
 import com.antheminc.oss.nimbus.domain.defn.Domain.ListenerType;
 import com.antheminc.oss.nimbus.domain.defn.Repo;
 import com.antheminc.oss.nimbus.domain.defn.Repo.Database;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantID;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,6 +41,7 @@ public class SampleMultiDbDomainSecondary {
 	private String _class = this.getClass().getName(); 
 	@Id
 	private Long id;
+	private TenantID _tenantID;
 	private String secondaryField1;
 	private String secondaryField2;
 	

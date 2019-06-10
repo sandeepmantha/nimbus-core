@@ -36,6 +36,7 @@ import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.ValueAccessor;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyRepositorySupport;
 import com.antheminc.oss.nimbus.domain.model.state.repo.IdSequenceRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.MongoIdSequenceRepository;
@@ -52,7 +53,7 @@ import lombok.Getter;
  *
  */
 @Getter
-public class DefaultMongoModelRepository implements ModelRepository {
+public class DefaultMongoModelRepository implements ModelRepository, MultitenancyRepositorySupport {
 
 	private final MongoOperations mongoOps;
 	private final IdSequenceRepository idSequenceRepo;
@@ -66,6 +67,22 @@ public class DefaultMongoModelRepository implements ModelRepository {
 		this.options = options;
 		
 		this.idSequenceRepo = new MongoIdSequenceRepository(mongoOps);
+	}
+
+	/**
+	 * <p>Create an object that is responsible for setting the tenant information retrieved from
+	 * a command into the domain entity state.
+	 * <p>Custom implementations can override this behavior for flexible behavior.
+	 */
+	@Override
+	public <T> MultitenancyInstantiator<T> getMultitenancyInstantiator() {
+		return new MultitenancyInstantiator<T>() {
+			@Override
+			public void execute(Command cmd, ModelConfig<T> mConfig, T newState) {
+				ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), "_tenantID");
+				beanHandler.setValue(va, newState, cmd.getTenantID());
+			}
+		};
 	}
 	
 	@Override
@@ -84,6 +101,8 @@ public class DefaultMongoModelRepository implements ModelRepository {
 		
 		ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), pId.getCode());
 		getBeanHandler().setValue(va, newState, id);
+		
+		getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
 		
 		return newState;
 	}
