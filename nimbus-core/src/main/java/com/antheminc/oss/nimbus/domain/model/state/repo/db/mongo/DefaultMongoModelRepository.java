@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -63,6 +64,9 @@ public class DefaultMongoModelRepository implements ModelRepository, Multitenanc
 	private final IdSequenceRepository idSequenceRepo;
 	private final JavaBeanHandler beanHandler;
 	private final MongoDBModelRepositoryOptions options;
+	
+	@Value("${nimbus.multitenant:false}")
+	private boolean multitenancyEnabled;
 	
 	public DefaultMongoModelRepository(MongoOperations mongoOps, BeanResolverStrategy beanResolver, 
 			MongoDBModelRepositoryOptions options) {
@@ -119,7 +123,9 @@ public class DefaultMongoModelRepository implements ModelRepository, Multitenanc
 		ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), pId.getCode());
 		getBeanHandler().setValue(va, newState, id);
 		
-		getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
+		if (this.isMultitenancyEnabled()) {
+			getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
+		}
 		
 		return newState;
 	}
