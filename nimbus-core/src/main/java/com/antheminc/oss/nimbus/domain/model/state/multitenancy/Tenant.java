@@ -15,38 +15,62 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import com.antheminc.oss.nimbus.domain.defn.Constants;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Tony Lopez
  * @since 2.0
  *
  */
-@Data
-public class TenantID {
+@Getter
+@Setter
+public class Tenant implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	private Long id;
 	
 	private String clientId;
 	private String orgId;
 	private String appCode;
-	private String version;
+	
+	@CreatedBy
+	private String createdBy;
+
+	@CreatedDate
+	private ZonedDateTime createdDate;
+
+	@LastModifiedBy
+	private String lastModifiedBy;
+
+	@LastModifiedDate
+	private ZonedDateTime lastModifiedDate;
 	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		appendIfNotEmpty(sb, clientId);
-		appendIfNotEmpty(sb, orgId);
-		appendIfNotEmpty(sb, appCode);
-		appendIfNotEmpty(sb, version);
+		append(sb, clientId);
+		append(sb, orgId);
+		append(sb, appCode);
 		return sb.toString();
 	}
-	
-	private void appendIfNotEmpty(StringBuilder sb, String value) {
-		if (!StringUtils.isEmpty(value)) {
-			sb.append(Constants.SEPARATOR_URI.code).append(value);
-		}
+
+	private void append(StringBuilder sb, String value) {
+		String appendValue = !StringUtils.isEmpty(value) ? value : "null";
+		sb.append(Constants.SEPARATOR_URI.code).append(appendValue);
 	}
 }

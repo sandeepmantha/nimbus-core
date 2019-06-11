@@ -30,7 +30,6 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.domain.defn.ConfigNature.Ignore;
 import com.antheminc.oss.nimbus.domain.defn.Model;
 import com.antheminc.oss.nimbus.domain.defn.SearchNature.StartsWith;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
@@ -84,7 +83,7 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
 	
 	@Ignore
 	@Setter
-	private TenantID _tenantID;
+	private Long _tenantId;
 	
 	@JsonIgnore
 	public <T extends AbstractEntityBehavior<M, ID>, M extends AbstractEntity<ID>> T newBehaviorInstance(Class<T> clazz) {

@@ -76,7 +76,7 @@ public class MongoSearchByExampleOperation extends MongoDBSearchOperation {
 		if(criteria == null) 
 			return new Query();
 		
-		ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withIgnoreNullValues().withIgnorePaths("version");
+		ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withIgnoreNullValues().withIgnorePaths(Constants.FIELD_NAME_VERSION.code);
 		
 		matcher = recurseAllFieldsAndBuildMatcher(referredClass, criteria, matcher);
 		

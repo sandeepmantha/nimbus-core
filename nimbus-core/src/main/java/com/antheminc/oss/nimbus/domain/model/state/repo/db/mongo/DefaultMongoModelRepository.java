@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -31,12 +33,14 @@ import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
+import com.antheminc.oss.nimbus.domain.defn.Constants;
 import com.antheminc.oss.nimbus.domain.defn.Domain;
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.ValueAccessor;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyRepositorySupport;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
 import com.antheminc.oss.nimbus.domain.model.state.repo.IdSequenceRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.MongoIdSequenceRepository;
@@ -79,8 +83,21 @@ public class DefaultMongoModelRepository implements ModelRepository, Multitenanc
 		return new MultitenancyInstantiator<T>() {
 			@Override
 			public void execute(Command cmd, ModelConfig<T> mConfig, T newState) {
-				ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), "_tenantID");
-				beanHandler.setValue(va, newState, cmd.getTenantID());
+				
+				Tenant tenantExample = cmd.extractTenantDetails();
+				ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withIgnoreNullValues().withIgnorePaths(Constants.FIELD_NAME_VERSION.code);
+				Query query = new Query(Criteria.byExample(Example.of(tenantExample, matcher)));
+				Tenant tenant = getMongoOps().findOne(query, Tenant.class, Constants.COLLECTION_TENANT.code);
+				
+				// if the tenant is not found, create it.
+				if (null == tenant) {
+					tenant = tenantExample;
+					tenant.setId(getIdSequenceRepo().getNextSequenceId(Constants.COLLECTION_TENANT.code));
+					getMongoOps().insert(tenantExample, Constants.COLLECTION_TENANT.code);
+				}
+				
+				ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), Constants.FIELD_NAME_TENANT_ID.code);
+				beanHandler.setValue(va, newState, tenant.getId());
 			}
 		};
 	}
