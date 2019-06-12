@@ -17,8 +17,11 @@ package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.AntPathMatcher;
 
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyProperties.TenantDetail;
@@ -53,11 +56,9 @@ public class DefaultTenantRepository implements TenantRepository {
 		}
 
 		List<Tenant> tenants = new ArrayList<>();
-		List<TenantDetail> tenantDetails = this.multitenancyProperties.getTenants();
-		for (int i = 0; i <= tenantDetails.size(); i++) {
-			TenantDetail tenantDetail = tenantDetails.get(i);
-			if (clientId.equals(tenantDetail.getClientId())) {
-				tenants.add(this.toTenant(i, tenantDetail));
+		for (Entry<Long, TenantDetail> entry: this.multitenancyProperties.getTenants().entrySet()) {
+			if (clientId.equals(entry.getValue().getClientId())) {
+				tenants.add(this.toTenant(entry.getKey(), entry.getValue()));
 			}
 		}
 		return tenants;
@@ -65,22 +66,18 @@ public class DefaultTenantRepository implements TenantRepository {
 
 	@Override
 	public Tenant findById(Long id) {
-		if (null == id || CollectionUtils.isEmpty(this.multitenancyProperties.getTenants())
-				|| id > this.multitenancyProperties.getTenants().size()) {
+		if (null == id || MapUtils.isEmpty(this.multitenancyProperties.getTenants())) {
 			return null;
 		}
-		int idInt = id.intValue();
-		return this.toTenant(idInt, this.multitenancyProperties.getTenants().get(idInt));
+		return this.toTenant(id, this.multitenancyProperties.getTenants().get(id));
 	}
 
 	@Override
 	public Tenant findOneMatchingPattern(String value) {
 		List<Tenant> tenants = new ArrayList<>();
-		List<TenantDetail> tenantDetails = this.multitenancyProperties.getTenants();
-		for (int i = 0; i < tenantDetails.size(); i++) {
-			TenantDetail tenantDetail = tenantDetails.get(i);
-			if (this.pathMatcher.match(tenantDetail.getPattern(), value)) {
-				tenants.add(this.toTenant(i, tenantDetail));
+		for (Entry<Long, TenantDetail> entry: this.multitenancyProperties.getTenants().entrySet()) {
+			if (this.pathMatcher.match(entry.getValue().getPattern(), value)) {
+				tenants.add(this.toTenant(entry.getKey(), entry.getValue()));
 			}
 		}
 
@@ -92,11 +89,10 @@ public class DefaultTenantRepository implements TenantRepository {
 		return tenants.get(0);
 	}
 
-	private Tenant toTenant(int id, TenantDetail tenantDetail) {
+	private Tenant toTenant(Long id, TenantDetail tenantDetail) {
 		Tenant tenant = new Tenant();
-		tenant.setId(new Long(id));
-		tenant.setClientId(tenantDetail.getClientId());
-		tenant.setPattern(tenantDetail.getPattern());
+		BeanUtils.copyProperties(tenantDetail, tenant);
+		tenant.setId(id);
 		return tenant;
 	}
 }

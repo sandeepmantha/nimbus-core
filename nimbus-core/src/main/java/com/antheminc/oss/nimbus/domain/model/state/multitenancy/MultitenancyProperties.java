@@ -15,7 +15,7 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -44,5 +44,5 @@ public class MultitenancyProperties {
 	}
 	private boolean enabled;
 
-	private List<TenantDetail> tenants;
+	private Map<Long, TenantDetail> tenants;
 }

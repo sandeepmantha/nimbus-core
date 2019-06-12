@@ -229,7 +229,7 @@ public class Command implements Serializable {
 	 * 
 	 * <p>
 	 * <b>Examples:</b>
-	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/domain/ef/gh/_process?fn=_set</i> then getAbsoluteDomainAlias() returns <i>/domain</i></li>
+	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set</i> then getAbsoluteDomainAlias() returns <i>/domain</i></li>
 	 * @return the absolute domain alias of this command.
 	 */
 	public String getAbsoluteDomainAlias() {
@@ -242,7 +242,7 @@ public class Command implements Serializable {
 	 * 
 	 * <p>
 	 * <b>Examples:</b>
-	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/domain/ef/gh/_process?fn=_set</i> then getAbsoluteDomainAlias() returns <i>/domain/ef/gh</i></li>
+	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set</i> then getAbsoluteDomainAlias() returns <i>/domain/ef/gh</i></li>
 	 * @return the absolute domain URI of this command.
 	 */
 	public String getAbsoluteDomainUri() {
@@ -254,7 +254,7 @@ public class Command implements Serializable {
 	 * Returns the tenant URI of this command.
 	 * 
 	 * <p> <b>Examples:</b> <p>When
-	 * {@code absoluteUri = "/Acme/ab/cd/domain/ef/gh/_process?fn=_set"} then
+	 * {@code absoluteUri = "/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set"} then
 	 * {@link #getTenantUri()} returns {@code "/Acme/ab/cd"}.
 	 * @return the absolute domain URI of this command.
 	 */
@@ -279,7 +279,7 @@ public class Command implements Serializable {
 	 * 
 	 * <p>
 	 * <b>Examples:</b>
-	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/domain/ef/gh/_process?fn=_set</i> then getAbsoluteAlias() returns <i>/Acme/ab/cd/domain/ef/gh</i></li>
+	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set</i> then getAbsoluteAlias() returns <i>/Acme/ab/cd/domain/ef/gh</i></li>
 	 * @return the absolute alias of this command.
 	 */
 	public String getAbsoluteAlias() {
@@ -292,7 +292,7 @@ public class Command implements Serializable {
 	 * 
 	 * <p>
 	 * <b>Examples:</b>
-	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/domain/ef/gh/_process?fn=_set</i> then getAbsoluteDomainAlias() returns <i>/domain/ef/gh/_process</i></li>
+	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set</i> then getAbsoluteDomainAlias() returns <i>/domain/ef/gh/_process</i></li>
 	 * @return the absolute alias with only the action included of this command.
 	 */
 	public String getAbsoluteAliasWithAction() {
@@ -306,7 +306,7 @@ public class Command implements Serializable {
 	 * 
 	 * <p>
 	 * <b>Examples:</b>
-	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/domain/ef/gh/_process?fn=_set</i> then getAbsoluteAliasTillRootDomain() returns <i>/Acme/ab/cd/domain</i></li>
+	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set</i> then getAbsoluteAliasTillRootDomain() returns <i>/Acme/ab/cd/domain</i></li>
 	 * @return the absolute alias up to the root domain of this command.
 	 */
 	public String getAbsoluteAliasTillRootDomain() {
