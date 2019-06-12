@@ -21,19 +21,36 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.antheminc.oss.nimbus.InvalidConfigException;
+import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
 import com.antheminc.oss.nimbus.domain.defn.Constants;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 import com.antheminc.oss.nimbus.support.JustLogit;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Soham Chakravarti
  *
  */
+@Getter @Setter
 public class WebCommandBuilder {
 
 	private JustLogit logit = new JustLogit(this.getClass());
+	
+	private final BeanResolverStrategy beanResolver;
+	
+	private final TenantRepository tenantRepository;
+	
+	public WebCommandBuilder(BeanResolverStrategy beanResolver) {
+		this.beanResolver = beanResolver;
+		this.tenantRepository = beanResolver.find(TenantRepository.class);
+	}
 	
 	public Command build(HttpServletRequest request) {
 		final String requestUri = constructRequestUri(request);
@@ -63,6 +80,15 @@ public class WebCommandBuilder {
 	
 	public Command handleInternal(String uri, Map<String, String[]> rParams) {
 		Command cmd = CommandBuilder.withUri(uri).addParams(rParams).getCommand();
+		
+		if (null != this.tenantRepository) {
+			Tenant tenant = this.tenantRepository.findOneMatchingPattern(cmd.getTenantUri());
+			if (null == tenant) {
+				throw new InvalidConfigException("Unable to determine tenant from Command URI: \"" + cmd.getAbsoluteUri() + "\".  Does a tenant identified by \"" + cmd.getTenantUri() + "\" exist?");
+			}
+			cmd.setTenant(tenant);
+		}
+		
 		return cmd;
 	} 
 	

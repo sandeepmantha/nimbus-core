@@ -15,14 +15,16 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
-import java.io.Serializable;
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * <p>A model object containing tenant information.
+ * <p>Holds configured properties related to multitenancy.
  * 
  * @author Tony Lopez
  * @since 2.0
@@ -30,14 +32,17 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString(of = { "id", "clientId" })
-public class Tenant implements Serializable {
+@ToString
+@ConfigurationProperties("nimbus.multitenancy")
+public class MultitenancyProperties {
 
-	private static final long serialVersionUID = 1L;
+	@Getter
+	@Setter
+	public static class TenantDetail {
+		private String clientId;
+		private String pattern;
+	}
+	private boolean enabled;
 
-	private Long id;
-	
-	private String clientId;
-
-	private String pattern;
+	private List<TenantDetail> tenants;
 }

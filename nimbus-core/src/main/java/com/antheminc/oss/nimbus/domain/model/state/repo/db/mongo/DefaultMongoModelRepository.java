@@ -21,9 +21,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -40,8 +37,8 @@ import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.ValueAccessor;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyRepositorySupport;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyProperties;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.ModelRepositoryMultitenancySupport;
 import com.antheminc.oss.nimbus.domain.model.state.repo.IdSequenceRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.MongoIdSequenceRepository;
@@ -58,50 +55,38 @@ import lombok.Getter;
  *
  */
 @Getter
-public class DefaultMongoModelRepository implements ModelRepository, MultitenancyRepositorySupport {
+public class DefaultMongoModelRepository implements ModelRepository, ModelRepositoryMultitenancySupport {
 
 	private final MongoOperations mongoOps;
 	private final IdSequenceRepository idSequenceRepo;
 	private final JavaBeanHandler beanHandler;
 	private final MongoDBModelRepositoryOptions options;
-	
-	@Value("${nimbus.multitenant:false}")
-	private boolean multitenancyEnabled;
+	private final MultitenancyProperties multitenancyProperties;
 	
 	public DefaultMongoModelRepository(MongoOperations mongoOps, BeanResolverStrategy beanResolver, 
 			MongoDBModelRepositoryOptions options) {
 		this.mongoOps = mongoOps;
 		this.beanHandler = beanResolver.get(JavaBeanHandler.class);
 		this.options = options;
-		
 		this.idSequenceRepo = new MongoIdSequenceRepository(mongoOps);
+		this.multitenancyProperties = beanResolver.get(MultitenancyProperties.class);
 	}
-
+	
 	/**
 	 * <p>Create an object that is responsible for setting the tenant information retrieved from
-	 * a command into the domain entity state.
+	 * a command into the domain entity state to support record level based tenancy.
 	 * <p>Custom implementations can override this behavior for flexible behavior.
 	 */
 	@Override
 	public <T> MultitenancyInstantiator<T> getMultitenancyInstantiator() {
 		return new MultitenancyInstantiator<T>() {
 			@Override
-			public void execute(Command cmd, ModelConfig<T> mConfig, T newState) {
-				
-				Tenant tenantExample = cmd.extractTenantDetails();
-				ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withIgnoreNullValues().withIgnorePaths(Constants.FIELD_NAME_VERSION.code);
-				Query query = new Query(Criteria.byExample(Example.of(tenantExample, matcher)));
-				Tenant tenant = getMongoOps().findOne(query, Tenant.class, Constants.COLLECTION_TENANT.code);
-				
-				// if the tenant is not found, create it.
-				if (null == tenant) {
-					tenant = tenantExample;
-					tenant.setId(getIdSequenceRepo().getNextSequenceId(Constants.COLLECTION_TENANT.code));
-					getMongoOps().insert(tenantExample, Constants.COLLECTION_TENANT.code);
+			public void execute(Command cmd, ModelConfig<T> mConfig, T newState) {				
+				if (null == cmd.getTenant()) {
+					throw new FrameworkRuntimeException("Tenant must not be null for command: " + cmd);
 				}
-				
 				ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), Constants.FIELD_NAME_TENANT_ID.code);
-				beanHandler.setValue(va, newState, tenant.getId());
+				beanHandler.setValue(va, newState, cmd.getTenant().getId());
 			}
 		};
 	}
@@ -123,7 +108,7 @@ public class DefaultMongoModelRepository implements ModelRepository, Multitenanc
 		ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), pId.getCode());
 		getBeanHandler().setValue(va, newState, id);
 		
-		if (this.isMultitenancyEnabled()) {
+		if (multitenancyProperties.isEnabled()) {
 			getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
 		}
 		

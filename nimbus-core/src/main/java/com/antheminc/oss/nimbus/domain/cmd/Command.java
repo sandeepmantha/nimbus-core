@@ -45,7 +45,7 @@ import lombok.ToString;
  * @author Soham Chakravarti
  *
  */
-@Data @ToString(of={"absoluteUri", "action", "behaviors", "clientUserId"}) 
+@Data @ToString(of={"absoluteUri", "tenant", "action", "behaviors", "clientUserId"}) 
 public class Command implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -65,6 +65,8 @@ public class Command implements Serializable {
 	private List<Behavior> behaviors;
 	
 	private Map<String, String[]> requestParams;
+	
+	private Tenant tenant;
 	
 	@JsonIgnore
 	private final Instant createdInstant = Instant.now();
@@ -246,6 +248,18 @@ public class Command implements Serializable {
 	public String getAbsoluteDomainUri() {
 		String u = buildUri(root().findFirstMatch(Type.DomainAlias));
 		return u;
+	}
+	
+	/**
+	 * Returns the tenant URI of this command.
+	 * 
+	 * <p> <b>Examples:</b> <p>When
+	 * {@code absoluteUri = "/Acme/ab/cd/domain/ef/gh/_process?fn=_set"} then
+	 * {@link #getTenantUri()} returns {@code "/Acme/ab/cd"}.
+	 * @return the absolute domain URI of this command.
+	 */
+	public String getTenantUri() {
+		return buildUri(Type.AppAlias);
 	}
 
 	
@@ -437,13 +451,5 @@ public class Command implements Serializable {
 	
 	public boolean containsFunction() {
 		return requestParams != null && requestParams.containsKey(Constants.KEY_FUNCTION.code);
-	}
-	
-	public Tenant extractTenantDetails() {
-		Tenant tenant = new Tenant();
-		tenant.setClientId(getAlias(Type.ClientAlias));
-		tenant.setOrgId(getAlias(Type.ClientOrgAlias));
-		tenant.setAppCode(getAlias(Type.AppAlias));
-		return tenant;
 	}
 }

@@ -159,8 +159,8 @@ public class DefaultCoreConfiguration {
 	
 	//web
 	@Bean
-	public WebCommandBuilder webCommandBuilder(){
-		return new WebCommandBuilder();
+	public WebCommandBuilder webCommandBuilder(BeanResolverStrategy beanResolver){
+		return new WebCommandBuilder(beanResolver);
 	}
 	
 	@Bean

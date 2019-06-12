@@ -23,12 +23,12 @@ import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
  * @since 2.0
  *
  */
-public interface MultitenancyRepositorySupport {
+public interface ModelRepositoryMultitenancySupport {
 
-	<T> MultitenancyInstantiator<T> getMultitenancyInstantiator();
-	
 	@FunctionalInterface
 	public static interface MultitenancyInstantiator<T> {
 		void execute(Command cmd, ModelConfig<T> mConfig, T obj);
 	}
+
+	<T> MultitenancyInstantiator<T> getMultitenancyInstantiator();
 }
