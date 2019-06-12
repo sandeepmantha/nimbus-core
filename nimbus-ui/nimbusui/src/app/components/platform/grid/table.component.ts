@@ -93,7 +93,9 @@ export class DataTable extends BaseTableElement implements ControlValueAccessor 
     rowStart = 0;
     rowEnd = 0;
     rowExpanderKey = '';
-    defaultPattern: RegExp = /^[ A-Za-z0-9_@./#&+-,()!%_{};:?.<>-]*$/;
+    //defaultPattern: RegExp = /^[ A-Za-z0-9_@./#&+-,()!%_{};:?.<>-]*$/;
+    defaultPattern: RegExp= /^[^|~`'"]+$/; //only those characters that dont fall in this group are allowed in filters
+    
     numPattern: RegExp = /[\d\-\.]/;
     id: String = 'grid-control' + counter++;
     gridRowConfig: any[];
