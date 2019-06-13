@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import com.antheminc.oss.nimbus.InvalidConfigException;
+import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Behavior;
@@ -137,7 +137,7 @@ public class WebCommandDispatcherTest {
 		assertEquals(expected, command.getTenant());
 	}
 	
-	@Test(expected = InvalidConfigException.class)
+	@Test(expected = FrameworkRuntimeException.class)
 	public void testSetTenantUnknownTenant() {
 		TenantRepository tenantRepository = Mockito.mock(TenantRepository.class);
 		Mockito.when(this.beanResolver.find(TenantRepository.class)).thenReturn(tenantRepository);
