@@ -27,15 +27,12 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Behavior;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 
 
 /**
@@ -210,33 +207,5 @@ public class WebCommandBuilderTest {
 		assertEquals("app", cmd.getAppAlias());
 		assertEquals("/flow_client-user", cmd.getAbsoluteDomainAlias());
 		assertTrue(cmd.isRootDomainOnly());
-	}
-	
-	@Test
-	public void testSetTenant() {
-		TenantRepository tenantRepository = Mockito.mock(TenantRepository.class);
-		Mockito.when(this.beanResolver.find(TenantRepository.class)).thenReturn(tenantRepository);
-		WebCommandBuilder cmdBuilder = new WebCommandBuilder(this.beanResolver);
-		
-		// build the command from the URI
-		MockHttpServletRequest httpReq = new MockHttpServletRequest(HttpMethod.GET.name(), "/client/org/app/p/domain/_get");
-		Tenant expected = new Tenant();
-		Mockito.when(tenantRepository.findOneMatchingPattern("/client/org/app")).thenReturn(expected);
-		Command cmd = cmdBuilder.build(httpReq, null);
-		
-		// validate tenant is set into command
-		assertEquals(expected, cmd.getTenant());
-	}
-	
-	@Test(expected = InvalidConfigException.class)
-	public void testSetTenantUnknownTenant() {
-		TenantRepository tenantRepository = Mockito.mock(TenantRepository.class);
-		Mockito.when(this.beanResolver.find(TenantRepository.class)).thenReturn(tenantRepository);
-		WebCommandBuilder cmdBuilder = new WebCommandBuilder(this.beanResolver);
-		
-		// build the command from the URI
-		MockHttpServletRequest httpReq = new MockHttpServletRequest(HttpMethod.GET.name(), "/client/org/app/p/domain/_get");
-		Mockito.when(tenantRepository.findOneMatchingPattern("/unknown/org/app")).thenReturn(null);
-		cmdBuilder.build(httpReq, null);
 	}
 }

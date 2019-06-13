@@ -15,15 +15,15 @@
  */
 package com.antheminc.oss.nimbus.channel.web;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Behavior;
@@ -33,29 +33,32 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContext;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 
 /**
  * 
  * @author Tony Lopez
  *
  */
-@RunWith(MockitoJUnitRunner.class)
 public class WebCommandDispatcherTest {
 	
 	private WebCommandDispatcher testee;
+
+	private BeanResolverStrategy beanResolver;
 	
-	@Mock
 	private WebCommandBuilder builder;
 
-	@Mock
 	private CommandExecutorGateway gateway;
 	
 	@Before
 	public void init() {
-		final BeanResolverStrategy beanResolver = Mockito.mock(BeanResolverStrategy.class);
+		this.beanResolver = Mockito.mock(BeanResolverStrategy.class);
+		this.gateway = Mockito.mock(CommandExecutorGateway.class);
+		this.builder = Mockito.mock(WebCommandBuilder.class);
 		Mockito.when(beanResolver.get(WebCommandBuilder.class)).thenReturn(this.builder);
 		Mockito.when(beanResolver.get(CommandExecutorGateway.class)).thenReturn(this.gateway);
-		this.testee = new WebCommandDispatcher(beanResolver);
+		this.testee = new WebCommandDispatcher(this.beanResolver);
 		Mockito.verify(beanResolver, Mockito.times(1)).get(WebCommandBuilder.class);
 		Mockito.verify(beanResolver, Mockito.times(1)).get(CommandExecutorGateway.class);
 	}
@@ -115,5 +118,35 @@ public class WebCommandDispatcherTest {
 		Mockito.verify(this.gateway, Mockito.times(1)).execute(command, payload);
 		
 		Assert.assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testSetTenant() {
+		TenantRepository tenantRepository = Mockito.mock(TenantRepository.class);
+		Mockito.when(this.beanResolver.find(TenantRepository.class)).thenReturn(tenantRepository);
+		testee = new WebCommandDispatcher(this.beanResolver);
+		
+		// build the command from the URI
+		final Command command = CommandBuilder.withUri("/client/org/app/p/domain/_get").getCommand();
+		
+		Tenant expected = new Tenant();
+		Mockito.when(tenantRepository.findOneMatchingPattern("/client/org/app")).thenReturn(expected);
+		testee.handle(command, null);
+		
+		// validate tenant is set into command
+		assertEquals(expected, command.getTenant());
+	}
+	
+	@Test(expected = InvalidConfigException.class)
+	public void testSetTenantUnknownTenant() {
+		TenantRepository tenantRepository = Mockito.mock(TenantRepository.class);
+		Mockito.when(this.beanResolver.find(TenantRepository.class)).thenReturn(tenantRepository);
+		testee = new WebCommandDispatcher(this.beanResolver);
+		
+		// build the command from the URI
+		final Command command = CommandBuilder.withUri("/unknown/org/app/p/domain/_get").getCommand();
+		
+		Mockito.when(tenantRepository.findOneMatchingPattern("/unknown/org/app")).thenReturn(null);
+		testee.handle(command, null);
 	}
 }

@@ -15,9 +15,12 @@
  */
 package com.antheminc.oss.nimbus.channel;
 
+import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 
 import lombok.Getter;
@@ -30,12 +33,29 @@ import lombok.Getter;
 public abstract class CommandDispatcher {
 
 	protected final CommandExecutorGateway gateway;
+	protected final TenantRepository tenantRepository;
 	
 	public CommandDispatcher(BeanResolverStrategy beanResolver) {
 		this.gateway = beanResolver.get(CommandExecutorGateway.class);
+		this.tenantRepository = beanResolver.find(TenantRepository.class);
 	}
 	
 	public MultiOutput handle(Command cmd, String payload) {
+		beforeCommandExecution(cmd);
 		return getGateway().execute(cmd, payload);
+	}
+	
+	protected void beforeCommandExecution(Command cmd) {
+		handleTenancy(cmd);
+	}
+	
+	protected void handleTenancy(Command cmd) {
+		if (null != this.tenantRepository) {
+			Tenant tenant = this.tenantRepository.findOneMatchingPattern(cmd.getTenantUri());
+			if (null == tenant) {
+				throw new InvalidConfigException("Unable to determine tenant from Command URI: \"" + cmd.getAbsoluteUri() + "\".  Does a tenant identified by \"" + cmd.getTenantUri() + "\" exist?");
+			}
+			cmd.setTenant(tenant);
+		}
 	}
 }
