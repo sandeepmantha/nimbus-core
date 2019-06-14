@@ -15,12 +15,11 @@
  */
 package com.antheminc.oss.nimbus.channel;
 
-import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
+import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 
 import lombok.Getter;
@@ -50,12 +49,6 @@ public abstract class CommandDispatcher {
 	}
 	
 	protected void handleTenancy(Command cmd) {
-		if (null != this.tenantRepository) {
-			Tenant tenant = this.tenantRepository.findOneMatchingPattern(cmd.getTenantUri());
-			if (null == tenant) {
-				throw new FrameworkRuntimeException("Unable to determine tenant from Command URI: \"" + cmd.getAbsoluteUri() + "\".  Does a tenant identified by \"" + cmd.getTenantUri() + "\" exist?");
-			}
-			cmd.setTenant(tenant);
-		}
+		new CommandBuilder(cmd).setTenant(this.tenantRepository);
 	}
 }
