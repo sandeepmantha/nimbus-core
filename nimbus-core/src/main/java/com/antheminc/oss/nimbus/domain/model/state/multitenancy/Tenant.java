@@ -38,6 +38,10 @@ public class Tenant implements Serializable {
 	private Long id;
 	
 	private String clientId;
+	
+	private String description;
 
-	private String pattern;
+//	private String pattern;
+	
+	private String prefix;
 }

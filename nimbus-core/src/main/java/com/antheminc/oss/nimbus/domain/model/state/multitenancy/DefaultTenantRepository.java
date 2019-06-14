@@ -16,8 +16,10 @@
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -50,12 +52,12 @@ public class DefaultTenantRepository implements TenantRepository {
 	}
 
 	@Override
-	public List<Tenant> findByClientId(String clientId) {
+	public Set<Tenant> findByClientId(String clientId) {
 		if (null == clientId) {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 
-		List<Tenant> tenants = new ArrayList<>();
+		Set<Tenant> tenants = new HashSet<>();
 		for (Entry<Long, TenantDetail> entry: this.multitenancyProperties.getTenants().entrySet()) {
 			if (clientId.equals(entry.getValue().getClientId())) {
 				tenants.add(this.toTenant(entry.getKey(), entry.getValue()));
@@ -71,12 +73,23 @@ public class DefaultTenantRepository implements TenantRepository {
 		}
 		return this.toTenant(id, this.multitenancyProperties.getTenants().get(id));
 	}
+	
+	@Override
+	public Set<Tenant> findByIds(Set<Long> ids) {
+		if (CollectionUtils.isEmpty(ids) || MapUtils.isEmpty(this.multitenancyProperties.getTenants())) {
+			return null;
+		}
+		Set<Tenant> tenants = new HashSet<>();
+		ids.stream().map(id -> findById(id)).forEach(tenants::add);
+		return tenants;
+	}
 
 	@Override
 	public Tenant findOneMatchingPattern(String value) {
 		List<Tenant> tenants = new ArrayList<>();
 		for (Entry<Long, TenantDetail> entry: this.multitenancyProperties.getTenants().entrySet()) {
-			if (this.pathMatcher.match(entry.getValue().getPattern(), value)) {
+//			if (this.pathMatcher.match(entry.getValue().getPattern(), value)) {
+			if (entry.getValue().getPrefix().equals(value)) {
 				tenants.add(this.toTenant(entry.getKey(), entry.getValue()));
 			}
 		}
