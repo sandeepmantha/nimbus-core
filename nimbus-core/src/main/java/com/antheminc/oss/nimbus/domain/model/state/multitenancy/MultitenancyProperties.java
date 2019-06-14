@@ -40,7 +40,9 @@ public class MultitenancyProperties {
 	@Setter
 	public static class TenantDetail {
 		private String clientId;
-		private String pattern;
+		private String description;
+//		private String pattern;
+		private String prefix;
 	}
 	private boolean enabled;
 
