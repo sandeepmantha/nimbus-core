@@ -56,7 +56,7 @@ public class ClientUser extends AbstractUser<ClientUserRole> {
 	private Set<Long> tenantIds;
 	private List<UserRole> roles;
 	private List<UserStatus> userStatuses;
-	private Tenant tenant;
+	private Long activeTenantId;
 	@ReadOnlyProperty
 	private List<ClientAccessEntity> resolvedAccessEntities;
 	private String roleName; // Temp for header

@@ -49,8 +49,11 @@ public class TenantFilter extends OncePerRequestFilter {
 	
 	private final SessionProvider sessionProvider;
 	
+	private final TenantRepository tenantRepository;
+	
 	public TenantFilter(BeanResolverStrategy beanResolver) {
 		this.sessionProvider = beanResolver.get(SessionProvider.class);
+		this.tenantRepository = beanResolver.get(TenantRepository.class);
 	}
 	
 	@Override
@@ -67,9 +70,12 @@ public class TenantFilter extends OncePerRequestFilter {
 		    if(user == null) {
 	        	throw new FrameworkRuntimeException("User is not authorized. Please contact a system administrator.");
 		    }
-		    if(StringUtils.isBlank(cookieValue) || (user != null && user.getTenant() != null && !StringUtils.equals(cookieValue, user.getTenant().getPrefix()))) {
-		    	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-	        	throw new FrameworkRuntimeException("Request is missing tenant information and is not allowed to access the system. Please contact a system administrator.");
+		    if(user.get_tenantId() != null) {
+	    		Tenant tenant = this.tenantRepository.findById(user.get_tenantId());
+			    if(StringUtils.isBlank(cookieValue) || (tenant != null && !StringUtils.equals(cookieValue, tenant.getPrefix()))) {
+			    	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		        	throw new FrameworkRuntimeException("Request is missing tenant information and is not allowed to access the system. Please contact a system administrator.");
+			    }
 		    }
 		}
 	    filterChain.doFilter(request, response);		
