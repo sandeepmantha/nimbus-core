@@ -45,9 +45,6 @@ import com.antheminc.oss.nimbus.entity.client.user.ClientUser;
 public class TenantFilter extends OncePerRequestFilter {
 
 	public static final String URI_PATTERN_P = "/**/p/**";
-	
-	@Value("${nimbus.multitenancy.urls}")
-	private String[] urlPatternsToSkipFilter ;
 
 	@Value("${nimbus.multitenancy.enabled}")
 	private boolean multiTenancyEnabled ;
