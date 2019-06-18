@@ -28,10 +28,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.channel.web.WebCommandBuilder;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.defn.Constants;
 import com.antheminc.oss.nimbus.domain.session.SessionProvider;
 import com.antheminc.oss.nimbus.entity.client.user.ClientUser;
@@ -41,6 +44,8 @@ import com.antheminc.oss.nimbus.entity.client.user.ClientUser;
  */
 public class TenantFilter extends OncePerRequestFilter {
 
+	public static final String URI_PATTERN_P = "/**/p/**";
+	
 	@Value("${nimbus.multitenancy.urls}")
 	private String[] urlPatternsToSkipFilter ;
 
@@ -49,11 +54,17 @@ public class TenantFilter extends OncePerRequestFilter {
 	
 	private final SessionProvider sessionProvider;
 	
-	private final TenantRepository tenantRepository;
+	private TenantRepository tenantRepository;
+	
+	private WebCommandBuilder builder;
+	
+	private final AntPathMatcher pathMatcher;
 	
 	public TenantFilter(BeanResolverStrategy beanResolver) {
 		this.sessionProvider = beanResolver.get(SessionProvider.class);
 		this.tenantRepository = beanResolver.get(TenantRepository.class);
+		this.builder = beanResolver.get(WebCommandBuilder.class);
+		this.pathMatcher = new AntPathMatcher();
 	}
 	
 	@Override
@@ -61,11 +72,10 @@ public class TenantFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		if(multiTenancyEnabled) {
 			ClientUser user = (ClientUser) sessionProvider.getLoggedInUser();
-		    if(user == null || user.get_tenantId() == null) {
+		    if(user == null) {
 	        	throw new FrameworkRuntimeException("Tenant/user information is missing. Please contact a system administrator.");
-		    }
-    		Tenant tenant = this.tenantRepository.findById(user.get_tenantId());
-		    if(isAuthorized(tenant, request)) {
+		    }			
+		    if(!isAuthorized(user, request)) {
 		    	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 	        	throw new FrameworkRuntimeException("Request is not authorized as the tenant information is not valid. Please contact a system administrator.");
 		    }
@@ -73,14 +83,26 @@ public class TenantFilter extends OncePerRequestFilter {
 	    filterChain.doFilter(request, response);		
 	}
 	
-	protected boolean isAuthorized(Tenant tenant, HttpServletRequest request) {
-		 Cookie[] cookies = request.getCookies();
-		    Stream<Cookie> stream = Objects.nonNull(cookies) ? Arrays.stream(cookies) : Stream.empty();
-		    String cookieValue = stream.filter(cookie -> Constants.ACTIVE_TENANT_COOKIE.code.equals(cookie.getName()))
-		        .findFirst()
-		        .orElse(new Cookie(Constants.ACTIVE_TENANT_COOKIE.code, null))
-		        .getValue();
-		if(StringUtils.isBlank(cookieValue) || (tenant != null && !StringUtils.equals(cookieValue, tenant.getPrefix()))) {
+	protected boolean isAuthorized(ClientUser user, HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+	    Stream<Cookie> stream = Objects.nonNull(cookies) ? Arrays.stream(cookies) : Stream.empty();
+	    String cookieValue = stream.filter(cookie -> Constants.ACTIVE_TENANT_COOKIE.code.equals(cookie.getName()))
+	        .findFirst()
+	        .orElse(new Cookie(Constants.ACTIVE_TENANT_COOKIE.code, null))
+	        .getValue();
+	    //check user has access to the tenant passed in the cookie
+	    if(StringUtils.isBlank(cookieValue)) {
+	    	return false;
+	    }
+	    Tenant tenant = this.tenantRepository.findOneMatchingPattern(cookieValue);
+	    if(tenant == null) {
+	    	return false;
+	    }
+	    Command cmd = this.builder.build(request);
+	    String tenantPrefixInSession = this.sessionProvider.getAttribute(Constants.ACTIVE_TENANT_COOKIE.code);
+		Long match = user.getTenantIds().stream().filter(tenant.getId()::equals).findAny().orElse(null);
+		
+		if(match == null || (!StringUtils.equals(cookieValue, tenantPrefixInSession)) || !StringUtils.equals(cmd.getTenantUri(), tenantPrefixInSession)) {
 			return false;
 		}
 		return true;
@@ -89,7 +111,7 @@ public class TenantFilter extends OncePerRequestFilter {
 	@Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return Arrays.stream(urlPatternsToSkipFilter).anyMatch(entry -> path.endsWith(entry));
+        return !this.pathMatcher.match(URI_PATTERN_P,request.getRequestURI());
 	}
 
 }
