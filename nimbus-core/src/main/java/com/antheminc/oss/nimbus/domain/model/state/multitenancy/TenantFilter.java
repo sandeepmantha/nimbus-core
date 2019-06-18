@@ -60,25 +60,30 @@ public class TenantFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		if(multiTenancyEnabled) {
-		    Cookie[] cookies = request.getCookies();
+			ClientUser user = (ClientUser) sessionProvider.getLoggedInUser();
+		    if(user == null || user.get_tenantId() == null) {
+	        	throw new FrameworkRuntimeException("Tenant/user information is missing. Please contact a system administrator.");
+		    }
+    		Tenant tenant = this.tenantRepository.findById(user.get_tenantId());
+		    if(isAuthorized(tenant, request)) {
+		    	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+	        	throw new FrameworkRuntimeException("Request is not authorized as the tenant information is not valid. Please contact a system administrator.");
+		    }
+		}
+	    filterChain.doFilter(request, response);		
+	}
+	
+	protected boolean isAuthorized(Tenant tenant, HttpServletRequest request) {
+		 Cookie[] cookies = request.getCookies();
 		    Stream<Cookie> stream = Objects.nonNull(cookies) ? Arrays.stream(cookies) : Stream.empty();
 		    String cookieValue = stream.filter(cookie -> Constants.ACTIVE_TENANT_COOKIE.code.equals(cookie.getName()))
 		        .findFirst()
 		        .orElse(new Cookie(Constants.ACTIVE_TENANT_COOKIE.code, null))
 		        .getValue();
-			ClientUser user = (ClientUser) sessionProvider.getLoggedInUser();
-		    if(user == null) {
-	        	throw new FrameworkRuntimeException("User is not authorized. Please contact a system administrator.");
-		    }
-		    if(user.get_tenantId() != null) {
-	    		Tenant tenant = this.tenantRepository.findById(user.get_tenantId());
-			    if(StringUtils.isBlank(cookieValue) || (tenant != null && !StringUtils.equals(cookieValue, tenant.getPrefix()))) {
-			    	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-		        	throw new FrameworkRuntimeException("Request is missing tenant information and is not allowed to access the system. Please contact a system administrator.");
-			    }
-		    }
+		if(StringUtils.isBlank(cookieValue) || (tenant != null && !StringUtils.equals(cookieValue, tenant.getPrefix()))) {
+			return false;
 		}
-	    filterChain.doFilter(request, response);		
+		return true;
 	}
 	
 	@Override
