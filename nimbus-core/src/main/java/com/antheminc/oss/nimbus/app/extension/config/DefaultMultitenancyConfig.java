@@ -18,8 +18,10 @@ package com.antheminc.oss.nimbus.app.extension.config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
+import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.DefaultTenantRepository;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyProperties;
+import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantFilter;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 
 /**
@@ -38,4 +40,10 @@ public class DefaultMultitenancyConfig {
 	public TenantRepository tenantRepository(MultitenancyProperties multitenancyProperties) {
 		return new DefaultTenantRepository(multitenancyProperties);
 	}
+	
+	@Bean
+	public TenantFilter tenantFilter(BeanResolverStrategy beanResolver) {
+		return new TenantFilter(beanResolver);
+	}
+	
 }
