@@ -17,10 +17,8 @@ package com.antheminc.oss.nimbus.channel;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Command;
-import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 
 import lombok.Getter;
 
@@ -32,23 +30,12 @@ import lombok.Getter;
 public abstract class CommandDispatcher {
 
 	protected final CommandExecutorGateway gateway;
-	protected final TenantRepository tenantRepository;
 	
 	public CommandDispatcher(BeanResolverStrategy beanResolver) {
 		this.gateway = beanResolver.get(CommandExecutorGateway.class);
-		this.tenantRepository = beanResolver.get(TenantRepository.class);
 	}
 	
 	public MultiOutput handle(Command cmd, String payload) {
-		beforeCommandExecution(cmd);
 		return getGateway().execute(cmd, payload);
-	}
-	
-	protected void beforeCommandExecution(Command cmd) {
-		handleTenancy(cmd);
-	}
-	
-	protected void handleTenancy(Command cmd) {
-		new CommandBuilder(cmd).setTenant(this.tenantRepository);
 	}
 }

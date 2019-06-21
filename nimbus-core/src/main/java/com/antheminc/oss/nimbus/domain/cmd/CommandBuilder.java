@@ -27,13 +27,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidArgumentException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.defn.Constants;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 import com.antheminc.oss.nimbus.support.JustLogit;
 
 import lombok.RequiredArgsConstructor;
@@ -96,7 +93,6 @@ public class CommandBuilder {
 		
 		String newAbsoluteUri = tmpCmd.buildUri(Type.DomainAlias);
 		CommandBuilder cb = withUri(newAbsoluteUri);
-		cb.cmd.setTenant(src.getTenant());
 		return cb;
 	}
 	
@@ -180,7 +176,7 @@ public class CommandBuilder {
 			startingIndex = 1;
 		}
 		
-		Type type = Type.ClientOrgAlias;
+		Type type = Type.TENANT_ID;
 		
 		for(int i=startingIndex; i<uriSplit.length; i++) {
 			String val = uriSplit[i];
@@ -267,16 +263,5 @@ public class CommandBuilder {
 	public CommandBuilder setBehaviors(List<Behavior> behaviors) {
 		cmd.setBehaviors(behaviors);
 		return withCommand(cmd);
-	}
-	
-	public CommandBuilder setTenant(TenantRepository tenantRepository) {
-		if (null != tenantRepository) {
-			Tenant tenant = tenantRepository.findOneMatchingPattern(cmd.getTenantUri());
-			if (null == tenant) {
-				throw new FrameworkRuntimeException("Unable to determine tenant from Command URI: \"" + cmd.getAbsoluteUri() + "\".  Does a tenant identified by \"" + cmd.getTenantUri() + "\" exist?");
-			}
-			cmd.setTenant(tenant);
-		}
-		return this;
 	}
 }

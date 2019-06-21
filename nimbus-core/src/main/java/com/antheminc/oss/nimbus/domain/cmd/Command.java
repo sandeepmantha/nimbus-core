@@ -32,7 +32,6 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.defn.Constants;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.Tenant;
 import com.antheminc.oss.nimbus.support.pojo.CollectionsTemplate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -45,7 +44,7 @@ import lombok.ToString;
  * @author Soham Chakravarti
  *
  */
-@Data @ToString(of={"absoluteUri", "tenant", "action", "behaviors", "clientUserId"}) 
+@Data @ToString(of={"absoluteUri", "action", "behaviors", "clientUserId"}) 
 public class Command implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -65,8 +64,6 @@ public class Command implements Serializable {
 	private List<Behavior> behaviors;
 	
 	private Map<String, String[]> requestParams;
-	
-	private Tenant tenant;
 	
 	@JsonIgnore
 	private final Instant createdInstant = Instant.now();
@@ -106,6 +103,7 @@ public class Command implements Serializable {
 			throw new InvalidConfigException(String.format(MISSING_COMMAND_ARGUMENTS_MSG, getAbsoluteUri(), "Behavior"));
 		
 		validateCommandArgument(Type.ClientAlias);
+		validateCommandArgument(Type.TENANT_ID);
 		validateCommandArgument(Type.AppAlias);
 		validateCommandArgument(Type.PlatformMarker);
 		validateCommandArgument(Type.DomainAlias);
@@ -124,7 +122,7 @@ public class Command implements Serializable {
 	}
 	
 	private String getMissingArgumentErrorMsg(Type type) {
-		return String.format(MISSING_COMMAND_ARGUMENTS_MSG, getAbsoluteUri(), type);
+		return String.format(MISSING_COMMAND_ARGUMENTS_MSG, getAbsoluteUri(), type.getDesc());
 	}
 	
 	public boolean isRootDomainOnly() {
@@ -204,6 +202,10 @@ public class Command implements Serializable {
 		return getAlias(Type.AppAlias);
 	}
 	
+	public String getTenantId() {
+		return getAlias(Type.TENANT_ID);
+	}
+	
 	public String getRootClientAlias() {
 		return getAlias(Type.ClientAlias);
 	}
@@ -251,14 +253,14 @@ public class Command implements Serializable {
 	}
 	
 	/**
-	 * Returns the tenant URI of this command.
+	 * Returns the prefix of this command.
 	 * 
 	 * <p> <b>Examples:</b> <p>When
 	 * {@code absoluteUri = "/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set"} then
-	 * {@link #getTenantUri()} returns {@code "/Acme/ab/cd"}.
+	 * {@link #getPrefix()} returns {@code "/Acme/ab/cd"}.
 	 * @return the absolute domain URI of this command.
 	 */
-	public String getTenantUri() {
+	public String getPrefix() {
 		return buildUri(Type.AppAlias);
 	}
 

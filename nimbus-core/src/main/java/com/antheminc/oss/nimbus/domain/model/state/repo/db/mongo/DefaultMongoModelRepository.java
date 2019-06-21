@@ -37,7 +37,6 @@ import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.ValueAccessor;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyProperties;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.ModelRepositoryMultitenancySupport;
 import com.antheminc.oss.nimbus.domain.model.state.repo.IdSequenceRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
@@ -77,15 +76,19 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 	 */
 	@Override
 	public <T> MultitenancyInstantiator<T> getMultitenancyInstantiator() {
-		return new MultitenancyInstantiator<T>() {
-			@Override
-			public void execute(Command cmd, ModelConfig<T> mConfig, T newState) {				
-				if (null == cmd.getTenant()) {
-					throw new FrameworkRuntimeException("Tenant must not be null for command: " + cmd);
-				}
-				ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), Constants.FIELD_NAME_TENANT_ID.code);
-				beanHandler.setValue(va, newState, cmd.getTenant().getId());
+		return (Command cmd, ModelConfig<T> mConfig, T newState) -> {				
+			String sTenantId = cmd.getTenantId();
+			if (null == sTenantId) {
+				throw new FrameworkRuntimeException("Tenant must not be null for command: " + cmd);
 			}
+			Long tenantId;
+			try {
+				tenantId = Long.valueOf(sTenantId);
+			} catch (NumberFormatException e) {
+				throw new FrameworkRuntimeException("Tenant id must be of type Long, but was \"" + sTenantId + "\".");
+			}
+			ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), Constants.FIELD_NAME_TENANT_ID.code);
+			beanHandler.setValue(va, newState, tenantId);
 		};
 	}
 	

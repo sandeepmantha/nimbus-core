@@ -62,15 +62,8 @@ public class DomainEntityMultitenancyTest extends AbstractFrameworkIntegrationTe
 	}
 	
 	@Test(expected = FrameworkRuntimeException.class)
-	public void testUnknownTenant() {
-		Command cmd = CommandUtils.prepareCommand("/unknown/1/app/p/sample_core/_new");
-		String payload = "{\"attr_String\": \"foo\"}";
-		this.webCommandDispatcher.handle(cmd, payload);
-	}
-	
-	@Test(expected = FrameworkRuntimeException.class)
 	public void testMongoRecordLevelTenancyNoTenantSet() {
-		Command cmd = CommandUtils.prepareCommand("/foo/2/app/p/sample_core/_new");
+		Command cmd = CommandUtils.prepareCommand("/foo/app/p/sample_core/_new");
 		String payload = "{\"attr_String\": \"foo\"}";
 		this.commandGateway.execute(cmd, payload);
 	}

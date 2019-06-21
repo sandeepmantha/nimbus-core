@@ -82,7 +82,7 @@ public class QuadModelCollectionsTest {
 		Command c = new Command("/hooli/comm/thebox/p/view_simplecase/_new");
 
 		c.createRoot(Type.ClientAlias, "hooli")
-			.createNext(Type.ClientOrgAlias, "compression")
+			.createNext(Type.TENANT_ID, "compression")
 			.createNext(Type.AppAlias, "icr")
 			.createNext(Type.PlatformMarker, "p")
 			.createNext(Type.DomainAlias, "view_simplecase")
