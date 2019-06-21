@@ -15,6 +15,8 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
+import java.util.Set;
+
 /**
  * <p>A repository for providing tenant objects.
  * 
@@ -25,11 +27,25 @@ package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 public interface TenantRepository {
 
 	/**
-	 * <p>Find a {@link Tenant} object where the provided {@code value} matches
-	 * the tenant object's pattern.
-	 * @param value the value to match against all known {@link Tenant} object's
-	 *            pattern.
+	 * <p>Find a {@link Tenant} by it's unique id.
+	 * @param id the of the {@link Tenant} to find
 	 * @return the {@link Tenant} object
 	 */
-	Tenant findOneMatchingPattern(String value);
+	Tenant findById(Long id);
+	
+	/**
+	 * <p>Find a list of {@link Tenant} by all unique ids.
+	 * @param ids the set of id's for {@link Tenant} objects to find
+	 * @return the {@link Tenant} object
+	 */
+	Set<Tenant> findByIds(Set<Long> ids);
+	
+	/**
+	 * <p>Find a {@link Tenant} object where the provided {@code value} matches
+	 * the tenant object's prefix.
+	 * @param value the value to match against all known {@link Tenant} object's
+	 *            prefix.
+	 * @return the {@link Tenant} object
+	 */
+	Tenant findOneMatchingPrefix(String value);
 }

@@ -16,10 +16,12 @@
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -54,7 +56,25 @@ public class DefaultTenantRepository implements TenantRepository {
 	}
 
 	@Override
-	public Tenant findOneMatchingPattern(String value) {
+	public Tenant findById(Long id) {
+		if (null == id || MapUtils.isEmpty(this.multitenancyProperties.getTenants())) {
+			return null;
+		}
+		return this.toTenant(id, this.multitenancyProperties.getTenants().get(id));
+	}
+	
+	@Override
+	public Set<Tenant> findByIds(Set<Long> ids) {
+		if (CollectionUtils.isEmpty(ids) || MapUtils.isEmpty(this.multitenancyProperties.getTenants())) {
+			return new HashSet<>();
+		}
+		Set<Tenant> tenants = new HashSet<>();
+		ids.stream().map(this::findById).forEach(tenants::add);
+		return tenants;
+	}
+	
+	@Override
+	public Tenant findOneMatchingPrefix(String value) {
 		List<Tenant> matchingTenants = new ArrayList<>();
 		for (Entry<Long, TenantDetail> entry : this.getTenantMap().entrySet()) {
 			final String pathToMatch = entry.getValue().getPrefix();

@@ -77,15 +77,9 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 	@Override
 	public <T> MultitenancyInstantiator<T> getMultitenancyInstantiator() {
 		return (Command cmd, ModelConfig<T> mConfig, T newState) -> {				
-			String sTenantId = cmd.getTenantId();
-			if (null == sTenantId) {
+			Long tenantId = cmd.getTenantId();
+			if (null == tenantId) {
 				throw new FrameworkRuntimeException("Tenant must not be null for command: " + cmd);
-			}
-			Long tenantId;
-			try {
-				tenantId = Long.valueOf(sTenantId);
-			} catch (NumberFormatException e) {
-				throw new FrameworkRuntimeException("Tenant id must be of type Long, but was \"" + sTenantId + "\".");
 			}
 			ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), Constants.FIELD_NAME_TENANT_ID.code);
 			beanHandler.setValue(va, newState, tenantId);

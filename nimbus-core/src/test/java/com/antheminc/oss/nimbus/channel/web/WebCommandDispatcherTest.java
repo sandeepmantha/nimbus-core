@@ -126,7 +126,7 @@ public class WebCommandDispatcherTest {
 		// build the command from the URI
 		final Command command = CommandBuilder.withUri("/unknown/org/app/p/domain/_get").getCommand();
 		
-		Mockito.when(tenantRepository.findOneMatchingPattern("/unknown/org/app")).thenReturn(null);
+		Mockito.when(tenantRepository.findOneMatchingPrefix("/unknown/org/app")).thenReturn(null);
 		testee.handle(command, null);
 	}
 }

@@ -202,8 +202,12 @@ public class Command implements Serializable {
 		return getAlias(Type.AppAlias);
 	}
 	
-	public String getTenantId() {
-		return getAlias(Type.TENANT_ID);
+	public Long getTenantId() {
+		try {
+			return Long.valueOf(getAlias(Type.TENANT_ID));
+		} catch (NumberFormatException e) {
+			throw new FrameworkRuntimeException("Tenant ID must be of type Long.");
+		}
 	}
 	
 	public String getRootClientAlias() {
