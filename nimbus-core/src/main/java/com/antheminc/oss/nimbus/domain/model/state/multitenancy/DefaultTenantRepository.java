@@ -18,9 +18,7 @@ package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -76,7 +74,7 @@ public class DefaultTenantRepository implements TenantRepository {
 	@Override
 	public Tenant findOneMatchingPrefix(String value) {
 		List<Tenant> matchingTenants = new ArrayList<>();
-		for (Entry<Long, TenantDetail> entry : this.getTenantMap().entrySet()) {
+		for (Entry<Long, TenantDetail> entry : this.multitenancyProperties.getTenants().entrySet()) {
 			final String pathToMatch = entry.getValue().getPrefix();
 			if (StringUtils.isEmpty(pathToMatch)) {
 				throw new InvalidConfigException(
@@ -93,12 +91,6 @@ public class DefaultTenantRepository implements TenantRepository {
 
 		// TODO find best match
 		return matchingTenants.get(0);
-	}
-
-	private Map<Long, TenantDetail> getTenantMap() {
-		return Optional.ofNullable(this.multitenancyProperties.getTenants())
-				.orElseThrow(() -> new InvalidConfigException(
-						"Unable to determine tenant information. Is \"${nimbus.multitenancy.tenants}\" set?"));
 	}
 
 	private Tenant toTenant(Long id, TenantDetail tenantDetail) {

@@ -15,8 +15,12 @@
  */
 package com.antheminc.oss.nimbus.app.extension.config;
 
+import java.util.Optional;
+
+import org.apache.commons.collections.MapUtils;
 import org.springframework.context.annotation.Bean;
 
+import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.DefaultTenantRepository;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyProperties;
@@ -36,6 +40,9 @@ public class DefaultMultitenancyConfig {
 	
 	@Bean
 	public TenantRepository tenantRepository(MultitenancyProperties multitenancyProperties) {
+		Optional.ofNullable(multitenancyProperties.getTenants())
+		.orElseThrow(() -> new InvalidConfigException(
+				"Unable to determine tenant information. Is \"${nimbus.multitenancy.tenants}\" set?"));
 		return new DefaultTenantRepository(multitenancyProperties);
 	}
 	
