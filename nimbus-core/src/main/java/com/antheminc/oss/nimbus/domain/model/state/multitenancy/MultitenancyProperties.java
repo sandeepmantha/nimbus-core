@@ -39,10 +39,9 @@ public class MultitenancyProperties {
 	@Getter
 	@Setter
 	public static class TenantDetail {
-		private String clientId;
-		private String pattern;
+		private String description;
+		private String prefix;
 	}
-	private boolean enabled;
 
 	private Map<Long, TenantDetail> tenants;
 }

@@ -15,7 +15,6 @@
  */
 package com.antheminc.oss.nimbus.app.extension.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.DefaultTenantRepository;
@@ -34,7 +33,6 @@ public class DefaultMultitenancyConfig {
 	}
 	
 	@Bean
-	@ConditionalOnProperty(name = "nimbus.multitenancy.enabled", havingValue = "true")
 	public TenantRepository tenantRepository(MultitenancyProperties multitenancyProperties) {
 		return new DefaultTenantRepository(multitenancyProperties);
 	}

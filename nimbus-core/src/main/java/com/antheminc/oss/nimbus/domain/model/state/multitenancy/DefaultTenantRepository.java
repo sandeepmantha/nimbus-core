@@ -17,13 +17,17 @@ package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.AntPathMatcher;
 
+import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.model.state.multitenancy.MultitenancyProperties.TenantDetail;
 
 import lombok.Getter;
@@ -50,43 +54,31 @@ public class DefaultTenantRepository implements TenantRepository {
 	}
 
 	@Override
-	public List<Tenant> findByClientId(String clientId) {
-		if (null == clientId) {
-			return new ArrayList<>();
-		}
-
-		List<Tenant> tenants = new ArrayList<>();
-		for (Entry<Long, TenantDetail> entry: this.multitenancyProperties.getTenants().entrySet()) {
-			if (clientId.equals(entry.getValue().getClientId())) {
-				tenants.add(this.toTenant(entry.getKey(), entry.getValue()));
-			}
-		}
-		return tenants;
-	}
-
-	@Override
-	public Tenant findById(Long id) {
-		if (null == id || MapUtils.isEmpty(this.multitenancyProperties.getTenants())) {
-			return null;
-		}
-		return this.toTenant(id, this.multitenancyProperties.getTenants().get(id));
-	}
-
-	@Override
 	public Tenant findOneMatchingPattern(String value) {
-		List<Tenant> tenants = new ArrayList<>();
-		for (Entry<Long, TenantDetail> entry: this.multitenancyProperties.getTenants().entrySet()) {
-			if (this.pathMatcher.match(entry.getValue().getPattern(), value)) {
-				tenants.add(this.toTenant(entry.getKey(), entry.getValue()));
+		List<Tenant> matchingTenants = new ArrayList<>();
+		for (Entry<Long, TenantDetail> entry : this.getTenantMap().entrySet()) {
+			final String pathToMatch = entry.getValue().getPrefix();
+			if (StringUtils.isEmpty(pathToMatch)) {
+				throw new InvalidConfigException(
+						"Tenant prefix must be defined but was not. Tenant details: " + entry.getValue());
+			}
+			if (this.pathMatcher.match(pathToMatch, value)) {
+				matchingTenants.add(this.toTenant(entry.getKey(), entry.getValue()));
 			}
 		}
 
-		if (CollectionUtils.isEmpty(tenants)) {
+		if (CollectionUtils.isEmpty(matchingTenants)) {
 			return null;
 		}
 
 		// TODO find best match
-		return tenants.get(0);
+		return matchingTenants.get(0);
+	}
+
+	private Map<Long, TenantDetail> getTenantMap() {
+		return Optional.ofNullable(this.multitenancyProperties.getTenants())
+				.orElseThrow(() -> new InvalidConfigException(
+						"Unable to determine tenant information. Is \"${nimbus.multitenancy.tenants}\" set?"));
 	}
 
 	private Tenant toTenant(Long id, TenantDetail tenantDetail) {

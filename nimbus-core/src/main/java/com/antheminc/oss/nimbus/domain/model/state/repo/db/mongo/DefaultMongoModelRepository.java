@@ -61,7 +61,6 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 	private final IdSequenceRepository idSequenceRepo;
 	private final JavaBeanHandler beanHandler;
 	private final MongoDBModelRepositoryOptions options;
-	private final MultitenancyProperties multitenancyProperties;
 	
 	public DefaultMongoModelRepository(MongoOperations mongoOps, BeanResolverStrategy beanResolver, 
 			MongoDBModelRepositoryOptions options) {
@@ -69,7 +68,6 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 		this.beanHandler = beanResolver.get(JavaBeanHandler.class);
 		this.options = options;
 		this.idSequenceRepo = new MongoIdSequenceRepository(mongoOps);
-		this.multitenancyProperties = beanResolver.get(MultitenancyProperties.class);
 	}
 	
 	/**
@@ -108,9 +106,7 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 		ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), pId.getCode());
 		getBeanHandler().setValue(va, newState, id);
 		
-		if (multitenancyProperties.isEnabled()) {
-			getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
-		}
+		getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
 		
 		return newState;
 	}

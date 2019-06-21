@@ -36,7 +36,7 @@ public abstract class CommandDispatcher {
 	
 	public CommandDispatcher(BeanResolverStrategy beanResolver) {
 		this.gateway = beanResolver.get(CommandExecutorGateway.class);
-		this.tenantRepository = beanResolver.find(TenantRepository.class);
+		this.tenantRepository = beanResolver.get(TenantRepository.class);
 	}
 	
 	public MultiOutput handle(Command cmd, String payload) {

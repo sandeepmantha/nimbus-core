@@ -30,14 +30,14 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString(of = { "id", "clientId" })
+@ToString(of = { "id", "prefix" })
 public class Tenant implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
-	
-	private String clientId;
 
-	private String pattern;
+	private String description;
+	
+	private String prefix;
 }

@@ -15,8 +15,6 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state.multitenancy;
 
-import java.util.List;
-
 /**
  * <p>A repository for providing tenant objects.
  * 
@@ -25,21 +23,6 @@ import java.util.List;
  *
  */
 public interface TenantRepository {
-
-	/**
-	 * <p>Find a list of {@link Tenant} objects that have a clientCode
-	 * equivalent to {@code clientId}.
-	 * @param clientId the {@code clientId} to match against
-	 * @return the list of {@link Tenant} objects
-	 */
-	List<Tenant> findByClientId(String clientId);
-
-	/**
-	 * <p>Find a {@link Tenant} by it's unique id.
-	 * @param id the of the {@link Tenant} to find
-	 * @return the {@link Tenant} object
-	 */
-	Tenant findById(Long id);
 
 	/**
 	 * <p>Find a {@link Tenant} object where the provided {@code value} matches
