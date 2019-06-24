@@ -166,10 +166,18 @@ public class CommandTest {
 	}
 	
 	@Test
+	public void testInvalidCommandMissingTenantId() throws Exception {
+		expectedEx.expect(InvalidConfigException.class);
+		expectedEx.expectMessage("Command with URI: /anthem/p/umcase_view:100/_get cannot have null TenantId.");
+		Command cmd = CommandBuilder.withUri("/anthem/p/umcase_view:100/_get").getCommand();
+		cmd.validate();
+	}
+	
+	@Test
 	public void testInvalidCommandMissingAppAlias() throws Exception {
 		expectedEx.expect(InvalidConfigException.class);
-		expectedEx.expectMessage("Command with URI: /anthem/p/umcase_view:100/_get cannot have null AppAlias.");
-		Command cmd = CommandBuilder.withUri("/anthem/p/umcase_view:100/_get").getCommand();
+		expectedEx.expectMessage("Command with URI: /anthem/1/p/umcase_view:100/_get cannot have null AppAlias.");
+		Command cmd = CommandBuilder.withUri("/anthem/1/p/umcase_view:100/_get").getCommand();
 		cmd.validate();
 	}
 	

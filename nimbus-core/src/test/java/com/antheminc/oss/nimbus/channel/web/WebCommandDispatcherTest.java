@@ -116,17 +116,4 @@ public class WebCommandDispatcherTest {
 		
 		Assert.assertEquals(expected, actual);
 	}
-	
-	@Test(expected = FrameworkRuntimeException.class)
-	public void testSetTenantUnknownTenant() {
-		TenantRepository tenantRepository = Mockito.mock(TenantRepository.class);
-		Mockito.when(this.beanResolver.find(TenantRepository.class)).thenReturn(tenantRepository);
-		testee = new WebCommandDispatcher(this.beanResolver);
-		
-		// build the command from the URI
-		final Command command = CommandBuilder.withUri("/unknown/org/app/p/domain/_get").getCommand();
-		
-		Mockito.when(tenantRepository.findOneMatchingPrefix("/unknown/org/app")).thenReturn(null);
-		testee.handle(command, null);
-	}
 }
