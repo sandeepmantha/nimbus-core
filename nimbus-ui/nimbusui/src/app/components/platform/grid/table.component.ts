@@ -1,3 +1,5 @@
+import { LoaderState } from './../loader/loader.state';
+import { LoaderService } from './../../../services/loader.service';
 /**
  * @license
  * Copyright 2016-2019 the original author or authors.
@@ -97,6 +99,7 @@ export class DataTable extends BaseTableElement
   addValErr = {};
   gridMode: string = '';
   gridModeRow: string = '-1';
+  loading: boolean;
 
   public onChange: any = _ => {
     /*Empty*/
@@ -160,7 +163,8 @@ export class DataTable extends BaseTableElement
     private dtFormat: DateTimeFormatPipe,
     protected cd: ChangeDetectorRef,
     private configService: ConfigService,
-    private counterMessageService: CounterMessageService
+    private counterMessageService: CounterMessageService,
+    private loaderservice: LoaderService
   ) {
     super(cd);
   }
@@ -321,6 +325,14 @@ export class DataTable extends BaseTableElement
         }
       });
     }
+
+    this.subscribers.push(this.loaderservice.loaderUpdate.subscribe(
+      (state: LoaderState) => {
+        if(state.path === this.element.path) {
+          this.loading = state.show;
+        }
+      }
+    ));
     // include row selection checkbox to column count
     if (
       this.element.config.uiStyles &&
