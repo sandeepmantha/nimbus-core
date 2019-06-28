@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.antheminc.oss.nimbus.channel.web.WebActionController;
+import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
 import com.antheminc.oss.nimbus.domain.cmd.CommandMessageConverter;
 import com.antheminc.oss.nimbus.entity.client.Client;
 import com.antheminc.oss.nimbus.test.FrameworkIntegrationTestScenariosApplication;
@@ -43,11 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=FrameworkIntegrationTestScenariosApplication.class)
 @ActiveProfiles("test")
-public abstract class AbstractFrameworkIntegrationTests {
-	
-	protected static final String CLIENT_ID = "hooli";
-	
-	protected static final String PLATFORM_ROOT = "/"+CLIENT_ID+"/thebox/p";
+public abstract class AbstractFrameworkIntegrationTests extends AbstractFrameworkTest {
 	
 	@Autowired protected WebActionController controller;
 	

@@ -64,6 +64,7 @@ public enum Constants {
 	
 	SEPARATOR_AND("And"),
 	SEPARATOR_MAPSTO(".m"),
+	STATIC_CODE_VALUE("staticCodeValue"),
 	
 	PREFIX_FLOW("flow_"),
 	PREFIX_DEFAULT("default."),

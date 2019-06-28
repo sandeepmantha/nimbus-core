@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import com.antheminc.oss.nimbus.FrameworkRuntimeException;
+import com.antheminc.oss.nimbus.AbstractFrameworkTest;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.cmd.Action;
 import com.antheminc.oss.nimbus.domain.cmd.Behavior;
@@ -31,14 +31,13 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContext;
 import com.antheminc.oss.nimbus.domain.model.state.ModelEvent;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.TenantRepository;
 
 /**
  * 
  * @author Tony Lopez
  *
  */
-public class WebCommandDispatcherTest {
+public class WebCommandDispatcherTest extends AbstractFrameworkTest {
 	
 	private WebCommandDispatcher testee;
 
@@ -72,7 +71,7 @@ public class WebCommandDispatcherTest {
 		final ModelEvent<String> event = new ModelEvent<>();
 		event.setPayload("{}");
 		
-		final String commandUri = "/Acme/abc/def/p/home/_new&execute";
+		final String commandUri = PLATFORM_ROOT + "/home/_new&execute";
 		final Command expectedCommand = CommandBuilder.withUri(commandUri).getCommand();
 		final MultiOutput expected = new MultiOutput(commandUri, new ExecutionContext(expectedCommand), Action._new, Behavior.$execute);
 		
@@ -90,7 +89,7 @@ public class WebCommandDispatcherTest {
 		final MockHttpServletRequest request = new MockHttpServletRequest();
 		final String payload = "{}";
 		
-		final String commandUri = "/Acme/abc/def/p/home/_new&execute";
+		final String commandUri = PLATFORM_ROOT + "/home/_new&execute";
 		final Command expectedCommand = CommandBuilder.withUri(commandUri).getCommand();
 		final MultiOutput expected = new MultiOutput(commandUri, new ExecutionContext(expectedCommand), Action._new, Behavior.$execute);
 		
@@ -106,7 +105,7 @@ public class WebCommandDispatcherTest {
 	@Test
 	public void testHandleViaJsonAndProvidedCommand() {
 		final String payload = "{}";
-		final String commandUri = "/Acme/abc/def/p/home/_new&execute";
+		final String commandUri = PLATFORM_ROOT + "/home/_new&execute";
 		final Command command = CommandBuilder.withUri(commandUri).getCommand();
 		final MultiOutput expected = new MultiOutput(commandUri, new ExecutionContext(command), Action._new, Behavior.$execute);
 		
