@@ -116,7 +116,7 @@ public class DefaultMongoModelRepository implements ModelRepository {
 			Long tenantId = cmd.acquireTenantId();
 			Query query = new Query().addCriteria(Criteria.where(FIELD_NAME_MONGO_ID).is(id))
 					.addCriteria(Criteria.where(Constants.FIELD_NAME_TENANT_ID.code).is(tenantId));
-			return getMongoOps().findOne(query, mConfig.getReferredClass());
+			return getMongoOps().findOne(query, mConfig.getReferredClass(), mConfig.getRepoAlias());
 		}
 
 		throw new UnsupportedOperationException("Unable to determine data retrieval strategy.");
