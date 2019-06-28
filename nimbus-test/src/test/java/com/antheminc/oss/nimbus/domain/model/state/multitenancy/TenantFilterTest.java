@@ -41,70 +41,67 @@ import com.antheminc.oss.nimbus.test.domain.support.utils.MockHttpRequestBuilder
 		"nimbus.multitenancy.tenants.2.description=DEF",
 		"nimbus.multitenancy.tenants.2.prefix=/a/2/b",
 })
-public class TenantFilterTest extends AbstractFrameworkIntegrationTests{
+public class TenantFilterTest extends AbstractFrameworkIntegrationTests {
 
 	@Autowired
 	private SessionProvider sessionProvider;
-	
-	protected static final String tenant_1_prefix = "/a/1/b";
-	protected static final String tenant_2_prefix = "/a/2/b";
 
-	protected static final String VIEW_PARAM_ROOT = tenant_1_prefix + "/p/sample_view";
+	protected static final String TENANT_1_PREFIX = "/a/1/b";
+	protected static final String TENANT_2_PREFIX = "/a/2/b";
 
-    private MockMvc mvc;
+	protected static final String VIEW_PARAM_ROOT = TENANT_1_PREFIX + "/p/sample_view";
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+	private MockMvc mvc;
 
-    @Autowired
-    private TenantFilter tenantFilter;
-    
-    @Before
-    public void setUp() {
-        mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilters(this.tenantFilter).build();
-    }
-    
+	@Autowired
+	private WebApplicationContext webApplicationContext;
+
+	@Autowired
+	private TenantFilter tenantFilter;
+
+	@Before
+	public void setUp() {
+		mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilters(this.tenantFilter).build();
+	}
+
 	@Test
-	public void test_01_filter() throws Exception {
-		
+	public void testFilter() throws Exception {
+
 		ClientUser clientUser = new ClientUser();
-    	clientUser.setTenantIds(new HashSet<>());
-    	clientUser.getTenantIds().add(1L);
-    	clientUser.getTenantIds().add(2L);
-    	sessionProvider.setLoggedInUser(clientUser);
-    	sessionProvider.setAttribute(Constants.ACTIVE_TENANT_COOKIE.code, tenant_1_prefix);
+		clientUser.setTenantIds(new HashSet<>());
+		clientUser.getTenantIds().add(1L);
+		clientUser.getTenantIds().add(2L);
+		sessionProvider.setLoggedInUser(clientUser);
+		sessionProvider.setAttribute(Constants.ACTIVE_TENANT_COOKIE.code, TENANT_1_PREFIX);
 		MockHttpServletRequest req = MockHttpRequestBuilder.withUri(VIEW_PARAM_ROOT).addAction(Action._new).getMock();
 		ResultActions res = mvc.perform(post(req.getRequestURI()).content("{}")
-				.cookie(new Cookie("NIMBUS_ACTIVE_TENANT_PREFIX", tenant_1_prefix))
-				.with(csrf())
+				.cookie(new Cookie(Constants.ACTIVE_TENANT_COOKIE.code, TENANT_1_PREFIX)).with(csrf())
 				.contentType(APPLICATION_JSON_UTF8));
-		
+
 		res.andExpect(status().isOk());
 
-		sessionProvider.setAttribute(Constants.ACTIVE_TENANT_COOKIE.code, tenant_2_prefix);
+		sessionProvider.setAttribute(Constants.ACTIVE_TENANT_COOKIE.code, TENANT_2_PREFIX);
 		MockHttpServletRequest req2 = MockHttpRequestBuilder.withUri(VIEW_PARAM_ROOT).addAction(Action._new).getMock();
 		try {
-			//cookie is different in the request
-			mvc.perform(post(req2.getRequestURI()).content("{}")
-					.with(csrf())
-					.contentType(APPLICATION_JSON_UTF8)
-					.cookie(new Cookie("NIMBUS_ACTIVE_TENANT_PREFIX", tenant_1_prefix)));
-		} catch(FrameworkRuntimeException e) {
-			assertEquals(e.getExecuteError().getMessage(), "Request is not authorized as the tenant information is not valid. Please contact a system administrator.");
+			// cookie is different in the request
+			mvc.perform(post(req2.getRequestURI()).content("{}").with(csrf()).contentType(APPLICATION_JSON_UTF8)
+					.cookie(new Cookie(Constants.ACTIVE_TENANT_COOKIE.code, TENANT_1_PREFIX)));
+		} catch (FrameworkRuntimeException e) {
+			assertEquals(e.getExecuteError().getMessage(),
+					"Request is not authorized as the tenant information is not valid. Please contact a system administrator.");
 		}
-		
-		sessionProvider.setAttribute(Constants.ACTIVE_TENANT_COOKIE.code, tenant_2_prefix);
+
+		sessionProvider.setAttribute(Constants.ACTIVE_TENANT_COOKIE.code, TENANT_2_PREFIX);
 		MockHttpServletRequest req3 = MockHttpRequestBuilder.withUri(VIEW_PARAM_ROOT).addAction(Action._new).getMock();
 		try {
-			//prefix to /p (tenantprefix) is not valid with the session value
-			mvc.perform(post(req3.getRequestURI()).content("{}")
-					.with(csrf())
-					.contentType(APPLICATION_JSON_UTF8)
-					.cookie(new Cookie("NIMBUS_ACTIVE_TENANT_PREFIX", tenant_2_prefix)));
-		} catch(FrameworkRuntimeException e) {
-			assertEquals(e.getExecuteError().getMessage(), "Request is not authorized as the tenant information is not valid. Please contact a system administrator.");
+			// prefix to /p (tenantprefix) is not valid with the session value
+			mvc.perform(post(req3.getRequestURI()).content("{}").with(csrf()).contentType(APPLICATION_JSON_UTF8)
+					.cookie(new Cookie(Constants.ACTIVE_TENANT_COOKIE.code, TENANT_2_PREFIX)));
+		} catch (FrameworkRuntimeException e) {
+			assertEquals(e.getExecuteError().getMessage(),
+					"Request is not authorized as the tenant information is not valid. Please contact a system administrator.");
 		}
 
 	}
-	
+
 }
