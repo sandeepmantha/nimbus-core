@@ -11,6 +11,7 @@ import java.util.HashSet;
 
 import javax.servlet.http.Cookie;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,4 +105,43 @@ public class TenantFilterTest extends AbstractFrameworkIntegrationTests {
 
 	}
 
+	@Test
+	public void testCreate() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testRead() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testUpdate() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testDelete() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testCreateUnallowed() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testReadUnallowed() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testUpdateUnallowed() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testDeleteUnallowed() {
+		Assert.fail("Implement me!");
+	}
 }

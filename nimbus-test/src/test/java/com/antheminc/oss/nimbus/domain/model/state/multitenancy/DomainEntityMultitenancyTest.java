@@ -51,12 +51,32 @@ public class DomainEntityMultitenancyTest extends AbstractFrameworkIntegrationTe
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testMongoRecordLevelTenancy() {
+	public void testMongoRecordLevelTenancyCreate() {
 		Command cmd = CommandBuilder.withUri("/foo/2/app/p/sample_core/_new").getCommand();
 		String payload = "{\"attr_String\": \"foo\"}";
 		
 		MultiOutput output = this.webCommandDispatcher.handle(cmd, payload);
 		Param<SampleCoreEntity> result = (Param<SampleCoreEntity>) output.getSingleResult();
 		Assert.assertEquals(Long.valueOf(2), result.getState().get_tenantId());
+	}
+	
+	@Test(expected = FrameworkRuntimeException.class)
+	public void testMongoRecordLevelTenancyMissingTenantId() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testMongoRecordLevelExampleSearch() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testMongoRecordLevelQuerySearch() {
+		Assert.fail("Implement me!");
+	}
+	
+	@Test
+	public void testMongoRecordLevelLookupSearch() {
+		Assert.fail("Implement me!");
 	}
 }
