@@ -37,10 +37,10 @@ import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.ValueAccessor;
-import com.antheminc.oss.nimbus.domain.model.state.multitenancy.ModelRepositoryMultitenancySupport;
 import com.antheminc.oss.nimbus.domain.model.state.repo.IdSequenceRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.ModelRepository;
 import com.antheminc.oss.nimbus.domain.model.state.repo.MongoIdSequenceRepository;
+import com.antheminc.oss.nimbus.domain.model.state.repo.db.ModelRepositoryOptions.TenancyStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.repo.db.MongoDBModelRepositoryOptions;
 import com.antheminc.oss.nimbus.domain.model.state.repo.db.MongoDBSearchOperation;
 import com.antheminc.oss.nimbus.domain.model.state.repo.db.SearchCriteria;
@@ -54,8 +54,10 @@ import lombok.Getter;
  *
  */
 @Getter
-public class DefaultMongoModelRepository implements ModelRepository, ModelRepositoryMultitenancySupport {
+public class DefaultMongoModelRepository implements ModelRepository {
 
+	public static final String FIELD_NAME_MONGO_ID = "_id";
+	
 	private final MongoOperations mongoOps;
 	private final IdSequenceRepository idSequenceRepo;
 	private final JavaBeanHandler beanHandler;
@@ -69,23 +71,6 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 		this.idSequenceRepo = new MongoIdSequenceRepository(mongoOps);
 	}
 	
-	/**
-	 * <p>Create an object that is responsible for setting the tenant information retrieved from
-	 * a command into the domain entity state to support record level based tenancy.
-	 * <p>Custom implementations can override this behavior for flexible behavior.
-	 */
-	@Override
-	public <T> MultitenancyInstantiator<T> getMultitenancyInstantiator() {
-		return (Command cmd, ModelConfig<T> mConfig, T newState) -> {				
-			Long tenantId = cmd.getTenantId();
-			if (null == tenantId) {
-				throw new FrameworkRuntimeException("Tenant must not be null for command: " + cmd);
-			}
-			ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), Constants.FIELD_NAME_TENANT_ID.code);
-			beanHandler.setValue(va, newState, tenantId);
-		};
-	}
-	
 	@Override
 	public <T> T _new(Command cmd, ModelConfig<T> mConfig) {
 		T newState = getBeanHandler().instantiate(mConfig.getReferredClass());
@@ -96,15 +81,21 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 	public <T> T _new(Command cmd, ModelConfig<T> mConfig, T newState) {
 		// detect id paramConfig
 		ParamConfig<?> pId = Optional.ofNullable(mConfig.getIdParamConfig())
-								.orElseThrow(()->new InvalidConfigException("Persistable Entity: "+mConfig.getReferredClass()+" must be configured with @Id param."));
-		
+				.orElseThrow(() -> new InvalidConfigException(
+						"Persistable Entity: " + mConfig.getReferredClass() + " must be configured with @Id param."));
+
 		Long id = getIdSequenceRepo().getNextSequenceId(mConfig.getRepoAlias());
-		
+
 		ValueAccessor va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(), pId.getCode());
 		getBeanHandler().setValue(va, newState, id);
-		
-		getMultitenancyInstantiator().execute(cmd, (ModelConfig<Object>) mConfig, newState);
-		
+
+		if (TenancyStrategy.RECORD == this.options.getTenancyStrategy()) {
+			Long tenantId = cmd.acquireTenantId();
+			va = JavaBeanHandlerUtils.constructValueAccessor(mConfig.getReferredClass(),
+					Constants.FIELD_NAME_TENANT_ID.code);
+			getBeanHandler().setValue(va, newState, tenantId);
+		}
+
 		return newState;
 	}
 
@@ -117,8 +108,18 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 	@Override
 	public <T> T _get(Command cmd, ModelConfig<T> mConfig) {
 		Long id = cmd.getRefId(Type.DomainAlias);
-		T state = getMongoOps().findById(id, mConfig.getReferredClass(), mConfig.getRepoAlias());
-		return state;
+		if (TenancyStrategy.NONE == this.options.getTenancyStrategy()) {
+			return getMongoOps().findById(id, mConfig.getReferredClass(), mConfig.getRepoAlias());
+		}
+
+		if (TenancyStrategy.RECORD == this.options.getTenancyStrategy()) {
+			Long tenantId = cmd.acquireTenantId();
+			Query query = new Query().addCriteria(Criteria.where(FIELD_NAME_MONGO_ID).is(id))
+					.addCriteria(Criteria.where(Constants.FIELD_NAME_TENANT_ID.code).is(tenantId));
+			return getMongoOps().findOne(query, mConfig.getReferredClass());
+		}
+
+		throw new UnsupportedOperationException("Unable to determine data retrieval strategy.");
 	}
 	
 	private String resolvePath(String path) {
@@ -132,7 +133,7 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 		// TODO Soham: Refactor
 		String path = resolvePath(param.getBeanPath());
 	  
-		Query query = new Query(Criteria.where("_id").is(param.getRootExecution().getRootCommand().getRefId(Type.DomainAlias)));
+		Query query = new Query(Criteria.where(FIELD_NAME_MONGO_ID).is(param.getRootExecution().getRootCommand().getRefId(Type.DomainAlias)));
 		Update update = new Update();
 		if(StringUtils.isBlank(path) || StringUtils.equalsIgnoreCase(path, "/c")) {
 			getMongoOps().save(state, param.getRootDomain().getConfig().getRepoAlias());
@@ -189,9 +190,8 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 		Class<T> referredClass = (Class<T>)param.getRootDomain().getConfig().getReferredClass();
 		String alias = param.getRootDomain().getConfig().getRepoAlias();
 		
-		Query query = new Query(Criteria.where("_id").is(id));
-		T state = getMongoOps().findAndRemove(query, referredClass, alias);
-		return state;
+		Query query = new Query(Criteria.where(FIELD_NAME_MONGO_ID).is(id));
+		return getMongoOps().findAndRemove(query, referredClass, alias);
 	}
 
 	@Override
@@ -203,6 +203,6 @@ public class DefaultMongoModelRepository implements ModelRepository, ModelReposi
 		if (!searchOperation.isPresent()) {
 			throw new FrameworkRuntimeException("Unable to determine search operation for search criteria: " + sc);
 		}
-		return searchOperation.get().search(referredClass, alias, sc);
+		return searchOperation.get().search(referredClass, alias, sc, this.options);
 	}
 }

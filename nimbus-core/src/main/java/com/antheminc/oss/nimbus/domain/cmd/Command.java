@@ -32,6 +32,7 @@ import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.defn.Constants;
+import com.antheminc.oss.nimbus.support.fi.util.SupplierUtils;
 import com.antheminc.oss.nimbus.support.pojo.CollectionsTemplate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -315,10 +316,22 @@ public class Command implements Serializable {
 	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain/ef/gh/_process?fn=_set</i> then getAbsoluteAliasTillRootDomain() returns <i>/Acme/ab/cd/domain</i></li>
 	 * @return the absolute alias up to the root domain of this command.
 	 */
-	public String getAbsoluteAliasTillRootDomain() {
-		String a = buildAlias(root(), Type.DomainAlias);
-		return a;
+	public String getAbsoluteAliasUntilRootDomain(boolean includeRefId) {
+		return buildAlias(root(), Type.DomainAlias, includeRefId);
 	}
+	
+	/**
+	 * Returns the absolute alias up to the root domain of this command with the ref id included
+	 * 
+	 * <p>
+	 * <b>Examples:</b>
+	 * <p>When <b>absoluteUri</b> = <i>/Acme/ab/cd/p/domain:42/ef/gh/_process?fn=_set</i> then getAbsoluteAliasTillRootDomain() returns <i>/Acme/ab/cd/domain:42</i></li>
+	 * @return the absolute alias up to the root domain of this command.
+	 */
+	public String getAbsoluteAliasTillRootDomain() {
+		return getAbsoluteAliasUntilRootDomain(false);
+	}
+	
 /* TODO Refactor -- END -- */
 	
 	public String buildAlias(CommandElementLinked startElem) {
@@ -326,6 +339,11 @@ public class Command implements Serializable {
 	}
 	public String buildAlias(Type endWhentype) {
 		return traverseElements(root(), endWhentype, (cmdElem, sb) -> sb.append(cmdElem.getAliasUri()));
+	}
+	public String buildAlias(CommandElementLinked startElem, Type endWhentype, boolean includeRefId) {
+		BiConsumer<CommandElement, StringBuilder> withRefId = (cmdElem, sb) -> sb.append(cmdElem.getUri());
+		BiConsumer<CommandElement, StringBuilder> withoutRefId = (cmdElem, sb) -> sb.append(cmdElem.getAliasUri());
+		return traverseElements(startElem, endWhentype, includeRefId ? withRefId : withoutRefId);
 	}
 	public String buildAlias(CommandElementLinked startElem, Type endWhentype) {
 		return traverseElements(startElem, endWhentype, (cmdElem, sb) -> sb.append(cmdElem.getAliasUri()));
@@ -457,5 +475,9 @@ public class Command implements Serializable {
 	
 	public boolean containsFunction() {
 		return requestParams != null && requestParams.containsKey(Constants.KEY_FUNCTION.code);
+	}
+	
+	public Long acquireTenantId() {
+		return SupplierUtils.acquire(this::getTenantId, "Tenant id must not be null for command: " + this);
 	}
 }
