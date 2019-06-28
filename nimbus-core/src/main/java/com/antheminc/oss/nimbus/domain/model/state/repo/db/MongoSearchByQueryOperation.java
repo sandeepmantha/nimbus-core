@@ -145,7 +145,11 @@ public class MongoSearchByQueryOperation extends MongoDBSearchOperation {
 			Long tenantId = criteria.getCmd().acquireTenantId();
 			String tenantClause = new StringBuilder(alias).append(".").append(Constants.FIELD_NAME_TENANT_ID.code)
 					.append(".eq(").append(tenantId).append(")").toString();
-			where = StringUtils.isEmpty(where) ? tenantClause : where + ".and(" + tenantClause + ")";
+			if (StringUtils.isEmpty(where) || "null".equals(where)) {
+				where = tenantClause;
+			} else {
+				where += ".and(" + tenantClause + ")";
+			}
 		}
 		
 		AbstractMongodbQuery query = new QueryBuilder(getMongoOps(), outputClass, alias)
