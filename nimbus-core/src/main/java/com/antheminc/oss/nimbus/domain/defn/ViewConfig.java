@@ -1302,6 +1302,9 @@ public class ViewConfig {
 		 */
 		String onAdd() default "../_action_onAdd";
 		
+		/**
+		 * <p>When set with fontawesome animated icon, shows the loading icon until the grid results are fetched from server
+		 */
 		String loaderIcon() default "fa fa fa-spinner";
 	}
 
