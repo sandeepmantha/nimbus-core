@@ -1221,7 +1221,7 @@ public class ViewConfig {
 		String pageSize() default "25";
 
 		boolean pagination() default true;
-
+		
 		/**
 		 * <p>Render a button below the rendered grid that when clicked, submits
 		 * an HTTP POST request with a payload containing the selected indexes
@@ -1301,6 +1301,8 @@ public class ViewConfig {
 		 * this decorated field.
 		 */
 		String onAdd() default "../_action_onAdd";
+		
+		String loaderIcon() default "fa fa fa-spinner";
 	}
 
 	/**
