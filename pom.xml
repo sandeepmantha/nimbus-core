@@ -501,7 +501,17 @@
 			<groupId>com.univocity</groupId>
 			<artifactId>univocity-parsers</artifactId>
 			<version>${univocity.version}</version>
-		</dependency>	
+		</dependency>
+		<!-- <dependency>
+            <groupId>org.optaplanner</groupId>
+            <artifactId>optaplanner-core</artifactId>
+            <version>7.21.0.Final</version>
+        </dependency> -->
+          <dependency>
+            <groupId>org.optaplanner</groupId>
+            <artifactId>optaplanner-core</artifactId>
+            <version>7.9.0.Final</version>
+        </dependency>
 	</dependencies>
 
     <distributionManagement>
