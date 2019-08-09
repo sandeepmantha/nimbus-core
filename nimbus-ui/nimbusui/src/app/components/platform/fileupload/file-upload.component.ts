@@ -36,6 +36,7 @@ import { CounterMessageService } from './../../../services/counter-message.servi
 import { FileService } from './../../../services/file.service';
 import { LoggerService } from './../../../services/logger.service';
 import { ServiceConstants } from './../../../services/service.constants';
+import { PageService } from './../../../services/page.service';
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -84,6 +85,7 @@ export class FileUploadComponent extends BaseElement
   constructor(
     private fileService: FileService,
     private logger: LoggerService,
+    private pageService: PageService,
     private counterMessageService: CounterMessageService
   ) {
     super();
@@ -142,6 +144,17 @@ export class FileUploadComponent extends BaseElement
   }
 
   ngAfterViewInit() {
+
+    this.subscribers.push(
+      this.pageService.eventUpdate$.subscribe(event => {
+        if (event.path == this.element.path) {
+          this.selectedFiles = [];
+          this.value = [];
+          this.pfu.files = [];
+        }
+      })
+    );
+
     if (
       this.form != undefined &&
       this.form.controls[this.element.config.code] != null
