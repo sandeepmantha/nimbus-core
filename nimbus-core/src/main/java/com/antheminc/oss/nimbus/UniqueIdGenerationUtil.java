@@ -15,6 +15,8 @@
  */
 package com.antheminc.oss.nimbus;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -29,12 +31,24 @@ public class UniqueIdGenerationUtil {
 	public static String generateUniqueId() {
 		LocalDateTime datetime = LocalDateTime.now();
 		
-		StringBuilder str = new StringBuilder();
-		str = str.append("{");
-		str.append(dateformat.format(datetime));
-		str.append("-");
-		str.append(Math.random());
-		str.append("}");
-		return str.toString();		
+		SecureRandom secureRandomGenerator;
+		try {
+			secureRandomGenerator = SecureRandom.getInstance("SHA1PRNG");
+        
+	        byte[] randomBytes = new byte[128];
+	        secureRandomGenerator.nextBytes(randomBytes);
+	        int num = secureRandomGenerator.nextInt();
+	        
+			StringBuilder str = new StringBuilder();
+			str = str.append("{");
+			str.append(dateformat.format(datetime));
+			str.append("-");
+			str.append(num);
+			str.append("}");
+			return str.toString();	
+		} catch (NoSuchAlgorithmException e) {
+			new FrameworkRuntimeException("Error generating unique ID: "+ e.getMessage());
+		}	
+		return null;
 	}
 }
