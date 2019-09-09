@@ -39,7 +39,7 @@ public class DefaultActionExecutorProcess<R> extends AbstractCommandExecutor<R> 
 	
 	public DefaultActionExecutorProcess(BeanResolverStrategy beanResolver) {
 		super(beanResolver);
-		this.bpmGateway = beanResolver.get(BPMGateway.class);
+		this.bpmGateway = beanResolver.find(BPMGateway.class);
 	}
 	
 	@Override

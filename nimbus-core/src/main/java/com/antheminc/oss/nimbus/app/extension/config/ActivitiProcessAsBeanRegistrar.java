@@ -23,6 +23,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +42,7 @@ import lombok.Getter;
 @EnableLoggingInterceptor
 @Configuration
 @Getter(value = AccessLevel.PROTECTED)
+@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true", matchIfMissing = true)
 public class ActivitiProcessAsBeanRegistrar implements ApplicationContextAware {
 
 	@Autowired

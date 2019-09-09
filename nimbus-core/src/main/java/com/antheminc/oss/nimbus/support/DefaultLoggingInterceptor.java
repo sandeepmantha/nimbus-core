@@ -29,7 +29,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
+//import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import com.antheminc.oss.nimbus.support.EnableAPIMetricCollection.LogLevel;
@@ -39,7 +39,7 @@ import com.antheminc.oss.nimbus.support.EnableAPIMetricCollection.LogLevel;
  *
  */
 @Aspect
-@RefreshScope
+//@RefreshScope
 public class DefaultLoggingInterceptor {
 
 	private static final JustLogit logit = new JustLogit("api-metric-logger");

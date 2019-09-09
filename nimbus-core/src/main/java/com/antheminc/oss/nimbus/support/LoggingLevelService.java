@@ -42,7 +42,7 @@ public class LoggingLevelService {
 	
 	public static Output<String> setLoggingLevel(String levelInput, String packageName) {
 		
-		String uri = WebActionController.URI_PATTERN_P+"/loglevel";
+		String uri = "";
 		Command cmd = CommandBuilder.withUri(uri).getCommand();
 
 		Output<String> returnStatus = new Output<>(uri, new ExecutionContext(cmd), Action._get, Behavior.$execute);

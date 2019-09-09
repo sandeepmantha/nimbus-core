@@ -15,6 +15,7 @@
  */
 package com.antheminc.oss.nimbus.app.extension.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.PropertyResolver;
@@ -98,6 +99,7 @@ public class DefaultCoreExecutorConfig {
 	}
 	
 	@Bean(name="default._process$execute")
+	@ConditionalOnProperty(prefix= "process", value = "useactiviti" , matchIfMissing = true)
 	public CommandExecutor<?> defaultActionExecutorProcess(BeanResolverStrategy beanResolver){
 		return new DefaultActionExecutorProcess<>(beanResolver);
 	}

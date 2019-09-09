@@ -15,6 +15,7 @@
  */
 package com.antheminc.oss.nimbus.domain.cmd.exec.internal.process;
 
+import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.bpm.BPMGateway;
 import com.antheminc.oss.nimbus.domain.cmd.exec.AbstractFunctionHandler;
@@ -45,6 +46,9 @@ public class StatelessBPMFunctionHanlder<T,R> extends AbstractFunctionHandler<T,
 	@SuppressWarnings("unchecked")
 	public R execute(ExecutionContext executionContext, Param<T> actionParameter) {
 		String processId = executionContext.getCommandMessage().getCommand().getFirstParameterValue(Constants.KEY_EXECUTE_PROCESS_ID.code);
+		if(getBpmGateway() == null ) {
+			throw new FrameworkRuntimeException("Please ensure the evnironemnt property useactiviti is set");
+		}
 		ProcessResponse response = getBpmGateway().startStatlessBusinessProcess(executionContext.getQuadModel().getView().getAssociatedParam(), processId);
 		return (R)response.getResponse();
 	}

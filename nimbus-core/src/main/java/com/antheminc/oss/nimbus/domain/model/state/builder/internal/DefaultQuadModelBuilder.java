@@ -81,7 +81,7 @@ public class DefaultQuadModelBuilder implements QuadModelBuilder {
 		this.stateBuilder = beanResolver.get(EntityStateBuilder.class);
 		this.validatorProvider = beanResolver.get(ValidatorProvider.class);
 		this.paramStateGateway = beanResolver.get(ParamStateGateway.class);
-		this.bpmGateway = beanResolver.get(BPMGateway.class);
+		this.bpmGateway = beanResolver.find(BPMGateway.class);
 		
 		setParamEventListeners(new LinkedList<>());
 		
@@ -127,8 +127,10 @@ public class DefaultQuadModelBuilder implements QuadModelBuilder {
 	
 	private EntityStateAspectHandlers createAspectHandlers() {
 		QuadScopedEventListener qEventListener = new QuadScopedEventListener(getParamEventListeners());
-		
-		BiFunction<Param<?>, String, Object> bpmEvaluator = (p, pid) -> getBpmGateway().continueBusinessProcessExecution(p, pid);
+		BiFunction<Param<?>, String, Object> bpmEvaluator = null;
+		if(getBpmGateway() != null) {
+			bpmEvaluator = (p, pid) -> getBpmGateway().continueBusinessProcessExecution(p, pid);
+		}
 		return new EntityStateAspectHandlers(qEventListener, bpmEvaluator, getValidatorProvider(), getParamStateGateway(), beanResolver);
 	}
 }

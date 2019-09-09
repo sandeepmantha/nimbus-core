@@ -63,7 +63,7 @@ public class DefaultActionExecutorNew extends AbstractCommandExecutor<Param<?>> 
 	public DefaultActionExecutorNew(BeanResolverStrategy beanResolver) {
 		super(beanResolver);
 		
-		this.bpmGateway = beanResolver.get(BPMGateway.class);
+		this.bpmGateway = beanResolver.find(BPMGateway.class);
 		this.commandGateway = getBeanResolver().find(CommandExecutorGateway.class);
 		this.domainConfigBuilder = getBeanResolver().find(DomainConfigBuilder.class);
 	}
@@ -183,6 +183,9 @@ public class DefaultActionExecutorNew extends AbstractCommandExecutor<Param<?>> 
 		
 		if(StringUtils.isEmpty(lifecycleKey))
 			return null;
+		else if(getBpmGateway() == null) {
+			return null;
+		}
 		return getBpmGateway().startBusinessProcess(rootDomainParam, lifecycleKey);
 
 	}

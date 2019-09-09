@@ -36,6 +36,9 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +53,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.domain.bpm.BPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiExpressionManager;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiUserTaskActivityBehavior;
 
@@ -81,6 +85,7 @@ import lombok.Setter;
  */
 @Configuration
 @ConfigurationProperties(prefix="process")
+@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true", matchIfMissing = true)
 public class BPMEngineConfig extends AbstractProcessEngineAutoConfiguration {
 	
 	@Value("${process.database.driver}") 
@@ -110,10 +115,11 @@ public class BPMEngineConfig extends AbstractProcessEngineAutoConfiguration {
 	@Getter @Setter
 	private List<String> customDeployers = new ArrayList<String>();	
 	
-	@Autowired
-	private ActivitiExpressionManager platformExpressionManager;
+//	@Autowired
+//	private ActivitiExpressionManager platformExpressionManager;
 	
 	@Bean
+	@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true", matchIfMissing = true)
 	public SpringProcessEngineConfiguration springProcessEngineConfiguration(
 			@Qualifier("processDataSource") DataSource processDataSource,
 			PlatformTransactionManager jpaTransactionManager, SpringAsyncExecutor springAsyncExecutor,
@@ -125,7 +131,7 @@ public class BPMEngineConfig extends AbstractProcessEngineAutoConfiguration {
 		if (deploymentName.isPresent()) {
 			engineConfiguration.setDeploymentName(deploymentName.get());
 		}
-		engineConfiguration.setExpressionManager(platformExpressionManager);
+		engineConfiguration.setExpressionManager(beanResolver.find(ActivitiExpressionManager.class));
 		engineConfiguration.setProcessDefinitionCache(new ActivitiProcessDefinitionCache());
 		engineConfiguration.setActivityBehaviorFactory(platformActivityBehaviorFactory(beanResolver));
 		engineConfiguration.setHistoryLevel(HistoryLevel.getHistoryLevelForKey(processHistoryLevel));

@@ -17,6 +17,7 @@ package com.antheminc.oss.nimbus.app.extension.config;
 
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,11 +54,13 @@ public class DefaultProcessConfig {
 	private Boolean supportStatefulProcesses;	
 		
 	@Bean
+	@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true" , matchIfMissing = true)
 	public ActivitiExpressionManager activitiExpressionManager(){
 		return new ActivitiExpressionManager();
 	}
 	
 	@Bean
+	@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true",  matchIfMissing = true)
 	public BPMGateway bpmGateway(BeanResolverStrategy beanResolver){
 		return new ActivitiBPMGateway(beanResolver,supportStatefulProcesses);
 	}		
@@ -98,6 +101,7 @@ public class DefaultProcessConfig {
 	}
 	
 	@Bean(name="default._process$execute?fn=_bpm")
+	@ConditionalOnProperty(prefix= "process", value = "useactiviti" , matchIfMissing = true)
 	public StatelessBPMFunctionHanlder<?,?> statelessBPMFunctionHanlder(BeanResolverStrategy beanResolver){
 		return new StatelessBPMFunctionHanlder<>(beanResolver);
 	}	
@@ -128,6 +132,7 @@ public class DefaultProcessConfig {
 	}
 	
 	@Bean(name="default._process$execute?fn=_eval")
+	@ConditionalOnProperty(prefix= "process", value = "useactiviti" , matchIfMissing = true)
 	public EvalFunctionHandler<?,?> evalFunctionHandler(ExpressionManager expressionManager){
 		return new EvalFunctionHandler(expressionManager);
 	}

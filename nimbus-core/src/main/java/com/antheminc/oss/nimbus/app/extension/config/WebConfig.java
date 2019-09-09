@@ -48,73 +48,73 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
 
-	private static final String CLASSPATH_STATIC = "classpath:./static/";
-	private static final String FORWARD = "forward:";
-
-	private final String defaultView;
-	private final String[] staticResourcePaths;
-
-	public WebConfig() {
-		this.staticResourcePaths = this.getDefaultStaticResourcePaths();
-		this.defaultView = "/index.html";
-	}
-
-	/**
-	 * <p>Adds Custom LocalDate serializer and deserializer during spring bean
-	 * initialization With this, every LocalDate field will be serialized and
-	 * deserialized in the form MM/dd/yyyy No need of using @JsonSerializer
-	 * and @JsonDeserializer.
-	 */
-	@Bean
-	public Jackson2ObjectMapperBuilderCustomizer addCustomLocalDateSerializerDeserializer() {
-		return new Jackson2ObjectMapperBuilderCustomizer() {
-
-			@Override
-			public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-				jacksonObjectMapperBuilder.serializationInclusion(Include.NON_NULL);
-				jacksonObjectMapperBuilder.featuresToEnable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-				jacksonObjectMapperBuilder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-				jacksonObjectMapperBuilder.featuresToDisable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
-
-				jacksonObjectMapperBuilder.deserializerByType(LocalDate.class, new CustomLocalDateDeserializer());
-				jacksonObjectMapperBuilder.serializerByType(LocalDate.class, new CustomLocalDateSerializer());
-				jacksonObjectMapperBuilder.serializerByType(LocalDateTime.class, new CustomLocalDateTimeSerializer());
-				jacksonObjectMapperBuilder.deserializerByType(LocalDateTime.class,
-						new CustomLocalDateTimeDeserializer());
-				jacksonObjectMapperBuilder.serializerByType(Date.class, new CustomDateSerializer());
-				jacksonObjectMapperBuilder.deserializerByType(Date.class, new CustomDateDeserializer());
-			}
-
-		};
-	}
-
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new WebSessionIdLoggerInterceptor());
-	}
-
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		final String[] staticResourceLocation = new String[] { CLASSPATH_STATIC };
-		for (String path : this.staticResourcePaths) {
-			if (!registry.hasMappingForPattern(path)) {
-				registry.addResourceHandler(path).addResourceLocations(staticResourceLocation);
-			}
-		}
-	}
-
-	@Override
-	public void addViewControllers(ViewControllerRegistry registry) {
-		registry.addViewController("/").setViewName(FORWARD + this.defaultView);
-	}
-
-	/**
-	 * <p>Get the default list of resources that should be served as a static resource.
-	 * @return an array containing a list of resource paths.
-	 */
-	private String[] getDefaultStaticResourcePaths() {
-		return new String[] { "/index.html", "/vendor**bundle*js", "/polyfills**bundle*js", "/inline**bundle*js",
-				"/scripts**bundle*js", "/main**bundle*js", "/styles**bundle*js", "/**ttf", "/**otf", "/**woff",
-				"/**woff2" };
-	}
+//	private static final String CLASSPATH_STATIC = "classpath:./static/";
+//	private static final String FORWARD = "forward:";
+//
+//	private final String defaultView;
+//	private final String[] staticResourcePaths;
+//
+//	public WebConfig() {
+//		this.staticResourcePaths = this.getDefaultStaticResourcePaths();
+//		this.defaultView = "/index.html";
+//	}
+//
+//	/**
+//	 * <p>Adds Custom LocalDate serializer and deserializer during spring bean
+//	 * initialization With this, every LocalDate field will be serialized and
+//	 * deserialized in the form MM/dd/yyyy No need of using @JsonSerializer
+//	 * and @JsonDeserializer.
+//	 */
+//	@Bean
+//	public Jackson2ObjectMapperBuilderCustomizer addCustomLocalDateSerializerDeserializer() {
+//		return new Jackson2ObjectMapperBuilderCustomizer() {
+//
+//			@Override
+//			public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
+//				jacksonObjectMapperBuilder.serializationInclusion(Include.NON_NULL);
+//				jacksonObjectMapperBuilder.featuresToEnable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+//				jacksonObjectMapperBuilder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+//				jacksonObjectMapperBuilder.featuresToDisable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+//
+//				jacksonObjectMapperBuilder.deserializerByType(LocalDate.class, new CustomLocalDateDeserializer());
+//				jacksonObjectMapperBuilder.serializerByType(LocalDate.class, new CustomLocalDateSerializer());
+//				jacksonObjectMapperBuilder.serializerByType(LocalDateTime.class, new CustomLocalDateTimeSerializer());
+//				jacksonObjectMapperBuilder.deserializerByType(LocalDateTime.class,
+//						new CustomLocalDateTimeDeserializer());
+//				jacksonObjectMapperBuilder.serializerByType(Date.class, new CustomDateSerializer());
+//				jacksonObjectMapperBuilder.deserializerByType(Date.class, new CustomDateDeserializer());
+//			}
+//
+//		};
+//	}
+//
+//	@Override
+//	public void addInterceptors(InterceptorRegistry registry) {
+//		registry.addInterceptor(new WebSessionIdLoggerInterceptor());
+//	}
+//
+//	@Override
+//	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//		final String[] staticResourceLocation = new String[] { CLASSPATH_STATIC };
+//		for (String path : this.staticResourcePaths) {
+//			if (!registry.hasMappingForPattern(path)) {
+//				registry.addResourceHandler(path).addResourceLocations(staticResourceLocation);
+//			}
+//		}
+//	}
+//
+//	@Override
+//	public void addViewControllers(ViewControllerRegistry registry) {
+//		registry.addViewController("/").setViewName(FORWARD + this.defaultView);
+//	}
+//
+//	/**
+//	 * <p>Get the default list of resources that should be served as a static resource.
+//	 * @return an array containing a list of resource paths.
+//	 */
+//	private String[] getDefaultStaticResourcePaths() {
+//		return new String[] { "/index.html", "/vendor**bundle*js", "/polyfills**bundle*js", "/inline**bundle*js",
+//				"/scripts**bundle*js", "/main**bundle*js", "/styles**bundle*js", "/**ttf", "/**otf", "/**woff",
+//				"/**woff2" };
+//	}
 }
