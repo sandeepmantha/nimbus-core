@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
@@ -57,122 +58,123 @@ import lombok.Setter;
  * @author Soham Chakravarti
  *
  */
-//@ControllerAdvice(assignableTypes=WebActionController.class)
-//@EnableConfigurationProperties
-//@ConfigurationProperties(prefix="application")
-//@Getter
-public class WebActionControllerAdvice{
+@ControllerAdvice(assignableTypes=WebActionController.class)
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix="application")
+@Getter
+@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true", matchIfMissing = true)
+public class WebActionControllerAdvice implements ResponseBodyAdvice<Object>{
 	
-//	private JustLogit logit = new JustLogit(this.getClass());
-//	
-//	@Value("${application.error.metricLoggingEnabled:true}")
-//	private boolean metricLoggingEnabled;
-//	
-//	@Getter @Setter
-//	private Map<Class<?>,String> exceptions;
-//	
-//	@Value("${application.error.genericMsg:#{null}}")
-//	private String genericMsg;
-//	
-//	@Autowired CommandTransactionInterceptor interceptor;
-//	
-//	@Override
-//	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-//		return true;
-//	}
-//	
-//	@Override
-//	public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, 
-//			Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-//		
-//		logit.debug(()->"Processed response from "+WebActionController.class+": "
-//					+ "\n"+ body);
-//		
-//		MultiExecuteOutput multiOutput = interceptor.handleResponse(body);
-//		return multiOutput;
-//	}
-//	
-//	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-//	@ExceptionHandler(Throwable.class)
-//	@ResponseBody
-//	public MultiExecuteOutput exception(Throwable pEx){
-//		ExecuteOutput<?> resp = new ExecuteOutput<>();
-//		ExecuteError execError = constructExecError(pEx);
-//		String message = constructMessage(execError);
-//		
-//		if (Optional.ofNullable(exceptions).isPresent()) {			
-//			if (exceptions.containsKey(pEx.getClass())) {
-//				message = constructMessage(exceptions.get(pEx.getClass()), execError);
-//			} else {
-//				Optional<Class<?>> hierarchyclass = exceptions.keySet()
-//						.stream()
-//						.filter(c -> null != c && c.isAssignableFrom(pEx.getClass()))
-//						.findFirst();
-//			
-//				if (hierarchyclass.isPresent()) 
-//					message = constructMessage(exceptions.get(hierarchyclass.get()), execError);
-//			}
-//		} 
-//		execError.setMessage(message);
-//		logError(execError, pEx);
-//		resp.setExecuteException(execError);
-//		return interceptor.handleResponse(resp);		
-//	}
-//
-//	private void logError(ExecuteError execError, Throwable pEx) {
-//		if (FrameworkRuntimeException.class.isAssignableFrom(pEx.getClass()) && logit.getLog().isInfoEnabled()
-//				&& isMetricLoggingEnabled()) {
-//			logit.error(execError::getMessage);
-//		} else {
-//			logit.error(execError::getMessage, pEx);
-//		}
-//	}
-//	
-//	@ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
-//	@ExceptionHandler(MethodArgumentNotValidException.class)
-//	@ResponseBody
-//	public MultiExecuteOutput exception(MethodArgumentNotValidException vEx){	
-//		logit.error(()->"Logging backing validation exception...",vEx);
-//		
-//		List<ValidationError> errors = new ArrayList<ValidationError>();
-//		if(vEx.getBindingResult()!=null && vEx.getBindingResult().getAllErrors()!=null){
-//			
-//			for(ObjectError objErr : vEx.getBindingResult().getAllErrors()){
-//				ValidationError err = new ValidationError(){};
-//				err.setCode(objErr.getCode());
-//				err.setMsg(objErr.getDefaultMessage());
-//				err.setModelAlias(objErr.getObjectName());
-//				errors.add(err);
-//			}
-//		}			
-//		
-//		ExecuteOutput<?> resp = new ExecuteOutput<>();		
-//		resp.setValidationResult(new ValidationResult());
-//		resp.getValidationResult().setErrors(errors);	
-//		
-//		return interceptor.handleResponse(resp);
-//	}
-//	
-//	private String constructMessage(ExecuteError err) {
-//		return Optional.ofNullable(genericMsg)
-//				.map((str) -> StringUtils.replace(str, Constants.KEY_ERR_UNIQUEID.code, err.getUniqueId()))
-//				.orElse(err.getMessage());
-//	}
-//	
-//	private String constructMessage(String configMsg, ExecuteError err) {
-//		return Optional.ofNullable(configMsg)
-//				.map((str) -> StringUtils.replace(str, Constants.KEY_ERR_UNIQUEID.code, err.getUniqueId()))
-//				.orElse(constructMessage(err));
-//	}
-//	
-//	private ExecuteError constructExecError(Throwable pEx) {
-//		ExecuteError execError = new ExecuteError();
-//		if ((FrameworkRuntimeException.class).isAssignableFrom(pEx.getClass())) {
-//			execError = ((FrameworkRuntimeException) pEx).getExecuteError();	
-//		} else 
-//			execError = new ExecuteError(pEx.getClass(), pEx.getMessage());
-//		
-//		return execError;
-//	}
+	private JustLogit logit = new JustLogit(this.getClass());
+	
+	@Value("${application.error.metricLoggingEnabled:true}")
+	private boolean metricLoggingEnabled;
+	
+	@Getter @Setter
+	private Map<Class<?>,String> exceptions;
+	
+	@Value("${application.error.genericMsg:#{null}}")
+	private String genericMsg;
+	
+	@Autowired CommandTransactionInterceptor interceptor;
+	
+	@Override
+	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+		return true;
+	}
+	
+	@Override
+	public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, 
+			Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+		
+		logit.debug(()->"Processed response from "+WebActionController.class+": "
+					+ "\n"+ body);
+		
+		MultiExecuteOutput multiOutput = interceptor.handleResponse(body);
+		return multiOutput;
+	}
+	
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ExceptionHandler(Throwable.class)
+	@ResponseBody
+	public MultiExecuteOutput exception(Throwable pEx){
+		ExecuteOutput<?> resp = new ExecuteOutput<>();
+		ExecuteError execError = constructExecError(pEx);
+		String message = constructMessage(execError);
+		
+		if (Optional.ofNullable(exceptions).isPresent()) {			
+			if (exceptions.containsKey(pEx.getClass())) {
+				message = constructMessage(exceptions.get(pEx.getClass()), execError);
+			} else {
+				Optional<Class<?>> hierarchyclass = exceptions.keySet()
+						.stream()
+						.filter(c -> null != c && c.isAssignableFrom(pEx.getClass()))
+						.findFirst();
+			
+				if (hierarchyclass.isPresent()) 
+					message = constructMessage(exceptions.get(hierarchyclass.get()), execError);
+			}
+		} 
+		execError.setMessage(message);
+		logError(execError, pEx);
+		resp.setExecuteException(execError);
+		return interceptor.handleResponse(resp);		
+	}
+
+	private void logError(ExecuteError execError, Throwable pEx) {
+		if (FrameworkRuntimeException.class.isAssignableFrom(pEx.getClass()) && logit.getLog().isInfoEnabled()
+				&& isMetricLoggingEnabled()) {
+			logit.error(execError::getMessage);
+		} else {
+			logit.error(execError::getMessage, pEx);
+		}
+	}
+	
+	@ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseBody
+	public MultiExecuteOutput exception(MethodArgumentNotValidException vEx){	
+		logit.error(()->"Logging backing validation exception...",vEx);
+		
+		List<ValidationError> errors = new ArrayList<ValidationError>();
+		if(vEx.getBindingResult()!=null && vEx.getBindingResult().getAllErrors()!=null){
+			
+			for(ObjectError objErr : vEx.getBindingResult().getAllErrors()){
+				ValidationError err = new ValidationError(){};
+				err.setCode(objErr.getCode());
+				err.setMsg(objErr.getDefaultMessage());
+				err.setModelAlias(objErr.getObjectName());
+				errors.add(err);
+			}
+		}			
+		
+		ExecuteOutput<?> resp = new ExecuteOutput<>();		
+		resp.setValidationResult(new ValidationResult());
+		resp.getValidationResult().setErrors(errors);	
+		
+		return interceptor.handleResponse(resp);
+	}
+	
+	private String constructMessage(ExecuteError err) {
+		return Optional.ofNullable(genericMsg)
+				.map((str) -> StringUtils.replace(str, Constants.KEY_ERR_UNIQUEID.code, err.getUniqueId()))
+				.orElse(err.getMessage());
+	}
+	
+	private String constructMessage(String configMsg, ExecuteError err) {
+		return Optional.ofNullable(configMsg)
+				.map((str) -> StringUtils.replace(str, Constants.KEY_ERR_UNIQUEID.code, err.getUniqueId()))
+				.orElse(constructMessage(err));
+	}
+	
+	private ExecuteError constructExecError(Throwable pEx) {
+		ExecuteError execError = new ExecuteError();
+		if ((FrameworkRuntimeException.class).isAssignableFrom(pEx.getClass())) {
+			execError = ((FrameworkRuntimeException) pEx).getExecuteError();	
+		} else 
+			execError = new ExecuteError(pEx.getClass(), pEx.getMessage());
+		
+		return execError;
+	}
 	
 }

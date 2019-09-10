@@ -22,6 +22,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -94,108 +95,109 @@ import com.antheminc.oss.nimbus.support.LoggingLevelService;
  */
 @RestController
 //@EnableResourceServer
+@ConditionalOnProperty(prefix= "process", value = "useactiviti" , havingValue = "true", matchIfMissing = true)
 public class WebActionController {
 	
-//	public static final String URI_PATTERN_P = "/{clientCode}/**/p";
-//	public static final String URI_PATTERN_P_OPEN = URI_PATTERN_P + "/**";
-//
-//	private static final Set<Action> notifyActionsToMatch = EnumSet.of(Action._replace, Action._update);
-//	
-//	@Autowired WebCommandDispatcher dispatcher;
-//	
-//	@Autowired ExecutionContextLoader ctxLoader;
-//	
-//	@Autowired WebCommandBuilder builder;
-//	
-//	@RequestMapping(value=URI_PATTERN_P+"/clear", produces="application/json", method=RequestMethod.GET)
-//	public void clear() {
-//		ctxLoader.clear();
-//	}
-//	
-//	/**
-//	 * Usage Example: /client/org/p/loglevel?level=debug&package=com.antheminc
-//	 * 
-//	 * @param level
-//	 * @param packageName
-//	 * @return
-//	 */
-//	@RequestMapping(value=URI_PATTERN_P+"/loglevel", produces="application/json", method=RequestMethod.GET)
-//	public Output<String> updateLogLevel(@RequestParam(value="level") String level, @RequestParam(value="package") String packageName) {
-//		return LoggingLevelService.setLoggingLevel(level, packageName);
-//	}
-//	
-//	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.GET)
-//	public Object handleGet(HttpServletRequest req, @RequestParam(required=false) String a) {
-//		return handleInternal(req, RequestMethod.GET, null, a);
-//	}
-//	
-//	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.DELETE)
-//	public Object handleDelete(HttpServletRequest req, @RequestParam String v) {
-//		return handleInternal(req, RequestMethod.DELETE, v, null);
-//	}
-//	
-//	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.POST)
-//	public Object handlePost(HttpServletRequest req, @RequestBody String json) { 
-//		return handleInternal(req, RequestMethod.POST, null, json);
-//	}
-//	
-//	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.PUT)
-//	public Object handlePut(HttpServletRequest req, @RequestParam String v, @RequestBody String json) {  
-//		return handleInternal(req, RequestMethod.PUT, v, json);
-//	}
-//	
-//	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.PATCH)
-//	public Object handlePatch(HttpServletRequest req, @RequestParam String v, @RequestBody String json) {  
-//		return handleInternal(req, RequestMethod.PATCH, v, json);
-//	}
-//	
-//	@RequestMapping(value=URI_PATTERN_P+"/event/notify", produces="application/json", method=RequestMethod.POST)
-//	public Object handleEventNotify(HttpServletRequest req, @RequestBody ModelEvent<String> event) {
-//		Object obj = dispatcher.handle(req, event);
-//		filterInputParamFromOutput(obj);
-//		Holder<Object> output = new Holder<>(obj);
-//		return output;
-//	}
-//	
-//	private void filterInputParamFromOutput(Object obj) {
-//		if(obj instanceof MultiOutput) {
-//			MultiOutput multiOp = (MultiOutput) obj;
-//			List<Output<?>> outputs = multiOp.getOutputs();
-//			if(CollectionUtils.isEmpty(outputs))
-//				return;
-//			
-//			Command cmd = CommandBuilder.withUri(multiOp.getInputCommandUri()).getCommand();
-//			String inputParamPath = cmd.getAbsoluteDomainAlias();
-//			
-//			outputs.removeIf(o -> isRemove(inputParamPath, o));
-//		}
-//	}
-//
-//	private boolean isRemove(String inputParamPath, Output<?> o) {
-//		if(o instanceof MultiOutput) {
-//			filterInputParamFromOutput(o);
-//		}
-//		else if(o.getValue() instanceof Param) {
-//			Param<?> param = (Param<?>) o.getValue();
-//			if(inputParamPath.equals(param.getPath()) && notifyActionsToMatch.contains(o.getAction())) {
-//				
-//				if(param.hasContextStateChanged())
-//					return false;
-//				
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-//	
-//	@RequestMapping(value = {"/login/*"}, method = RequestMethod.GET)
-//	public ResponseEntity<?> login(){
-//		return ResponseEntity.status(HttpStatus.OK).body(null);
-//	}
-//	
-//	protected Object handleInternal(HttpServletRequest req, RequestMethod httpMethod, String v, String json) {
-//		Object obj = dispatcher.handle(req, json);
-//		Holder<Object> output = new Holder<>(obj);
-//		return output;
-//	}
+	public static final String URI_PATTERN_P = "/{clientCode}/**/p";
+	public static final String URI_PATTERN_P_OPEN = URI_PATTERN_P + "/**";
+
+	private static final Set<Action> notifyActionsToMatch = EnumSet.of(Action._replace, Action._update);
+	
+	@Autowired WebCommandDispatcher dispatcher;
+	
+	@Autowired ExecutionContextLoader ctxLoader;
+	
+	@Autowired WebCommandBuilder builder;
+	
+	@RequestMapping(value=URI_PATTERN_P+"/clear", produces="application/json", method=RequestMethod.GET)
+	public void clear() {
+		ctxLoader.clear();
+	}
+	
+	/**
+	 * Usage Example: /client/org/p/loglevel?level=debug&package=com.antheminc
+	 * 
+	 * @param level
+	 * @param packageName
+	 * @return
+	 */
+	@RequestMapping(value=URI_PATTERN_P+"/loglevel", produces="application/json", method=RequestMethod.GET)
+	public Output<String> updateLogLevel(@RequestParam(value="level") String level, @RequestParam(value="package") String packageName) {
+		return LoggingLevelService.setLoggingLevel(level, packageName);
+	}
+	
+	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.GET)
+	public Object handleGet(HttpServletRequest req, @RequestParam(required=false) String a) {
+		return handleInternal(req, RequestMethod.GET, null, a);
+	}
+	
+	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.DELETE)
+	public Object handleDelete(HttpServletRequest req, @RequestParam String v) {
+		return handleInternal(req, RequestMethod.DELETE, v, null);
+	}
+	
+	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.POST)
+	public Object handlePost(HttpServletRequest req, @RequestBody String json) { 
+		return handleInternal(req, RequestMethod.POST, null, json);
+	}
+	
+	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.PUT)
+	public Object handlePut(HttpServletRequest req, @RequestParam String v, @RequestBody String json) {  
+		return handleInternal(req, RequestMethod.PUT, v, json);
+	}
+	
+	@RequestMapping(value=URI_PATTERN_P_OPEN, produces="application/json", method=RequestMethod.PATCH)
+	public Object handlePatch(HttpServletRequest req, @RequestParam String v, @RequestBody String json) {  
+		return handleInternal(req, RequestMethod.PATCH, v, json);
+	}
+	
+	@RequestMapping(value=URI_PATTERN_P+"/event/notify", produces="application/json", method=RequestMethod.POST)
+	public Object handleEventNotify(HttpServletRequest req, @RequestBody ModelEvent<String> event) {
+		Object obj = dispatcher.handle(req, event);
+		filterInputParamFromOutput(obj);
+		Holder<Object> output = new Holder<>(obj);
+		return output;
+	}
+	
+	private void filterInputParamFromOutput(Object obj) {
+		if(obj instanceof MultiOutput) {
+			MultiOutput multiOp = (MultiOutput) obj;
+			List<Output<?>> outputs = multiOp.getOutputs();
+			if(CollectionUtils.isEmpty(outputs))
+				return;
+			
+			Command cmd = CommandBuilder.withUri(multiOp.getInputCommandUri()).getCommand();
+			String inputParamPath = cmd.getAbsoluteDomainAlias();
+			
+			outputs.removeIf(o -> isRemove(inputParamPath, o));
+		}
+	}
+
+	private boolean isRemove(String inputParamPath, Output<?> o) {
+		if(o instanceof MultiOutput) {
+			filterInputParamFromOutput(o);
+		}
+		else if(o.getValue() instanceof Param) {
+			Param<?> param = (Param<?>) o.getValue();
+			if(inputParamPath.equals(param.getPath()) && notifyActionsToMatch.contains(o.getAction())) {
+				
+				if(param.hasContextStateChanged())
+					return false;
+				
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@RequestMapping(value = {"/login/*"}, method = RequestMethod.GET)
+	public ResponseEntity<?> login(){
+		return ResponseEntity.status(HttpStatus.OK).body(null);
+	}
+	
+	protected Object handleInternal(HttpServletRequest req, RequestMethod httpMethod, String v, String json) {
+		Object obj = dispatcher.handle(req, json);
+		Holder<Object> output = new Holder<>(obj);
+		return output;
+	}
 }
