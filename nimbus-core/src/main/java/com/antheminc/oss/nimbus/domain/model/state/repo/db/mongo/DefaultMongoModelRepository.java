@@ -133,38 +133,40 @@ public class DefaultMongoModelRepository implements ModelRepository {
 	@Override
 	public <T> T _update(Param<?> param, T state) {
 		// TODO Soham: Refactor
-		String path = resolvePath(param.getBeanPath());
-	  
-		Query query = new Query(Criteria.where("_id").is(param.getRootExecution().getRootCommand().getRefId(Type.DomainAlias)));
-		Update update = new Update();
-		if(StringUtils.isBlank(path) || StringUtils.equalsIgnoreCase(path, "/c")) {
-			getMongoOps().save(state, param.getRootDomain().getConfig().getRepoAlias());
+		if(!param.getConfig().isTransientData()) {
+			String path = resolvePath(param.getBeanPath());
+		  
+			Query query = new Query(Criteria.where("_id").is(param.getRootExecution().getRootCommand().getRefId(Type.DomainAlias)));
+			Update update = new Update();
+			if(StringUtils.isBlank(path) || StringUtils.equalsIgnoreCase(path, "/c")) {
+				getMongoOps().save(state, param.getRootDomain().getConfig().getRepoAlias());
+			}
+			else{
+				if(StringUtils.equals(path, "/id") || StringUtils.equals(path, "id")) { 
+				 // if we updated the  document with path "/id", MongoDB is upserting with a new document with same _id but property field as "/id". e.g. if patient document already exist with
+				 // all the fields populated, it would insert a new patient document with same _id like:
+				 //	{"_id": NumberLong(1), "/id":NumberLong(1)}
+				 // whereas there is already a correct patient document as:
+				 //	{"_id": NumberLong(1), "firstName":"Rakesh"}
+				 // I think this is because the "id" property gets saved in the monog as "_id" key and so when the next update comes with path="/id", for MongoDB, it would be a new field (non id),
+				 // hence, ends up creating a new document. for now just returning from this mehtod without going to MongoDB.
+					return state;
+				}
+				path = StringUtils.substringAfter(path, "/");
+				path = path.replaceAll("/", "\\.");
+				if(state == null)
+					update.unset(path);
+				else
+					update.set(path, state);
+				
+				String repoAlias = param.getRootDomain().getConfig().getRepoAlias();
+				if (StringUtils.isBlank(repoAlias)) {
+					throw new InvalidConfigException("Core Persistent entity must be configured with "
+							+ Domain.class.getSimpleName() + " annotation. Not found for root model: " + param.getRootDomain());
+				}
+				getMongoOps().upsert(query, update, repoAlias);
+			} 
 		}
-		else{
-			if(StringUtils.equals(path, "/id") || StringUtils.equals(path, "id")) { 
-			 // if we updated the  document with path "/id", MongoDB is upserting with a new document with same _id but property field as "/id". e.g. if patient document already exist with
-			 // all the fields populated, it would insert a new patient document with same _id like:
-			 //	{"_id": NumberLong(1), "/id":NumberLong(1)}
-			 // whereas there is already a correct patient document as:
-			 //	{"_id": NumberLong(1), "firstName":"Rakesh"}
-			 // I think this is because the "id" property gets saved in the monog as "_id" key and so when the next update comes with path="/id", for MongoDB, it would be a new field (non id),
-			 // hence, ends up creating a new document. for now just returning from this mehtod without going to MongoDB.
-				return state;
-			}
-			path = StringUtils.substringAfter(path, "/");
-			path = path.replaceAll("/", "\\.");
-			if(state == null)
-				update.unset(path);
-			else
-				update.set(path, state);
-			
-			String repoAlias = param.getRootDomain().getConfig().getRepoAlias();
-			if (StringUtils.isBlank(repoAlias)) {
-				throw new InvalidConfigException("Core Persistent entity must be configured with "
-						+ Domain.class.getSimpleName() + " annotation. Not found for root model: " + param.getRootDomain());
-			}
-			getMongoOps().upsert(query, update, repoAlias);
-		} 
 		
 		return state;
 	}
