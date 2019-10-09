@@ -82,6 +82,10 @@ public class ParamStateAtomicPersistenceEventListener extends ParamStatePersiste
 			return true;
 		}
 		
+		if(p.getConfig().isTransientData()) {
+			return true;
+		}
+		
 		modelRepo._update(pRoot, pRoot.getState());
 		return true;
 	}
