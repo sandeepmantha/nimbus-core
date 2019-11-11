@@ -104,4 +104,9 @@ public @interface MessageConditional {
 	 * <p>Path of param on which the messages are to be set
 	 */
 	String[] targetPath() default { };
+	
+	/**
+	 * <p>Title of the message
+	 */
+	String summary() default "";
 }

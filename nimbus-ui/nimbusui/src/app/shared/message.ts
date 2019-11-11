@@ -35,6 +35,7 @@ export class Message implements Serializable<Message, string> {
   messageArray: any[] = [];
   life: number;
   styleClass: string;
+  summary: string;
 
   deserialize(inJson) {
     let obj: Message = this;
@@ -47,7 +48,8 @@ export class Message implements Serializable<Message, string> {
         this.text,
         this.life,
         this.styleClass,
-        inJson.transient
+        inJson.transient,
+        inJson.summary
       );
     }
 
@@ -59,7 +61,7 @@ export class Message implements Serializable<Message, string> {
    * \@whatItDoes
    *      Creates a customizable instance of message class that can show up in the top right corner of the screen
    * \@howToUse
-   *      Call this createMessage method by providing it with 4 variables
+   *      Call this createMessage method by providing variables
    */
   public static createMessage(
     type,
@@ -67,7 +69,8 @@ export class Message implements Serializable<Message, string> {
     detail,
     life,
     styleClass,
-    transient?: boolean
+    transient?: boolean,
+    title?: string
   ): Message {
     let severity: string, summary: string, updatedLife: number;
 
@@ -116,7 +119,7 @@ export class Message implements Serializable<Message, string> {
     } else {
       message.messageArray.push({
         severity: severity,
-        summary: summary,
+        summary: title !="" ? title : summary,
         detail: detail,
         life: updatedLife,
         styleClass: styleClass

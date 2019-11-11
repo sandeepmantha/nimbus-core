@@ -69,7 +69,7 @@ public class MessageConditionalHandler extends EvalExprWithCrudActions<MessageCo
 		// TODO: The same msg should not be added accross two Message Conditionals -Add a static validation for it in future
 		Message msg = new Message(configuredAnnotation.message(), message, configuredAnnotation.messageType(), configuredAnnotation.context(),configuredAnnotation.cssClass());
 		msg.setTransient(configuredAnnotation.isTransient());
-		
+		msg.setSummary(configuredAnnotation.summary());
 		Set<Message> newMsgs = new HashSet<>();
 		if(!CollectionUtils.isEmpty(param.getMessages())) 
 			newMsgs.addAll(param.getMessages());
