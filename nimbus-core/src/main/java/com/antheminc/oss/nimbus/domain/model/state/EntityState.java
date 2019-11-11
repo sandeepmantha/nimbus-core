@@ -648,7 +648,9 @@ public interface EntityState<T> {
 			private final String styleClass;
 			
 			private boolean isTransient = true;
-
+			
+			private String summary = "";
+			
 			@Override
 			public boolean equals(Object obj) {
 				if(obj==null && this.text==null && this.type==null && this.context==null)
