@@ -69,7 +69,10 @@ public enum Constants {
 	
 	CODE_VALUE_CONFIG_DELIMITER("-"),
 	PARAM_VALUES_URI_PREFIX("*/*/*/p/"),
-	PARAM_VALUES_URI_SUFFIX("/_lookup"),
+	PARAM_VALUES_LOOKUP_FN_KEY("lookup"),
+	PARAM_VALUES_URI_SUFFIX("/_" + Constants.PARAM_VALUES_LOOKUP_FN_KEY.code),
+	PARAM_VALUES_DOMAIN_ALIAS("staticCodeValue"),
+	PARAM_VALUES_CACHE_KEY("staticcodevalues"),
 	
 	KEY_FUNCTION("fn"),
 	KEY_FUNCTION_NAME("name"),
@@ -109,6 +112,7 @@ public enum Constants {
 	SEARCH_REQ_ORDERBY_DESC_MARKER("desc()"),
 	SEARCH_REQ_ORDERBY_ASC_MARKER("asc()"),
 	SEARCH_REQ_WHERE_MARKER("where"),
+	SEARCH_REQ_LIMIT_MARKER("limit"),
 	
 	SEARCH_REQ_PAGINATION_SIZE("pageSize"),
 	SEARCH_REQ_PAGINATION_PAGE_NUM("page"),
